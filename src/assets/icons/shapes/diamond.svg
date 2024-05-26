@@ -1,0 +1,11 @@
+<svg fill="none" viewBox="0 0 24 24" id="icon-shapes-diamond">
+  <clipPath id="icon-shapes-diamond_master_svg0_8672_02094">
+    <rect x="0" y="0" width="24" height="24" rx="0"></rect>
+  </clipPath>
+  <g clip-path="url(#icon-shapes-diamond_master_svg0_8672_02094)" style="mix-blend-mode:passthrough">
+        <rect x="2.75" y="12.6494140625" width="12.5" height="12.5" rx="0.25"
+          transform="matrix(0.7071067690849304,-0.7071067690849304,0.7071067690849304,0.7071067690849304,-7.828369769908022,4.8994713689316995)"
+          fill-opacity="0" stroke-opacity="1" stroke="currentColor" stroke-width="1.5" fill="none" stroke-dasharray="">
+        </rect>
+      </g>
+</svg>

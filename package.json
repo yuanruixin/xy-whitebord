@@ -1,0 +1,33 @@
+{
+  "name": "xy-whiteboard",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.19",
+    "gsap": "^3.12.5",
+    "konva": "^9.3.6",
+    "nanoid": "^5.0.7",
+    "pinia": "^2.1.7",
+    "unplugin-vue-components": "^0.26.0",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.211",
+    "@iconify/tailwind": "^1.1.1",
+    "@types/node": "^20.11.30",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue-tsc": "^2.0.6"
+  }
+}
