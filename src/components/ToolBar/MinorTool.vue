@@ -47,7 +47,6 @@
 import { watch } from "vue";
 import { useTool } from "./useTool";
 import { defineRenderStore } from "@/store/render";
-import { render } from "vue";
 const { selectedTool, isActiveTool, clearSelectedTool } = useTool();
 const renderStore = defineRenderStore();
 
