@@ -6,6 +6,9 @@ export type ValueOf<T> = T[keyof T];
 
 export interface RenderConfig {
   showBg?: boolean;
+  attractResize?: boolean
+  attractBg?: boolean
+  attractNode?: boolean
 }
 
 export interface Handler {

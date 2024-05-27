@@ -2,8 +2,6 @@ import Konva from 'konva'
 //
 import { Render } from '../index'
 import * as Types from '../types'
-//
-import * as Draws from '../draws'
 
 interface SortItem {
   id?: number // 有 id 就是其他节点，否则就是 选择目标
@@ -80,7 +78,7 @@ export class SelectionHandlers implements Types.Handler {
     stage: {
       mousedown: (e: Konva.KonvaEventObject<GlobalEventHandlersEventMap['mousedown']>) => {
         const parent = e.target.getParent()
-
+        
         if (e.target === this.render.stage) {
           // 点击空白处
 
@@ -104,10 +102,13 @@ export class SelectionHandlers implements Types.Handler {
 
             // 开始选择
             this.selecting = true
+            
           }
         } else if (parent instanceof Konva.Transformer) {
           // transformer 点击事件交给 transformer 自己的 handler
         } else if (parent instanceof Konva.Group) {
+          console.log(parent);
+          
           if (e.evt.button === Types.MouseButton.left) {
             if (!this.render.ignore(parent) && !this.render.ignoreDraw(e.target)) {
               if (e.evt.ctrlKey) {
@@ -152,6 +153,8 @@ export class SelectionHandlers implements Types.Handler {
             width: this.render.toStageValue(Math.abs(this.selectRectEndX - this.selectRectStartX)),
             height: this.render.toStageValue(Math.abs(this.selectRectEndY - this.selectRectStartY))
           })
+
+          
         }
       },
       mouseup: () => {
@@ -273,10 +276,7 @@ export class SelectionHandlers implements Types.Handler {
           this.reset()
         }
       },
-      transform: () => {
-        // 更新预览
-        this.render.draws[Draws.PreviewDraw.name].draw()
-      },
+
       transformend: () => {
         // 变换结束
 
@@ -284,9 +284,7 @@ export class SelectionHandlers implements Types.Handler {
         this.reset()
 
         // 更新历史
-        this.render.updateHistory()
-        // 更新预览
-        this.render.draws[Draws.PreviewDraw.name].draw()
+        // this.render.updateHistory()
       },
       //
       dragstart: () => {
@@ -303,9 +301,6 @@ export class SelectionHandlers implements Types.Handler {
             x: this.render.toStageValue(transformerPos.x - this.transformerMousedownPos.x),
             y: this.render.toStageValue(transformerPos.y - this.transformerMousedownPos.y)
           })
-
-          // 更新预览
-          this.render.draws[Draws.PreviewDraw.name].draw()
         }
       },
       dragend: () => {
@@ -315,9 +310,7 @@ export class SelectionHandlers implements Types.Handler {
         this.reset()
 
         // 更新历史
-        this.render.updateHistory()
-        // 更新预览
-        this.render.draws[Draws.PreviewDraw.name].draw()
+        // this.render.updateHistory()
       },
       // 子节点 hover
       mousemove: () => {
@@ -617,9 +610,7 @@ export class SelectionHandlers implements Types.Handler {
         ].sort((a, b) => a.value - b.value)) {
           if (diff.value < 5) {
             if (diff.type === 'stageRightX') {
-              console.log(1, newPosX)
               newPosX = this.render.toBoardValue(logicStageRightX) + stageState.x - width
-              console.log(2, newPosX)
             } else if (diff.type === 'leftX') {
               newPosX = this.render.toBoardValue(logicClosestLeftX) + stageState.x
             } else if (diff.type === 'rightX') {

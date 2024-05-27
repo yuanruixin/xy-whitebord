@@ -24,7 +24,6 @@ export class PaintTool {
       const stageState = this.render.getStageState();
       const x = this.render.toStageValue(pos.x - stageState.x);
       const y = this.render.toStageValue(pos.y - stageState.y);
-      console.log(x, y);
 
       this.currentLine = new Konva.Line({
         stroke: this.color(),

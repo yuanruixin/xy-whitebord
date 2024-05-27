@@ -7,19 +7,11 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Avatar: typeof import('primevue/avatar')['default']
-    Badge: typeof import('primevue/badge')['default']
     Board: typeof import('./src/components/Board/Board.vue')['default']
-    Button: typeof import('primevue/button')['default']
-    Chips: typeof import('primevue/chips')['default']
     ColorPicker: typeof import('./src/components/ColorPicker/ColorPicker.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu/ContextMenu.vue')['default']
-    Dropdown: typeof import('primevue/dropdown')['default']
     Header: typeof import('./src/components/Header/Header.vue')['default']
-    InputText: typeof import('primevue/inputtext')['default']
-    Menu: typeof import('primevue/menu')['default']
     MinorTool: typeof import('./src/components/ToolBar/MinorTool.vue')['default']
-    OverlayPanel: typeof import('primevue/overlaypanel')['default']
     ShapesTool: typeof import('./src/components/ToolBar/ShapesTool.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon/SvgIcon.vue')['default']
     ToolBar: typeof import('./src/components/ToolBar/ToolBar.vue')['default']

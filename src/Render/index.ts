@@ -10,7 +10,7 @@ import { getKeys } from "@/utils/secureTS";
 export class Render {
   container: HTMLDivElement;
   // 同一时间鼠标只能处理一个事件(创建元素、画笔、橡皮、选择模式、拖拽模式)
-  private _mouseMode: Types.MouseMode = "default";
+  private _workMode: Types.MouseMode = "default";
 
   stage: Konva.Stage;
   // 主要层
@@ -49,7 +49,7 @@ export class Render {
   // 选择框
   selectRect: Konva.Rect = new Konva.Rect({
     id: "selectRect",
-    fill: "rgba(0,0,255,0.1)",
+    fill: "rgba(0,0,0,0.1)",
     visible: false,
   });
   // 光标管理
@@ -60,7 +60,10 @@ export class Render {
   handlersManager: {
     [Handlers.DragHandlers.name]: Handlers.DragHandlers;
     [Handlers.ZoomHandlers.name]: Handlers.ZoomHandlers;
+    [Handlers.SelectionHandlers.name]: Handlers.SelectionHandlers;
   };
+
+  // 监听函数回调管理
 
   constructor(container: HTMLDivElement, config: Types.RenderConfig) {
     this.config = config;
@@ -79,7 +82,10 @@ export class Render {
         size: this.bgSize,
       }),
     };
-
+    // 辅助层-顶层
+    this.groupTransformer.add(this.transformer);
+    this.groupTransformer.add(this.selectRect);
+    this.layerCover.add(this.groupTransformer);
     // 选择工具
     this.selectionTool = new Tools.SelectionTool(this);
     // 画笔工具
@@ -91,6 +97,7 @@ export class Render {
     this.handlersManager = {
       [Handlers.ZoomHandlers.name]: new Handlers.ZoomHandlers(this),
       [Handlers.DragHandlers.name]: new Handlers.DragHandlers(this),
+      [Handlers.SelectionHandlers.name]: new Handlers.SelectionHandlers(this),
     };
 
     this.init();
@@ -106,27 +113,31 @@ export class Render {
     // 事件绑定
     this.eventBind();
   }
-  mouseMode(mouseMode?: Types.MouseMode) {
-    if (!mouseMode) return this._mouseMode;
 
-    if (mouseMode === this._mouseMode) return mouseMode;
+  /**
+   * @description 这里设置工作模式
+   */
+  workMode(workMode?: Types.MouseMode) {
+    if (!workMode) return this._workMode;
+
+    if (workMode === this._workMode) return workMode;
     // 清除旧工具
-    const oldMouseMode = this._mouseMode;
+    const oldMouseMode = this._workMode;
     if (oldMouseMode === "createElement") {
     } else if (oldMouseMode === "brush") {
       this.paintTool.destroy();
     }
 
     // 设置新工具
-    this._mouseMode = mouseMode;
-    if (mouseMode === "drag") {
+    this._workMode = workMode;
+    if (workMode === "drag") {
       this.stage.draggable(true);
       this.cursor.set("grab");
-    } else if (mouseMode === "brush") this.cursor.set("brush");
-    else if (mouseMode === "earser") this.cursor.set("eraser");
+    } else if (workMode === "brush") this.cursor.set("brush");
+    else if (workMode === "earser") this.cursor.set("eraser");
     else this.cursor.reset();
 
-    return this._mouseMode;
+    return this._workMode;
   }
   // 事件绑定
   eventBind() {
@@ -135,20 +146,29 @@ export class Render {
       // 获取要监听的对象 target
       getKeys(this.handlersManager[handlerToolName].handlers).forEach(
         (target) => {
+          // 这里不能正确推断类型(需要手动纠正)
+          const targetAfteCorrectedType = target as
+            | "dom"
+            | "stage"
+            | "transformer";
           // 获取监听事件名 event
           getKeys(
             this.handlersManager[handlerToolName].handlers[target]
           ).forEach((event) => {
             const callback =
               this.handlersManager[handlerToolName].handlers.stage[event];
-            if (target === "container" || target === "dom") {
+            if (targetAfteCorrectedType === "dom") {
               this.container.addEventListener(event, callback);
-            } else if (target === "stage") {
+            } else if (
+              targetAfteCorrectedType === "stage" ||
+              targetAfteCorrectedType === "transformer"
+            ) {
               // 增加事件修饰符
               const eventName = event + "." + handlerToolName;
               this[target].on(eventName, callback);
             } else {
-              let a: never = target;
+              // 未处理的分支
+              let a: never = targetAfteCorrectedType;
               throw `未处理的分支,${a}`;
             }
           });
@@ -254,5 +274,30 @@ export class Render {
   // 忽略各 draw 的根 group
   ignoreDraw(node: Konva.Node) {
     return node.name() === Draws.BgDraw.name;
+  }
+
+  setStageScale(scale: number) {
+    const newScale = +scale.toFixed(2);
+    this.stage.scale({ x: newScale, y: newScale });
+
+    // 更新背景
+    this.draws.bg.draw();
+
+    // 更新预览元素默认大小
+    this.shape.updatePreviewElementSize();
+  }
+
+  /**
+   * @description 获取鼠标位置（在stage的scale和x,y属性变化后的相对鼠标位置）
+   *
+   */
+  getPointerPosAfterStageChanged() {
+    const getPointerPosInStage = this.stage.getPointerPosition();
+    if (!getPointerPosInStage) return null;
+    const stageState = this.getStageState();
+    return {
+      x: this.toStageValue(getPointerPosInStage.x - stageState.x),
+      y: this.toStageValue(getPointerPosInStage.y - stageState.y),
+    };
   }
 }

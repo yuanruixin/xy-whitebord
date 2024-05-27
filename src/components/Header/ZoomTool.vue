@@ -109,11 +109,7 @@ function increaseScale() {
   return;
 }
 function setStageScale(scale: number) {
-  renderStore.render?.stage.scale({
-    x: scale / 100,
-    y: scale / 100,
-  });
-  renderStore.render?.draws.bg.draw();
+  renderStore.render?.setStageScale(scale/100)
 }
 
 // 用于缩放比变化过程的显示

@@ -7,3 +7,7 @@ This template should help get you started developing with Vue 3 and TypeScript i
 - [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
 
 - Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking from the command line, or for generating d.ts files for SFCs.
+
+
+## 问题
+konva在不同的地方对同一个事件进行监听时，不能使用提前返回的写法，这会终止其他地方事件的执行

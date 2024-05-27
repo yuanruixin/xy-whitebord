@@ -8,8 +8,6 @@ export interface BgDrawOption {
 }
 export class BgDraw extends Types.BaseDraw implements Types.Draw {
   static override readonly name = "bg";
-  // 缓冲距离(向屏幕外多绘制)
-  bufferDistance: { x: number; y: number };
   option: BgDrawOption;
 
   constructor(render: Types.Render, layer: Konva.Layer, option: BgDrawOption) {
@@ -17,11 +15,7 @@ export class BgDraw extends Types.BaseDraw implements Types.Draw {
 
     this.option = option;
 
-    this.bufferDistance = {
-      x: this.render.stage.width(),
-      y: this.render.stage.height(),
-    };
-
+  
     this.group.listening(false);
   }
 

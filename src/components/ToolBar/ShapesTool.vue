@@ -133,7 +133,6 @@ function selectShape(close: () => void) {
   }, 100);
 
   function handleClick() {
-    
     renderStore.render?.shape.completeCreate()
     window.removeEventListener("click", handleClick);
     selectedTool.value='none'

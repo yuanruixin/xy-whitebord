@@ -40,17 +40,15 @@ export class ZoomHandlers implements Types.Handler {
             direction > 0 ? oldScale + this.scaleBy : oldScale - this.scaleBy;
           if (newScale > this.scaleMax) newScale = this.scaleMax;
           if (newScale < this.scaleMin) newScale = this.scaleMin;
+          
           // 缩放 stage
-          this.render.stage.scale({ x: newScale, y: newScale });
+          this.render.setStageScale(newScale)
 
           // 移动 stage
           this.render.stage.position({
             x: pos.x - mousePointTo.x * newScale,
             y: pos.y - mousePointTo.y * newScale,
           });
-
-          // 更新背景
-          this.render.draws.bg.draw();
         }
       },
     },

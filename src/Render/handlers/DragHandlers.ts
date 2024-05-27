@@ -4,7 +4,7 @@ import { Render } from "../index";
 import * as Types from "../types";
 import { throttle } from "@/utils/throttle";
 
-export class DragHandlers  {
+export class DragHandlers {
   static readonly name = "Drag";
 
   private render: Render;
@@ -27,22 +27,22 @@ export class DragHandlers  {
       ) => {
         if (this.render.mouseMode() !== "drag") {
           this.render.stage.draggable(false);
-          return;
+        }else{
+          // 鼠标左键
+        if (e.evt.button == Types.MouseButton.left) {
+          this.mousedownLeft = true;
+          this.render.stage.draggable(true);
+          // stage 状态
+          const stageState = this.render.getStageState();
+          this.mousedownStagePos = { x: stageState.x, y: stageState.y };
+          const pos = this.render.stage.getPointerPosition();
+          if (pos) {
+            this.mousedownPointerPos = { x: pos.x, y: pos.y };
+          }
+        }
         }
 
-        // 鼠标左键
-        if (e.evt.button !== Types.MouseButton.left) return;
-        this.mousedownLeft = true;
-        this.render.stage.draggable(true);
-        // stage 状态
-        const stageState = this.render.getStageState();
-
-        this.mousedownStagePos = { x: stageState.x, y: stageState.y };
-
-        const pos = this.render.stage.getPointerPosition();
-        if (pos) {
-          this.mousedownPointerPos = { x: pos.x, y: pos.y };
-        }
+        
       },
       mouseup: () => {
         this.mousedownLeft = false;
@@ -68,18 +68,19 @@ export class DragHandlers  {
         if (this.isStageDraggable && this.mousedownLeft) {
           // 鼠标左键拖动
           const pos = this.render.stage.getPointerPosition();
-          if (!pos) return;
-          // const offsetX = pos.x - this.mousedownPointerPos.x;
-          // const offsetY = pos.y - this.mousedownPointerPos.y;
+          if (pos) {
+            // const offsetX = pos.x - this.mousedownPointerPos.x;
+            // const offsetY = pos.y - this.mousedownPointerPos.y;
 
-          // 移动 stage
-          // this.render.stage.position({
-          //   x: this.mousedownStagePos.x + offsetX,
-          //   y: this.mousedownStagePos.y + offsetY,
-          // });
+            // 移动 stage
+            // this.render.stage.position({
+            //   x: this.mousedownStagePos.x + offsetX,
+            //   y: this.mousedownStagePos.y + offsetY,
+            // });
 
-          // 更新背景
-          this.render.draws.bg.draw();
+            // 更新背景
+            this.render.draws.bg.draw();
+          }
         }
       }, 10),
       mousemove: () => {
