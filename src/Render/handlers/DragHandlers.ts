@@ -25,7 +25,7 @@ export class DragHandlers {
       mousedown: (
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
-        if (this.render.mouseMode() !== "drag") {
+        if (this.render.workMode() !== "drag") {
           this.render.stage.draggable(false);
         }else{
           // 鼠标左键
@@ -89,6 +89,6 @@ export class DragHandlers {
     },
   } satisfies Types.Handler["handlers"];
   get isStageDraggable() {
-    return this.render.mouseMode() === "drag";
+    return this.render.workMode() === "drag";
   }
 }

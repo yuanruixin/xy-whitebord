@@ -7,7 +7,14 @@
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "build:nocheck": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "husky install",
+    "commitlint": "commitlint --config commitlint.config.cjs -e -V"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx,vue}": [
+      "git add"
+    ]
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
@@ -19,11 +26,21 @@
     "vue": "^3.4.21"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.24.6",
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
     "@iconify/json": "^2.2.211",
     "@iconify/tailwind": "^1.1.1",
     "@types/node": "^20.11.30",
     "@vitejs/plugin-vue": "^5.0.4",
     "autoprefixer": "^10.4.19",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-vue": "^9.26.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.5",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.2.2",

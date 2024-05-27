@@ -155,11 +155,7 @@ export class Shape {
   private async createPreviewElement() {
     let previewElementNode = document.createElement("div");
 
-    Object.assign(previewElementNode.style, {
-      left: 0,
-      top: 0,
-      draggable: false,
-    });
+   
 
     document.body.appendChild(previewElementNode);
     previewElementNode.style.position = "fixed";
@@ -171,6 +167,17 @@ export class Shape {
       width: previewElementNode.offsetWidth * this.render.stage.scaleX(),
       height: previewElementNode.offsetHeight * this.render.stage.scaleX(),
     };
+    console.log(this.initialSize);
+    
+    Object.assign(previewElementNode.style, {
+      left: 0,
+      top: 0,
+      draggable: false,
+    });
+    // 这里需要手动赋值
+    previewElementNode.style.width = this.initialSize.width + 'px'
+    previewElementNode.style.height = this.initialSize.height + 'px'
+
     return previewElementNode;
   }
   /**
