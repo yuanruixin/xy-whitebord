@@ -15,7 +15,7 @@ export class PaintTool {
   }
 
   init() {
-    this.render.mouseMode("brush");
+    this.render.workMode("brush");
     this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
       this.isPaint = true;
       const pos = this.render.stage.getPointerPosition();
