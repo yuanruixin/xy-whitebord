@@ -153,7 +153,6 @@ export class SelectionHandlers implements Types.Handler {
             width: this.render.toStageValue(Math.abs(this.selectRectEndX - this.selectRectStartX)),
             height: this.render.toStageValue(Math.abs(this.selectRectEndY - this.selectRectStartY))
           })
-
           
         }
       },

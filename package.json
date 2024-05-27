@@ -9,15 +9,18 @@
     "build:nocheck": "vite build",
     "preview": "vite preview",
     "prepare": "husky install",
+    "fix": "eslint src --fix",
     "commitlint": "commitlint --config commitlint.config.cjs -e -V"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,vue}": [
+      "eslint --fix",
       "git add"
     ]
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
+    "@typescript-eslint/eslint-plugin": "^7.10.0",
     "gsap": "^3.12.5",
     "konva": "^9.3.6",
     "nanoid": "^5.0.7",

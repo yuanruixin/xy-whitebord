@@ -71,11 +71,10 @@ import { defineRenderStore } from '@/store/render'
 
 const renderStore = defineRenderStore()
 
-
 const stageDraggable = ref(false);
-function toggleStageDragable(){;
+function toggleStageDragable(){
   stageDraggable.value=!stageDraggable.value
-  renderStore.render?.mouseMode('drag')
+  renderStore.render?.workMode('drag')
 }
 
 </script>

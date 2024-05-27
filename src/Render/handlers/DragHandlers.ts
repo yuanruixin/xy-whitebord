@@ -41,7 +41,6 @@ export class DragHandlers {
           }
         }
         }
-
         
       },
       mouseup: () => {

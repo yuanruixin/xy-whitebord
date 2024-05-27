@@ -14,7 +14,6 @@ export class BgDraw extends Types.BaseDraw implements Types.Draw {
     super(render, layer);
 
     this.option = option;
-
   
     this.group.listening(false);
   }

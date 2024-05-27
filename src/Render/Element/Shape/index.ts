@@ -48,7 +48,7 @@ export class Shape {
       name: "shape",
     });
 
-    let fill = this.config.fill ?? "#4e95ff";
+    const fill = this.config.fill ?? "#4e95ff";
 
     this.shapeElement = new Konva.Path({
       x: 0,
@@ -153,9 +153,7 @@ export class Shape {
 
   // 创建节点 用于预览大小 和 位置
   private async createPreviewElement() {
-    let previewElementNode = document.createElement("div");
-
-   
+    const previewElementNode = document.createElement("div");
 
     document.body.appendChild(previewElementNode);
     previewElementNode.style.position = "fixed";

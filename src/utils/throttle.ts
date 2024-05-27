@@ -1,11 +1,13 @@
-export function throttle(func: Function, wait: number = 20) {
+export function throttle(
+  func: (...args: any[]) => void,
+  wait: number = 20
+) {
   let timeout: NodeJS.Timeout | null;
-  return function (this: unknown) {
-    const args = arguments;
+  return function (...args: unknown[]) {
     if (!timeout) {
       timeout = setTimeout(() => {
         timeout = null;
-        func.apply(this, args);
+        func(...args);
       }, wait);
     }
   };

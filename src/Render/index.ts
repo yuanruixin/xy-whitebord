@@ -124,6 +124,7 @@ export class Render {
     // 清除旧工具
     const oldMouseMode = this._workMode;
     if (oldMouseMode === "createElement") {
+      /* eslint-disable */
     } else if (oldMouseMode === "brush") {
       this.paintTool.destroy();
     }
@@ -168,7 +169,7 @@ export class Render {
               this[target].on(eventName, callback);
             } else {
               // 未处理的分支
-              let a: never = targetAfteCorrectedType;
+              const a: never = targetAfteCorrectedType;
               throw `未处理的分支,${a}`;
             }
           });

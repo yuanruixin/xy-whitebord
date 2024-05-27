@@ -12,7 +12,3 @@ export type BaseShapeType=
   | "parallelogramLeft" 
   | "parallelogramRight"
 
-
-
-
-
