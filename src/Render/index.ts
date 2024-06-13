@@ -50,7 +50,7 @@ export class Render {
   selectRect: Konva.Rect = new Konva.Rect({
     id: "selectRect",
     fill: "rgba(0,0,0,0.1)",
-    visible: false,
+    visible: true,
   });
   // 光标管理
   cursor: Cursor;
@@ -115,7 +115,7 @@ export class Render {
   }
 
   /**
-   * @description 这里设置工作模式
+   * @description 这里设置获取获取当前工作模式
    */
   workMode(workMode?: Types.MouseMode) {
     if (!workMode) return this._workMode;
@@ -124,7 +124,7 @@ export class Render {
     // 清除旧工具
     const oldMouseMode = this._workMode;
     if (oldMouseMode === "createElement") {
-      /* eslint-disable */
+      this.shape.destory();
     } else if (oldMouseMode === "brush") {
       this.paintTool.destroy();
     }
@@ -157,7 +157,7 @@ export class Render {
             this.handlersManager[handlerToolName].handlers[target]
           ).forEach((event) => {
             const callback =
-              this.handlersManager[handlerToolName].handlers.stage[event];
+              this.handlersManager[handlerToolName].handlers[target][event];
             if (targetAfteCorrectedType === "dom") {
               this.container.addEventListener(event, callback);
             } else if (
@@ -300,5 +300,28 @@ export class Render {
       x: this.toStageValue(getPointerPosInStage.x - stageState.x),
       y: this.toStageValue(getPointerPosInStage.y - stageState.y),
     };
+  }
+
+  deleteSelectingElement() {
+    const remove = (nodes: Konva.Node[]) => {
+      for (const node of nodes) {
+        if (node instanceof Konva.Transformer) {
+          // 移除已选择的节点
+          remove(this.selectionTool.selectingNodes);
+        } else {
+          // 移除未选择的节点
+          node.remove();
+        }
+      }
+
+      if (nodes.length > 0) {
+        // 更新历史
+        // this.updateHistory()
+        // // 更新预览
+        // this.draws[Draws.PreviewDraw.name].draw()
+      }
+    };
+    remove(this.selectionTool.selectingNodes);
+    this.selectionTool.selectingClear();
   }
 }

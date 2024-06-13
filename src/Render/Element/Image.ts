@@ -30,9 +30,6 @@ export class Image {
       );
 
       render.layer.add(group)
-      console.log(render,group);
-      
     });
-
   }
 }

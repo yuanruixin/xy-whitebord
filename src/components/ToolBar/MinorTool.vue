@@ -52,8 +52,8 @@ const renderStore = defineRenderStore();
 
 function paintToolToggle() {
   if (isActiveTool("brush")) {
-    clearSelectedTool()
-  };
+    clearSelectedTool();
+  }
   selectedTool.value = "brush";
 
   renderStore.render?.paintTool.init();
@@ -68,7 +68,6 @@ watch(
     }
   }
 );
-
 </script>
 
 <style scoped></style>

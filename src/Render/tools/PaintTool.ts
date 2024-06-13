@@ -1,5 +1,5 @@
 import Konva from "konva";
-//
+import { nanoid } from "nanoid";
 import { Render } from "../index";
 
 type PaintMode = "brush" | "eraser";
@@ -15,6 +15,7 @@ export class PaintTool {
   }
 
   init() {
+
     this.render.workMode("brush");
     this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
       this.isPaint = true;
@@ -34,7 +35,12 @@ export class PaintTool {
         lineJoin: "round",
         points: [x, y, x, y],
       });
-      this.render.layer.add(this.currentLine);
+      const group = new Konva.Group({
+        id: nanoid(),
+        name: "paint",
+      });
+      group.add(this.currentLine);
+      this.render.layer.add(group);
     });
 
     this.render.stage.on("mouseup.paintTool touchend.paintTool", () => {
@@ -69,7 +75,7 @@ export class PaintTool {
     }
     return this._color;
   }
-  // 开启绘制
+
   destroy() {
     this.removeEvents();
     this.render.cursor.reset();

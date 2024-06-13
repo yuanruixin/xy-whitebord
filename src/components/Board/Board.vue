@@ -12,10 +12,12 @@ import { onMounted,onUnmounted,shallowRef} from "vue";
 import ToolBar from "@/components/ToolBar/ToolBar.vue";
 import ContextMenu from "@/components/ContextMenu/ContextMenu.vue";
 import type { MenuItem } from "@/components/ContextMenu/ContextMenu.vue";
+import {defineRenderStore} from '@/store/render'
 import {useRender} from './useRender'
 
 const canvasBox = shallowRef<HTMLDivElement | null>(null);
 
+const boardStore = defineRenderStore()
 const menuList: MenuItem[] = [
   {
     label: "上移一层",
@@ -31,11 +33,15 @@ const menuList: MenuItem[] = [
   },
   {
     label: "置于底层",
-    callback: () => {},
+    callback: ()=>{
+      boardStore.render?.deleteActiveElement()
+    },
   },
   {
     label: "删除",
-    callback: () => {},
+    callback: () => {
+      boardStore.render?.deleteActiveElement()
+    },
   }
 ];
 // 初始化画板
@@ -48,8 +54,6 @@ onMounted(() => {
 onUnmounted(()=>{
   
 })
-
-
 
 </script>
 

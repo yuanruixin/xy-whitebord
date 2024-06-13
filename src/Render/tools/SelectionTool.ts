@@ -20,7 +20,7 @@ export class SelectionTool {
   selectingClear() {
     // 清空选择
     this.render.transformer.nodes([])
-
+    
     // 移除 selectingNodesArea
     this.selectingNodesArea?.remove()
     this.selectingNodesArea = null
@@ -47,6 +47,7 @@ export class SelectionTool {
 
     // 清空选择节点
     this.selectingNodes = []
+    
   }
 
   // 选择节点

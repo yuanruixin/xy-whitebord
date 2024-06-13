@@ -27,21 +27,20 @@ export class DragHandlers {
       ) => {
         if (this.render.workMode() !== "drag") {
           this.render.stage.draggable(false);
-        }else{
+        } else {
           // 鼠标左键
-        if (e.evt.button == Types.MouseButton.left) {
-          this.mousedownLeft = true;
-          this.render.stage.draggable(true);
-          // stage 状态
-          const stageState = this.render.getStageState();
-          this.mousedownStagePos = { x: stageState.x, y: stageState.y };
-          const pos = this.render.stage.getPointerPosition();
-          if (pos) {
-            this.mousedownPointerPos = { x: pos.x, y: pos.y };
+          if (e.evt.button == Types.MouseButton.left) {
+            this.mousedownLeft = true;
+            this.render.stage.draggable(true);
+            // stage 状态
+            const stageState = this.render.getStageState();
+            this.mousedownStagePos = { x: stageState.x, y: stageState.y };
+            const pos = this.render.stage.getPointerPosition();
+            if (pos) {
+              this.mousedownPointerPos = { x: pos.x, y: pos.y };
+            }
           }
         }
-        }
-        
       },
       mouseup: () => {
         this.mousedownLeft = false;

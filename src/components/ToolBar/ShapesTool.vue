@@ -28,6 +28,7 @@
               v-for="(shape, index) in shapes"
               v-slot="{ checked }"
               :value="index"
+              :key="index"
             >
               <div
                 class="flex justify-center items-center w-10 h-10 hover:bg-gray-700 rounded-md cursor-pointer"
@@ -128,17 +129,13 @@ function selectShape(close: () => void) {
   setTimeout(() => {
     close();
     renderStore.render?.shape.creating({shape:shapes[currentIndex.value].name})
-    window.addEventListener("click", handleClick);
-
+    renderStore.render?.container.addEventListener("click", handleClick);
   }, 100);
 
   function handleClick() {
-    renderStore.render?.shape.completeCreate()
-    window.removeEventListener("click", handleClick);
+    // renderStore.render?.shape.completeCreate()
+    renderStore.render?.container.removeEventListener("click", handleClick);
     selectedTool.value='none'
   }
 }
-
-
-
 </script>

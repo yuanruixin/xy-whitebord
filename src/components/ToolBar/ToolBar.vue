@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, } from "vue";
+import { ref} from "vue";
 import SvgIcon from "@/components/SvgIcon/SvgIcon.vue";
 import ShapesTool from "./ShapesTool.vue";
 import MinorTool from "./MinorTool.vue";
@@ -72,11 +72,16 @@ import { defineRenderStore } from '@/store/render'
 const renderStore = defineRenderStore()
 
 const stageDraggable = ref(false);
+
+// const workMode = computed(()=>{
+//   if(1){}
+// })
+
+// 修改工作模式
 function toggleStageDragable(){
   stageDraggable.value=!stageDraggable.value
-  renderStore.render?.workMode('drag')
+  renderStore.render?.workMode(stageDraggable.value?'drag':'default')
 }
-
 </script>
 
 <style scoped >

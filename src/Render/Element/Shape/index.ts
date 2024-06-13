@@ -41,7 +41,7 @@ export class Shape {
     this.render = render;
   }
   // 完成创建显示真实图形
-  completeCreate() {
+  completeCreate = () => {
     if (!this.config) throw "请先执行init进行初始化，然后进行绘制";
     const group = new Konva.Group({
       id: nanoid(),
@@ -57,7 +57,7 @@ export class Shape {
       fill,
     });
 
-    const pos = this.render.getPointerPosAfterStageChanged()
+    const pos = this.render.getPointerPosAfterStageChanged();
     if (!pos || !this.shapeElement) return;
     this.shapeElement.setAttrs({
       x: pos.x,
@@ -81,44 +81,28 @@ export class Shape {
     this.render.workMode("default");
     this.hidePreviewElement();
     this.destory();
-  }
+  };
 
   //  正在创建元素
   async creating(config: ShapeConfig) {
+    this.render.workMode("createElement");
     this.config = config;
 
-    //  待优化（暂时销毁再重建。期待——>存在则复用）
+    //  初始化预览元素
     if (this.previewingElement) {
       this.previewingElement.parentNode!.removeChild(this.previewingElement);
     }
+    
     this.previewingElement = await this.createPreviewElement();
 
-    // 疑问？？？监听stage，有卡顿。监听window则没有
-    /*     this.render.stage.on(
-      "mousemove.creatingShape",
-      throttle((e: Konva.KonvaEventObject<MouseEvent>) => {
-        console.log("creating");
-
-        // 鼠标不在stage中，不显示
-        const previewingElement = this.previewingElement;
-        if (!previewingElement) return;
-
-        const x = e.evt.clientX;
-        const y = e.evt.clientY;
-        // 下面代码让回调卡顿
-        requestAnimationFrame(() => {
-          previewingElement.style.transform = `
-        translate(${x}px,${y}px)
-      `;
-        });
-      }, 30)
-    ); */
-
-    // 原生监听事件（解决卡顿问题）
+    // 移动时更新元素
     this.render.container.addEventListener(
       "mousemove",
       this.creatingMousemoveHandler
     );
+
+    // 再次点击stage容器，创建元素
+    this.render.container.addEventListener("click", this.completeCreate);
   }
 
   creatingMousemoveHandler = throttle(
@@ -154,35 +138,43 @@ export class Shape {
   // 创建节点 用于预览大小 和 位置
   private async createPreviewElement() {
     const previewElementNode = document.createElement("div");
-
     document.body.appendChild(previewElementNode);
+    // 鼠标穿透
+    previewElementNode.style.pointerEvents = "none";
     previewElementNode.style.position = "fixed";
-    // previewElementNode.innerHTML = `<img id='imgOfPreviewElement' draggable='false' class='block' src='${this.getSelectedImagetURl()}'/>`;
+    // 图片节点
     const imgNode = await loadImage(this.getSelectedImagetURl());
+    imgNode.style.pointerEvents = "none";
     imgNode.draggable = false;
+
     previewElementNode.appendChild(imgNode);
+
     this.initialSize = {
       width: previewElementNode.offsetWidth * this.render.stage.scaleX(),
       height: previewElementNode.offsetHeight * this.render.stage.scaleX(),
     };
-    console.log(this.initialSize);
-    
+
     Object.assign(previewElementNode.style, {
       left: 0,
       top: 0,
       draggable: false,
     });
     // 这里需要手动赋值
-    previewElementNode.style.width = this.initialSize.width + 'px'
-    previewElementNode.style.height = this.initialSize.height + 'px'
+    previewElementNode.style.width = this.initialSize.width + "px";
+    previewElementNode.style.height = this.initialSize.height + "px";
+    // 默认创建到当前鼠标位置
 
+    const mousePos = this.render.getPointerPosAfterStageChanged()!
+    console.log(mousePos,"鼠标位置");
+    
+    previewElementNode.style.transform = `translate(${mousePos.x}px,${mousePos.y}px)`
+    
     return previewElementNode;
   }
   /**
    * @description 动态引入图片文件
    */
   getSelectedImagetURl() {
-    // （注意:1.只能使用模板字符串 2.不能使用路径别名，要使用相对路径）
     return new URL(
       `../../../assets/shapes/${this.config?.shape}.svg`,
       import.meta.url
@@ -211,7 +203,7 @@ export class Shape {
       "mousemove",
       this.creatingMousemoveHandler
     );
-
+    this.render.container.removeEventListener("click", this.completeCreate);
     this._moveTimesAfterCreat = 0;
 
     if (this.previewingElement) {
@@ -219,3 +211,9 @@ export class Shape {
     }
   };
 }
+
+// todo
+/* 
+  bug 
+  创建元素中，切换工具会自动创建
+*/
