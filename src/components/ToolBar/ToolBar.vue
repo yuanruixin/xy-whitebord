@@ -30,19 +30,24 @@
       </li>
       <!-- 形状选择工具 -->
       <li class="cursor-pointer rounded-md overflow-hidden">
-        <ShapesTool class="w-12 h-12 "></ShapesTool>
+        <ShapesTool class="w-12 h-12"></ShapesTool>
       </li>
     </ul>
-    <div class="divider m-0 w-3/5 relative left-[20%] h-[1px] bg-slate-400/20"></div>
+    <div
+      class="divider m-0 w-3/5 relative left-[20%] h-[1px] bg-slate-400/20"
+    ></div>
     <!-- 副功能区 -->
     <MinorTool></MinorTool>
 
-    <div class="divider m-0 w-3/5 relative left-[20%] h-[1px] bg-slate-400/20"></div>
+    <div
+      class="divider m-0 w-3/5 relative left-[20%] h-[1px] bg-slate-400/20"
+    ></div>
     <!-- 触摸模式(选择、拖拽) -->
     <div class="flex flex-col items-center p-2" @click="toggleStageDragable">
       <span
         class="w-10 h-10 p-0 flex justify-center items-center cursor-pointer rounded-md overflow-hidden"
-      >
+        :class="{'bg-primary':isActiveTool('select')||isActiveTool('drag')}"
+        >
         <svg-icon
           prefix="menu"
           name="pointer"
@@ -63,26 +68,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref} from "vue";
+import { ref } from "vue";
 import SvgIcon from "@/components/SvgIcon/SvgIcon.vue";
 import ShapesTool from "./ShapesTool.vue";
 import MinorTool from "./MinorTool.vue";
-import { defineRenderStore } from '@/store/render'
-
-const renderStore = defineRenderStore()
-
+import { defineRenderStore } from "@/store/render";
+import { useTool } from "./useTool";
+const renderStore = defineRenderStore();
 const stageDraggable = ref(false);
-
-// const workMode = computed(()=>{
-//   if(1){}
-// })
+const { selectedTool,isActiveTool } = useTool();
 
 // 修改工作模式
-function toggleStageDragable(){
-  stageDraggable.value=!stageDraggable.value
-  renderStore.render?.workMode(stageDraggable.value?'drag':'default')
+function toggleStageDragable() {
+  if (selectedTool.value === "select" || selectedTool.value === "drag") {
+    stageDraggable.value = !stageDraggable.value;
+  }
+  selectedTool.value=stageDraggable.value ? "drag" : "select"
+  renderStore.render?.workMode(stageDraggable.value ? "drag" : "default");
 }
 </script>
 
-<style scoped >
-</style>
+<style scoped></style>

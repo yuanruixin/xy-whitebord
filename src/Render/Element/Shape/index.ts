@@ -89,8 +89,8 @@ export class Shape {
     this.config = config;
 
     //  初始化预览元素
-    if (this.previewingElement) {
-      this.previewingElement.parentNode!.removeChild(this.previewingElement);
+    if (this.previewingElement?.parentElement) {
+      this.previewingElement.parentNode?.removeChild(this.previewingElement);
     }
     
     this.previewingElement = await this.createPreviewElement();
@@ -208,12 +208,8 @@ export class Shape {
 
     if (this.previewingElement) {
       this.previewingElement.style.transition = "";
+      this.previewingElement.parentNode?.removeChild(this.previewingElement!)
     }
+    
   };
 }
-
-// todo
-/* 
-  bug 
-  创建元素中，切换工具会自动创建
-*/

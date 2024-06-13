@@ -4,7 +4,7 @@
   >
     <PopoverButton
       class="focus-visible:outline-none w-full h-full hover:bg-gray-700 rounded-sm overflow-hidden"
-      :class="{'bg-gray-700':isActiveTool('createShape')}"
+      :class="{'bg-primary':isActiveTool('createShape')}"
       @click="selectedTool='createShape'"
     >
       <svg-icon
@@ -32,7 +32,6 @@
             >
               <div
                 class="flex justify-center items-center w-10 h-10 hover:bg-gray-700 rounded-md cursor-pointer"
-                :data-tip="shape.tip"
                 :class="{ 'bg-primary hover:bg-primary': checked }"
                 @click="selectShape(close)"
               >
@@ -133,9 +132,8 @@ function selectShape(close: () => void) {
   }, 100);
 
   function handleClick() {
-    // renderStore.render?.shape.completeCreate()
     renderStore.render?.container.removeEventListener("click", handleClick);
-    selectedTool.value='none'
+    selectedTool.value='select'
   }
 }
 </script>

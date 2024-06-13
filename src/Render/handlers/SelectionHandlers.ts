@@ -208,22 +208,20 @@ export class SelectionHandlers implements Types.Handler {
     },
     transformer: {
       // 记录初始状态
-      mousedown: (
-        e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
-      ) => {
-        const anchor = this.render.transformer.getActiveAnchor();
+      mousedown: (e: Konva.KonvaEventObject<GlobalEventHandlersEventMap['mousedown']>) => {
+        const anchor = this.render.transformer.getActiveAnchor()
         if (!anchor) {
           // 非变换
           if (e.evt.ctrlKey) {
             // 选择
             if (this.render.selectionTool.selectingNodes.length > 0) {
-              const pos = this.render.stage.getPointerPosition();
+              const pos = this.render.stage.getPointerPosition()
               if (pos) {
-                const keeps: Konva.Node[] = [];
-                const removes: Konva.Node[] = [];
+                const keeps: Konva.Node[] = []
+                const removes: Konva.Node[] = []
 
                 // 从高到低，逐个判断 已选节点 和 鼠标点击位置 是否重叠
-                let finded = false;
+                let finded = false
                 for (const node of this.render.selectionTool.selectingNodes.sort(
                   (a, b) => b.zIndex() - a.zIndex()
                 )) {
@@ -232,24 +230,24 @@ export class SelectionHandlers implements Types.Handler {
                     Konva.Util.haveIntersection(node.getClientRect(), {
                       ...pos,
                       width: 1,
-                      height: 1,
+                      height: 1
                     })
                   ) {
                     // 记录需要移除选择的节点
-                    removes.unshift(node);
-                    finded = true;
+                    removes.unshift(node)
+                    finded = true
                   } else {
-                    keeps.unshift(node);
+                    keeps.unshift(node)
                   }
                 }
 
                 if (removes.length > 0) {
                   // 取消选择
-                  this.render.selectionTool.select(keeps);
+                  this.render.selectionTool.select(keeps)
                 } else {
                   // 从高到低，逐个判断 未选节点 和 鼠标点击位置 是否重叠
-                  let finded = false;
-                  const adds: Konva.Node[] = [];
+                  let finded = false
+                  const adds: Konva.Node[] = []
                   for (const node of this.render.layer
                     .getChildren()
                     .filter((node) => !this.render.ignore(node))
@@ -259,20 +257,20 @@ export class SelectionHandlers implements Types.Handler {
                       Konva.Util.haveIntersection(node.getClientRect(), {
                         ...pos,
                         width: 1,
-                        height: 1,
+                        height: 1
                       })
                     ) {
                       // 记录需要增加选择的节点
-                      adds.unshift(node);
-                      finded = true;
+                      adds.unshift(node)
+                      finded = true
                     }
                   }
                   if (adds.length > 0) {
                     // 新增选择
                     this.render.selectionTool.select([
                       ...this.render.selectionTool.selectingNodes,
-                      ...adds,
-                    ]);
+                      ...adds
+                    ])
                   }
                 }
               }
@@ -281,14 +279,14 @@ export class SelectionHandlers implements Types.Handler {
             if (this.render.selectionTool.selectingNodes.length > 0) {
               // 拖动前
               // 重置状态
-              this.reset();
+              this.reset()
             }
           }
         } else {
           // 变换前
 
           // 重置状态
-          this.reset();
+          this.reset()
         }
       },
 

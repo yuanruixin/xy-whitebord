@@ -56,12 +56,6 @@ export class SelectionTool {
     this.selectingClear()
 
     if (nodes.length > 0) {
-      // 用于撑开 transformer
-      this.selectingNodesArea = new Konva.Group({
-        visible: false,
-        // opacity: 0.2,
-        listening: false
-      })
 
       // 最大zIndex
       const maxZIndex = Math.max(
@@ -83,9 +77,6 @@ export class SelectionTool {
 
       // 设置透明度、提升层次、不可交互
       for (const node of nodes.sort((a, b) => a.zIndex() - b.zIndex())) {
-        const copy = node.clone()
-
-        this.selectingNodesArea.add(copy)
 
         node.setAttrs({
           listening: false,
@@ -97,11 +88,7 @@ export class SelectionTool {
       // 选中的节点
       this.selectingNodes = nodes
 
-      // 放进 transformer 所在的层
-      this.render.groupTransformer.add(this.selectingNodesArea)
-
-      // 选中的节点，放进 transformer
-      this.render.transformer.nodes([...this.selectingNodes, this.selectingNodesArea])
+      this.render.transformer.nodes(this.selectingNodes)
     }
   }
 

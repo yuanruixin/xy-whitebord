@@ -6,30 +6,39 @@ interface ImageConfig {
 }
 export class Image {
   render: Render;
-  constructor(config: ImageConfig, render: Render) {
+  constructor( render: Render) {
     this.render = render;
-    const group = new Konva.Group();
-    Konva.Image.fromURL(config.src, (image) => {
-      image.setAttrs({
+    
+  }
+  create(config:ImageConfig){
+    const group = new Konva.Group({
+      id: nanoid(),
+      name: "image",
+    });
+    
+    Konva.Image.fromURL(config.src, (imageNode) => {
+      console.log(imageNode);
+      
+      const imgWidth = imageNode.width()
+      const imgHeight = imageNode.height()
+      const imgPos = this.render.stage.getAbsoluteTransform().point({
+        x:(this.render.stage.width() -imgWidth)/2 ,
+        y:(this.render.stage.height()-imgHeight)/2
+      })
+        
+      imageNode.setAttrs({
         id: nanoid(),
-        width: image.width(),
-        height: image.height(),
+        width: imgWidth,
+        height: imgHeight,
         name: "asset",
-        x:0,
-        y:0
+        src:config.src,
+        x:imgPos.x,
+        y:imgPos.y
       });
-
-      group.add(
-        new Konva.Rect({
-          id: "hoverRect",
-          width: image.width(),
-          height: image.height(),
-          fill: "rgba(0,255,0,0.3)",
-          visible: false,
-        })
-      );
-
-      render.layer.add(group)
+      group.add(imageNode)
+      this.render.layer.add(group)
+      
     });
   }
 }
+// todo

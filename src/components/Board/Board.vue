@@ -34,13 +34,13 @@ const menuList: MenuItem[] = [
   {
     label: "置于底层",
     callback: ()=>{
-      boardStore.render?.deleteActiveElement()
+      boardStore.render?.deleteSelectingElement()
     },
   },
   {
     label: "删除",
     callback: () => {
-      boardStore.render?.deleteActiveElement()
+      boardStore.render?.deleteSelectingElement()
     },
   }
 ];

@@ -30,6 +30,7 @@ export class Render {
   // assetTool: Tools.AssetTool
   // 形状创建工具
   shape: elements.Shape;
+  image:elements.Image
   // 绘制工具(画笔、橡皮)
   paintTool: Tools.PaintTool;
   // 选择工具
@@ -92,6 +93,8 @@ export class Render {
     this.paintTool = new Tools.PaintTool(this);
     // 形状创建
     this.shape = new elements.Shape(this);
+    // 图片加载
+    this.image = new elements.Image(this);
 
     // 事件处理初始化
     this.handlersManager = {
@@ -295,11 +298,10 @@ export class Render {
   getPointerPosAfterStageChanged() {
     const getPointerPosInStage = this.stage.getPointerPosition();
     if (!getPointerPosInStage) return null;
-    const stageState = this.getStageState();
-    return {
-      x: this.toStageValue(getPointerPosInStage.x - stageState.x),
-      y: this.toStageValue(getPointerPosInStage.y - stageState.y),
-    };
+    return this.stage.getAbsoluteTransform().point({
+      x:getPointerPosInStage.x ,
+      y:getPointerPosInStage.y 
+    })
   }
 
   deleteSelectingElement() {

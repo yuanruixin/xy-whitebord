@@ -1,22 +1,21 @@
 import { ref } from "vue";
 
-const selectedTool = ref<ToolType>("default");
+const selectedTool = ref<ToolType>("select");
 type ToolType =
   | "createShape"
   | "picture"
   | "brush"
   | "eraser"
   | "drag"
-  | "select"
-  | "default"
-  | "none";
+  | 'elbowed' //连接线
+  | "select"   
 
 export const useTool = () => {
   function isActiveTool(name: ToolType) {
     return name === selectedTool.value;
   }
   function clearSelectedTool() {
-    selectedTool.value = 'none';
+    selectedTool.value = 'select';
   }
   return {
     selectedTool,
