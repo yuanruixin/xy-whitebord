@@ -4,12 +4,27 @@
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('brush') }"
-      @click="paintToolToggle"
+      @click="toggleTool('brush')"
     >
       <a class="w-10 h-10 p-0 flex justify-center items-center">
         <svg-icon
           prefix="menu"
           name="brush"
+          :size="48"
+          class="hover:animate-swing-small"
+        ></svg-icon>
+      </a>
+    </li>
+    <!-- 文本工具 -->
+    <li
+      class="cursor-pointer hover:bg-gray-700 rounded-md"
+      :class="{ 'bg-primary hover:bg-primary': isActiveTool('text') }"
+      @click="toggleTool('text')"
+    >
+      <a class="w-10 h-10 p-0 flex justify-center items-center">
+        <svg-icon
+          prefix="menu"
+          name="text"
           :size="48"
           class="hover:animate-swing-small"
         ></svg-icon>
@@ -33,7 +48,7 @@
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('picture') }"
-      @click="selectedTool = 'picture'"
+      @click="toggleTool('picture')"
     >
       <a class="w-10 h-10 p-0 flex justify-center items-center">
         <svg-icon
@@ -43,26 +58,23 @@
           class="hover:animate-swing-small"
         ></svg-icon>
       </a>
-      <input type="file" accept="image/*" id="imgInput" class="hidden" />
+      <input
+        ref="pictureInputRef"
+        type="file"
+        accept="image/*"
+        class="hidden"
+      />
     </li>
   </ul>
 </template>
 
 <script setup lang="ts">
-import { watch } from "vue";
+import { watch, ref } from "vue";
 import { useTool } from "./useTool";
 import { defineRenderStore } from "@/store/render";
 import { onMounted } from "vue";
 const { selectedTool, isActiveTool, clearSelectedTool } = useTool();
 const renderStore = defineRenderStore();
-
-function paintToolToggle() {
-  if (isActiveTool("brush")) {
-    clearSelectedTool();
-  }
-  selectedTool.value = "brush";
-  renderStore.render?.paintTool.init();
-}
 
 // 工具切换时，销毁旧工具（事件监听、样式等）
 watch(
@@ -70,34 +82,40 @@ watch(
   (newVal, oldVal) => {
     if (oldVal === "brush" && newVal !== oldVal) {
       renderStore.render?.paintTool.destroy();
-    } else if (newVal === "picture") {
-      const inputEl = document.querySelector("#imgInput") as HTMLInputElement;
-      inputEl.click();
     }
   }
 );
+const pictureInputRef = ref<HTMLInputElement | null>();
 // 获取用户选择文件的URL
 onMounted(() => {
-  const inputEl = document.querySelector("#imgInput") as HTMLInputElement;
-
-  inputEl.addEventListener("change", (e) => {
-    console.log(inputEl, 1112);
+  pictureInputRef.value?.addEventListener("change", (e) => {
     const target = e.target as HTMLInputElement;
     if (!target.files) return;
     const url = URL.createObjectURL(target.files[0]);
-   
+
     renderStore.render?.image.create({ src: url });
-    // const reader = new FileReader();
-    // reader.onload = (e) => {
-    //   const base64String = e.target?.result;
-    //   if(typeof(base64String) === "string"){
-    //     renderStore.render?.image.create({src:base64String})
-    //   }
-    // };
-    // reader.readAsDataURL(target.files[0]);
     clearSelectedTool();
   });
 });
+
+function toggleTool(tool: "picture" | "brush" | "text") {
+  if(isActiveTool(tool)){
+    clearSelectedTool();
+  }
+  selectedTool.value = tool;
+  if (tool === "picture") {
+    pictureInputRef.value?.click();
+    setTimeout(() => {
+      clearSelectedTool();
+    }, 500);
+  } else if (tool === "brush") {
+    // renderStore.render?.paintTool.init();
+    renderStore.render?.workMode('brush')   
+  } else if (tool === "text") {
+    renderStore.render?.workMode('createText')
+  }
+}
+
 </script>
 
 <style scoped></style>

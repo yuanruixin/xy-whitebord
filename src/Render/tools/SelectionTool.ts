@@ -1,7 +1,7 @@
 import Konva from 'konva'
 //
 import { Render } from '../index'
-
+import { isTextNode } from '../utils/elementJudgment'
 export class SelectionTool {
   static readonly name = 'SelectionTool'
 
@@ -11,7 +11,7 @@ export class SelectionTool {
   }
 
   // 【被选中的】
-  selectingNodes: Konva.Node[] = []
+  _selectingNodes: Konva.Node[] = []
 
   // 代替【被选中的】进行整体移动、放大缩小、旋转动作
   selectingNodesArea: Konva.Group | null = null
@@ -49,7 +49,18 @@ export class SelectionTool {
     this.selectingNodes = []
     
   }
+  set selectingNodes(nodes: Konva.Node[]) {
+    if(nodes.length === 1 && isTextNode(nodes[0])){
+      this.render.transformer.enabledAnchors(['middle-left', 'middle-right'])
+    }else{
+      this.render.transformer.enabledAnchors(['top-left', 'top-right', 'bottom-left', 'bottom-right'])
+    }
+    this._selectingNodes = nodes
 
+  }
+  get selectingNodes() {
+    return this._selectingNodes
+  }
   // 选择节点
   select(nodes: Konva.Node[]) {
     // 选之前，清一下
@@ -58,13 +69,13 @@ export class SelectionTool {
     if (nodes.length > 0) {
 
       // 最大zIndex
-      const maxZIndex = Math.max(
+     /*  const maxZIndex = Math.max(
         ...this.render.layer
           .getChildren((node) => {
             return !this.render.ignore(node)
           })
           .map((o) => o.zIndex())
-      )
+      ) */
 
       // 记录状态
       for (const node of nodes) {
@@ -76,14 +87,14 @@ export class SelectionTool {
       }
 
       // 设置透明度、提升层次、不可交互
-      for (const node of nodes.sort((a, b) => a.zIndex() - b.zIndex())) {
+      // for (const node of nodes.sort((a, b) => a.zIndex() - b.zIndex())) {
 
-        node.setAttrs({
-          listening: false,
-          opacity: node.opacity() * 0.8,
-          zIndex: maxZIndex
-        })
-      }
+      //   node.setAttrs({
+      //     listening: false,
+      //     // opacity: node.opacity() * 0.8,
+      //     zIndex: maxZIndex
+      //   })
+      // }
 
       // 选中的节点
       this.selectingNodes = nodes

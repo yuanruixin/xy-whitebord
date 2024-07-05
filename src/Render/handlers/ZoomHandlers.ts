@@ -49,6 +49,7 @@ export class ZoomHandlers implements Types.Handler {
             x: pos.x - mousePointTo.x * newScale,
             y: pos.y - mousePointTo.y * newScale,
           });
+          
         }
       },
     },

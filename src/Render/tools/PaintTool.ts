@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
 import { Render } from "../index";
-
+import { throttle } from "@/utils/throttle";
 type PaintMode = "brush" | "eraser";
 export class PaintTool {
   static readonly name = "SelectionTool";
@@ -15,8 +15,6 @@ export class PaintTool {
   }
 
   init() {
-
-    this.render.workMode("brush");
     this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
       this.isPaint = true;
       const pos = this.render.stage.getPointerPosition();
@@ -47,20 +45,22 @@ export class PaintTool {
       this.isPaint = false;
     });
 
-    this.render.stage.on("mousemove.paintTool touchmove.paintTool", (e) => {
-      if (!this.isPaint || !this.currentLine) return;
-      e.evt.preventDefault();
-      const pos = this.render.stage.getPointerPosition();
-      if (!pos) return;
-      const stageState = this.render.getStageState();
+    this.render.stage.on(
+      "mousemove.paintTool touchmove.paintTool",
+      throttle((e) => {
+        if (!this.isPaint || !this.currentLine) return;
+        e.evt.preventDefault();
+        const pos = this.render.stage.getPointerPosition();
+        if (!pos) return;
+        const stageState = this.render.getStageState();
 
-      const x = this.render.toStageValue(pos.x - stageState.x);
-      const y = this.render.toStageValue(pos.y - stageState.y);
-      const newPoints = this.currentLine.points().concat([x, y]);
-      
-      this.currentLine!.points(newPoints);
-    });
+        const x = this.render.toStageValue(pos.x - stageState.x);
+        const y = this.render.toStageValue(pos.y - stageState.y);
+        const newPoints = this.currentLine.points().concat([x, y]);
 
+        this.currentLine!.points(newPoints);
+      },10)
+    );
   }
 
   mode(mode?: PaintMode) {

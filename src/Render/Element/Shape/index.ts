@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { Render } from "@/Render";
 import pathJSon from "./pathData.json";
 import { throttle } from "@/utils/throttle";
-import { loadImage } from "@/Render/utils/image";
+import { loadImage } from "@/Render/utils/loadImage";
 export type ShapeType =
   | "arrowLeft"
   | "arrowRight"
@@ -40,6 +40,28 @@ export class Shape {
   constructor(render: Render) {
     this.render = render;
   }
+
+  //  正在创建元素
+  async init(config: ShapeConfig) {
+    this.render.workMode("createElement");
+    this.config = config;
+
+    //  初始化预览元素
+    if (this.previewingElement?.parentElement) {
+      this.previewingElement.parentNode?.removeChild(this.previewingElement);
+    }
+
+    this.previewingElement = await this.createPreviewElement();
+
+    // 移动时更新元素
+    this.render.container.addEventListener(
+      "mousemove",
+      this.creatingMousemoveHandler
+    );
+
+    // 再次点击stage容器，创建元素
+    this.render.container.addEventListener("click", this.completeCreate);
+  }
   // 完成创建显示真实图形
   completeCreate = () => {
     if (!this.config) throw "请先执行init进行初始化，然后进行绘制";
@@ -56,8 +78,7 @@ export class Shape {
       data: pathData[this.config.shape],
       fill,
     });
-
-    const pos = this.render.getPointerPosAfterStageChanged();
+    const pos = this.render.stage.getRelativePointerPosition();
     if (!pos || !this.shapeElement) return;
     this.shapeElement.setAttrs({
       x: pos.x,
@@ -66,15 +87,6 @@ export class Shape {
     group.add(this.shapeElement);
 
     // hover 框（多选时才显示）
-    group.add(
-      new Konva.Rect({
-        id: "hoverRect",
-        width: this.initialSize!.width,
-        height: this.initialSize!.height,
-        fill: "rgba(0,255,0,0.3)",
-        visible: false,
-      })
-    );
     this.render.layer.add(group);
 
     // 恢复鼠标模式
@@ -82,31 +94,10 @@ export class Shape {
     this.hidePreviewElement();
     this.destory();
   };
-
-  //  正在创建元素
-  async creating(config: ShapeConfig) {
-    this.render.workMode("createElement");
-    this.config = config;
-
-    //  初始化预览元素
-    if (this.previewingElement?.parentElement) {
-      this.previewingElement.parentNode?.removeChild(this.previewingElement);
-    }
-    
-    this.previewingElement = await this.createPreviewElement();
-
-    // 移动时更新元素
-    this.render.container.addEventListener(
-      "mousemove",
-      this.creatingMousemoveHandler
-    );
-
-    // 再次点击stage容器，创建元素
-    this.render.container.addEventListener("click", this.completeCreate);
-  }
-
   creatingMousemoveHandler = throttle(
     (e: GlobalEventHandlersEventMap["mousemove"]) => {
+      console.log('moving');
+      
       // 用于确定是否是第一次移动
       if (this._moveTimesAfterCreat < 3) this._moveTimesAfterCreat++;
       // 鼠标不在stage中，不显示
@@ -115,7 +106,7 @@ export class Shape {
 
       const x = e.clientX;
       const y = e.clientY;
-      // 下面代码让回调卡顿
+
       previewingElement.style.transform = `
             translate(${x}px,${y}px)
        `;
@@ -164,11 +155,10 @@ export class Shape {
     previewElementNode.style.height = this.initialSize.height + "px";
     // 默认创建到当前鼠标位置
 
-    const mousePos = this.render.getPointerPosAfterStageChanged()!
-    console.log(mousePos,"鼠标位置");
-    
-    previewElementNode.style.transform = `translate(${mousePos.x}px,${mousePos.y}px)`
-    
+    const mousePos = this.render.stage.getPointerPosition() || { x: 0, y: 0 };
+
+    previewElementNode.style.transform = `translate(${mousePos.x}px,${mousePos.y + 60}px)`;
+
     return previewElementNode;
   }
   /**
@@ -208,8 +198,7 @@ export class Shape {
 
     if (this.previewingElement) {
       this.previewingElement.style.transition = "";
-      this.previewingElement.parentNode?.removeChild(this.previewingElement!)
+      this.previewingElement.parentNode?.removeChild(this.previewingElement!);
     }
-    
   };
 }

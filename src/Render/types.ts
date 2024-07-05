@@ -95,9 +95,10 @@ export type CursorType =
   | "brush"
   | "none";
 
-export type MouseMode =  "createElement"
+export type  MouseMode =  "createElement"
 | "brush"
 | "earser"
 | "select"
 | "drag"
 | "default" 
+| "createText" 

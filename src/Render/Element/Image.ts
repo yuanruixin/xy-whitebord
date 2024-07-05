@@ -17,8 +17,7 @@ export class Image {
     });
     
     Konva.Image.fromURL(config.src, (imageNode) => {
-      console.log(imageNode);
-      
+  
       const imgWidth = imageNode.width()
       const imgHeight = imageNode.height()
       const imgPos = this.render.stage.getAbsoluteTransform().point({
@@ -41,4 +40,3 @@ export class Image {
     });
   }
 }
-// todo

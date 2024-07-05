@@ -11,8 +11,6 @@ export  class Cursor {
 
   // 设置鼠标指针样式
   set(type:CursorType = 'default') {
-    console.log(type);
-    
     this.currentType = type
     let style:string = type
     if (type === 'eraser') {

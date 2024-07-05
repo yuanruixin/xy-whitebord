@@ -6,11 +6,13 @@ import * as Draws from "./draws";
 import * as Handlers from "./handlers";
 import * as elements from "./Element";
 import { getKeys } from "@/utils/secureTS";
+// 选择元素后出现的编辑工具条（目前只有颜色修改器）
+import { PickColor } from "@/components/ColorPicker";
 // 主类
 export class Render {
   container: HTMLDivElement;
   // 同一时间鼠标只能处理一个事件(创建元素、画笔、橡皮、选择模式、拖拽模式)
-  private _workMode: Types.MouseMode = "default";
+  private _workMode: Types.MouseMode = "select";
 
   stage: Konva.Stage;
   // 主要层
@@ -25,26 +27,34 @@ export class Render {
   // 附加工具
   draws: {
     bg: Draws.BgDraw;
+    contextmenu: Draws.ContextmenuDraw;
   };
-  // 素材工具
-  // assetTool: Tools.AssetTool
   // 形状创建工具
   shape: elements.Shape;
-  image:elements.Image
+  text: elements.Text;
+  image: elements.Image;
   // 绘制工具(画笔、橡皮)
   paintTool: Tools.PaintTool;
   // 选择工具
   selectionTool: Tools.SelectionTool;
-
+  // 编辑条工具
+  editToolbar: Tools.EditToolbar;
+  // 层级工具
+  zIndexTool: Tools.ZIndexTool;
   // 多选器层
   groupTransformer: Konva.Group = new Konva.Group();
 
   // 多选器
   transformer: Konva.Transformer = new Konva.Transformer({
+    flipEnabled:false,
     shouldOverdrawWholeArea: true,
     borderDash: [4, 4],
     padding: 1,
     rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315, 360],
+    boundBoxFunc: function (oldBox, newBox) {
+      newBox.width = Math.max(30, newBox.width);
+      return newBox;
+    },
   });
 
   // 选择框
@@ -82,6 +92,7 @@ export class Render {
       bg: new Draws.BgDraw(this, this.layerFloor, {
         size: this.bgSize,
       }),
+      contextmenu: new Draws.ContextmenuDraw(this, this.layerCover, {}),
     };
     // 辅助层-顶层
     this.groupTransformer.add(this.transformer);
@@ -89,13 +100,17 @@ export class Render {
     this.layerCover.add(this.groupTransformer);
     // 选择工具
     this.selectionTool = new Tools.SelectionTool(this);
+    this.editToolbar = new Tools.EditToolbar(this);
     // 画笔工具
     this.paintTool = new Tools.PaintTool(this);
+    // 层级工具
+    this.zIndexTool = new Tools.ZIndexTool(this);
     // 形状创建
     this.shape = new elements.Shape(this);
+    // 文本创建
+    this.text = new elements.Text(this);
     // 图片加载
     this.image = new elements.Image(this);
-
     // 事件处理初始化
     this.handlersManager = {
       [Handlers.ZoomHandlers.name]: new Handlers.ZoomHandlers(this),
@@ -108,7 +123,7 @@ export class Render {
   init() {
     this.stage.add(this.layerFloor);
     this.draws[Draws.BgDraw.name].init();
-
+    this.draws[Draws.ContextmenuDraw.name].init();
     this.stage.add(this.layer);
 
     this.stage.add(this.layerCover);
@@ -121,30 +136,58 @@ export class Render {
    * @description 这里设置获取获取当前工作模式
    */
   workMode(workMode?: Types.MouseMode) {
+    
     if (!workMode) return this._workMode;
-
+   
     if (workMode === this._workMode) return workMode;
-    // 清除旧工具
-    const oldMouseMode = this._workMode;
-    if (oldMouseMode === "createElement") {
-      this.shape.destory();
-    } else if (oldMouseMode === "brush") {
-      this.paintTool.destroy();
+    // 清除正在使用的旧工具
+    clearOldTool.apply(this);
+    setNewTool.apply(this);
+    function clearOldTool(this: Render) {
+      const oldMouseMode = this._workMode;
+      if (oldMouseMode === "createElement") {
+        this.shape.destory();
+      } else if (oldMouseMode === "brush") {
+        this.paintTool.destroy();
+      } else if (oldMouseMode === "select" || oldMouseMode === "default") {
+        this.selectionTool.selectingClear();
+      } else if (oldMouseMode === "createText") {
+        this.text.destory();
+      } else if (oldMouseMode === "drag") {
+        this.stage.draggable(false);
+        this.cursor.reset();
+      } else if (oldMouseMode === "earser") {
+        this.paintTool.destroy();
+      } else {
+        const _: never = oldMouseMode;
+        console.log(_);
+      }
     }
-
-    // 设置新工具
-    this._workMode = workMode;
-    if (workMode === "drag") {
-      this.stage.draggable(true);
-      this.cursor.set("grab");
-    } else if (workMode === "brush") this.cursor.set("brush");
-    else if (workMode === "earser") this.cursor.set("eraser");
-    else this.cursor.reset();
+   
+    function setNewTool(this: Render) {
+      if (!workMode) return this._workMode;
+      this._workMode = workMode;
+      // 设置新工具
+      if (workMode === "drag") {
+        this.stage.draggable(true);
+        this.cursor.set("grab");
+      } else if (workMode === "brush") {
+        this.paintTool.init();
+        this.cursor.set('brush');
+      } else if (workMode === "earser") {
+        console.log("earser工具待完成");
+        
+      } else if (workMode === "createText") {
+        this.cursor.set("crosshair");
+      } else {
+        this.cursor.reset();
+      }
+    }
 
     return this._workMode;
   }
-  // 事件绑定
   eventBind() {
+    // handlers事件绑定
     // 获取哪个handler工具（即handers下的不同功能封装）
     getKeys(this.handlersManager).forEach((handlerToolName) => {
       // 获取要监听的对象 target
@@ -182,60 +225,20 @@ export class Render {
 
     const container = this.stage.container();
     container.tabIndex = 1;
-    // for (const event of [
-    //   "mouseenter",
-    //   "dragenter",
-    //   "mouseout",
-    //   "dragenter",
-    //   "dragover",
-    //   "drop",
-    //   "keydown",
-    //   "keyup",
-    // ]) {
-    //   container.addEventListener(event, (e) => {
-    //     e?.preventDefault();
 
-    //     // if (["mouseenter", "dragenter"].includes(event)) {
-    //     //   // 激活 dom 事件
-    //     //   this.stage.container().focus();
-    //     // }
+    getKeys(this.draws.contextmenu.handlers).forEach((bindTarget) => {
+      if (bindTarget === "stage") {
+        getKeys(this.draws.contextmenu.handlers[bindTarget]).forEach(
+          (eventName) => {
+            const callBack =
+              this.draws.contextmenu.handlers[bindTarget][eventName];
+            this.stage.on(eventName, callBack);
+          }
+        );
+      }
+    });
 
-    //     for (const k in this.draws) {
-    //       this.draws[k as keyof typeof this.draws].handlers?.dom?.[event]?.(e);
-    //     }
-
-    //     for (const k in this.handlers) {
-    //       this.handlers[k].handlers?.dom?.[event]?.(e);
-    //     }
-    //   });
-    // }
-
-    // for (const event of [
-    //   "mousedown",
-    //   "transformend",
-    //   "dragstart",
-    //   "dragmove",
-    //   "dragend",
-    // ]) {
-    //   this.transformer.on(event, (e) => {
-    //     e?.evt?.preventDefault();
-
-    //     for (const k in this.draws) {
-    //       this.draws[k].handlers?.transformer?.[event]?.(e);
-    //     }
-
-    //     for (const k in this.handlers) {
-    //       this.handlers[k].handlers?.transformer?.[event]?.(e);
-    //     }
-    //   });
-    // }
-
-    // this.handlers[Handlers.SelectionHandlers.name].transformerConfig
-    //   ?.dragBoundFunc &&
-    //   this.transformer.dragBoundFunc(
-    //     this.handlers[Handlers.SelectionHandlers.name].transformerConfig!
-    //       .dragBoundFunc!
-    //   );
+    // draws事件绑定
   }
 
   // 获取 stage 状态
@@ -277,7 +280,10 @@ export class Render {
 
   // 忽略各 draw 的根 group
   ignoreDraw(node: Konva.Node) {
-    return node.name() === Draws.BgDraw.name;
+    return (
+      node.name() === Draws.BgDraw.name ||
+      node.name() === Draws.ContextmenuDraw.name
+    );
   }
 
   setStageScale(scale: number) {
@@ -289,6 +295,10 @@ export class Render {
 
     // 更新预览元素默认大小
     this.shape.updatePreviewElementSize();
+
+    // 更新工具条位置
+    
+    this.editToolbar.init()
   }
 
   /**
@@ -299,12 +309,13 @@ export class Render {
     const getPointerPosInStage = this.stage.getPointerPosition();
     if (!getPointerPosInStage) return null;
     return this.stage.getAbsoluteTransform().point({
-      x:getPointerPosInStage.x ,
-      y:getPointerPosInStage.y 
-    })
+      x: getPointerPosInStage.x,
+      y: getPointerPosInStage.y + 60,
+    });
   }
 
   deleteSelectingElement() {
+    PickColor.close();
     const remove = (nodes: Konva.Node[]) => {
       for (const node of nodes) {
         if (node instanceof Konva.Transformer) {

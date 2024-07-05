@@ -127,7 +127,7 @@ const currentIndex = ref(0);
 function selectShape(close: () => void) {
   setTimeout(() => {
     close();
-    renderStore.render?.shape.creating({shape:shapes[currentIndex.value].name})
+    renderStore.render?.shape.init({shape:shapes[currentIndex.value].name})
     renderStore.render?.container.addEventListener("click", handleClick);
   }, 100);
 

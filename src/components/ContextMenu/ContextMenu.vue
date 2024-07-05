@@ -10,6 +10,7 @@
         >
           <li
             v-for="item in props.menuList"
+            :key="item.label"
             class="px-3 cursor-pointer hover:bg-slate-100 active:bg-[#e4e7ec] leading-8"
             @click="item.callback"
           >

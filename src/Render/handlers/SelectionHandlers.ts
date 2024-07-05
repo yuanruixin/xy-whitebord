@@ -1,7 +1,7 @@
 import Konva from "konva";
-//
 import { Render } from "../index";
 import * as Types from "../types";
+import { PickColor } from "@/components/ColorPicker";
 
 interface SortItem {
   id?: number; // 有 id 就是其他节点，否则就是 选择目标
@@ -13,7 +13,7 @@ type SortItemPair = [SortItem, SortItem];
 export class SelectionHandlers implements Types.Handler {
   static readonly name = "Selection";
 
-  private render: Render;
+  render: Render;
   constructor(render: Render) {
     this.render = render;
   }
@@ -132,10 +132,13 @@ export class SelectionHandlers implements Types.Handler {
             }
           }
         }
+        this.render.editToolbar.init();
       },
       mousemove: () => {
+        
         // stage 状态
         const stageState = this.render.getStageState();
+        
         // 选择框
         if (
           this.selecting &&
@@ -204,24 +207,27 @@ export class SelectionHandlers implements Types.Handler {
 
         // 选择区域结束
         this.selecting = false;
+        this.render.editToolbar.init();
       },
     },
     transformer: {
       // 记录初始状态
-      mousedown: (e: Konva.KonvaEventObject<GlobalEventHandlersEventMap['mousedown']>) => {
-        const anchor = this.render.transformer.getActiveAnchor()
+      mousedown: (
+        e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
+      ) => {
+        const anchor = this.render.transformer.getActiveAnchor();
         if (!anchor) {
           // 非变换
           if (e.evt.ctrlKey) {
             // 选择
             if (this.render.selectionTool.selectingNodes.length > 0) {
-              const pos = this.render.stage.getPointerPosition()
+              const pos = this.render.stage.getPointerPosition();
               if (pos) {
-                const keeps: Konva.Node[] = []
-                const removes: Konva.Node[] = []
+                const keeps: Konva.Node[] = [];
+                const removes: Konva.Node[] = [];
 
                 // 从高到低，逐个判断 已选节点 和 鼠标点击位置 是否重叠
-                let finded = false
+                let finded = false;
                 for (const node of this.render.selectionTool.selectingNodes.sort(
                   (a, b) => b.zIndex() - a.zIndex()
                 )) {
@@ -230,24 +236,24 @@ export class SelectionHandlers implements Types.Handler {
                     Konva.Util.haveIntersection(node.getClientRect(), {
                       ...pos,
                       width: 1,
-                      height: 1
+                      height: 1,
                     })
                   ) {
                     // 记录需要移除选择的节点
-                    removes.unshift(node)
-                    finded = true
+                    removes.unshift(node);
+                    finded = true;
                   } else {
-                    keeps.unshift(node)
+                    keeps.unshift(node);
                   }
                 }
 
                 if (removes.length > 0) {
                   // 取消选择
-                  this.render.selectionTool.select(keeps)
+                  this.render.selectionTool.select(keeps);
                 } else {
                   // 从高到低，逐个判断 未选节点 和 鼠标点击位置 是否重叠
-                  let finded = false
-                  const adds: Konva.Node[] = []
+                  let finded = false;
+                  const adds: Konva.Node[] = [];
                   for (const node of this.render.layer
                     .getChildren()
                     .filter((node) => !this.render.ignore(node))
@@ -257,20 +263,20 @@ export class SelectionHandlers implements Types.Handler {
                       Konva.Util.haveIntersection(node.getClientRect(), {
                         ...pos,
                         width: 1,
-                        height: 1
+                        height: 1,
                       })
                     ) {
                       // 记录需要增加选择的节点
-                      adds.unshift(node)
-                      finded = true
+                      adds.unshift(node);
+                      finded = true;
                     }
                   }
                   if (adds.length > 0) {
                     // 新增选择
                     this.render.selectionTool.select([
                       ...this.render.selectionTool.selectingNodes,
-                      ...adds
-                    ])
+                      ...adds,
+                    ]);
                   }
                 }
               }
@@ -278,18 +284,50 @@ export class SelectionHandlers implements Types.Handler {
           } else {
             if (this.render.selectionTool.selectingNodes.length > 0) {
               // 拖动前
-              // 重置状态
-              this.reset()
+              const pos = this.render.stage.getPointerPosition();
+              if (pos) {
+                let selectNode: Konva.Node | null = null;
+
+                let finded = false;
+                for (const node of this.render.selectionTool.selectingNodes.sort(
+                  (a, b) => b.zIndex() - a.zIndex()
+                )) {
+                  if (
+                    !finded &&
+                    Konva.Util.haveIntersection(node.getClientRect(), {
+                      ...pos,
+                      width: 1,
+                      height: 1,
+                    })
+                  ) {
+                    // 记录选择的节点
+                    selectNode = node;
+                    finded = true;
+                    break;
+                  }
+                }
+
+                if (selectNode) {
+                  // 取消选择
+                  if(e.evt.button === Types.MouseButton.right) return
+                  this.render.selectionTool.select([selectNode]);
+                  setTimeout(() => {
+                    this.render.editToolbar.init();
+                  });
+                }
+              }
             }
           }
         } else {
           // 变换前
 
           // 重置状态
-          this.reset()
+          this.reset();
         }
       },
-
+      transform: () => {
+        PickColor.close();
+      },
       transformend: () => {
         // 变换结束
 
@@ -307,7 +345,8 @@ export class SelectionHandlers implements Types.Handler {
       dragmove: () => {
         const pos = this.render.transformer.position();
         const { pos: transformerPos, isAttract } = this.attract(pos);
-
+        // 变换过程中关闭颜色选择工具
+        PickColor.close();
         if (isAttract) {
           // 磁吸偏移
           this.selectingNodesPositionByOffset({
@@ -329,51 +368,6 @@ export class SelectionHandlers implements Types.Handler {
         // 更新历史
         // this.render.updateHistory()
       },
-      // 子节点 hover
-     /*  mousemove: () => {
-        // const pos = this.render.stage.getPointerPosition();
-        // if (pos) {
-        //   // 获取所有图形
-        //   const shapes = this.render.transformer.nodes();
-
-        //   // 隐藏 hover 框
-        //   for (const shape of shapes) {
-        //     if (shape instanceof Konva.Group) {
-        //       shape.findOne("#hoverRect")?.visible(false);
-        //     }
-        //   }
-
-        //   // 多选
-        //   if (shapes.length > 1) {
-        //     // zIndex 倒序（大的优先）
-        //     shapes.sort((a, b) => b.zIndex() - a.zIndex());
-
-        //     // 提取重叠目标
-        //     const selected = shapes.find((shape) => {
-        //       // 关键 api
-        //       return Konva.Util.haveIntersection(
-        //         { ...pos, width: 1, height: 1 },
-        //         shape.getClientRect()
-        //       );
-        //     });
-
-        //     // 显示 hover 框
-        //     if (selected) {
-        //       if (selected instanceof Konva.Group) {
-        //         selected.findOne("#hoverRect")?.visible(true);
-        //       }
-        //     }
-        //   }
-        // }
-      },
-      mouseleave: () => {
-        // 隐藏 hover 框
-        for (const shape of this.render.transformer.nodes()) {
-          if (shape instanceof Konva.Group) {
-            shape.findOne("#hoverRect")?.visible(false);
-          }
-        }
-      }, */
     },
   } satisfies Types.Handler["handlers"];
 

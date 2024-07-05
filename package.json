@@ -20,6 +20,7 @@
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
+    "fit-curve": "^0.2.0",
     "gsap": "^3.12.5",
     "konva": "^9.3.6",
     "nanoid": "^5.0.7",

@@ -81,9 +81,6 @@ export class DragHandlers {
           }
         }
       }, 10),
-      mousemove: () => {
-        this.render.draws.bg.draw();
-      },
     },
   } satisfies Types.Handler["handlers"];
   get isStageDraggable() {
