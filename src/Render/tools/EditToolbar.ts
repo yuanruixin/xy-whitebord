@@ -58,6 +58,7 @@ export class EditToolbar{
             }
           });
         });
+        this.render.historyTool.updateHistory();
       });
     } else if (this.render.selectionTool.selectingNodes.length === 0) {
       PickColor.close();

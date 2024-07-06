@@ -85,7 +85,17 @@ export enum MoveKey {
   right = "ArrowRight",
   down = "ArrowDown",
 }
-
+export enum ShutcutKey {
+  Delete = 'Delete',
+  C = 'KeyC',
+  V = 'KeyV',
+  Z = 'KeyZ',
+  Y = 'KeyY',
+  A = 'KeyA',
+  R = 'KeyR',
+  Esc = 'Escape',
+  Backspace = 'Backspace'
+}
 export type CursorType =
   | "default"
   | "move"

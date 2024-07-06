@@ -36,7 +36,7 @@ export class Image {
       });
       group.add(imageNode)
       this.render.layer.add(group)
-      
+      this.render.historyTool.updateHistory();
     });
   }
 }

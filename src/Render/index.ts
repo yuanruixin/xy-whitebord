@@ -33,26 +33,26 @@ export class Render {
   shape: elements.Shape;
   text: elements.Text;
   image: elements.Image;
-  // 绘制工具(画笔、橡皮)
-  paintTool: Tools.PaintTool;
-  // 选择工具
-  selectionTool: Tools.SelectionTool;
-  // 编辑条工具
-  editToolbar: Tools.EditToolbar;
-  // 层级工具
-  zIndexTool: Tools.ZIndexTool;
+  cursor: Cursor; // 光标样式设置
+
+  paintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
+  selectionTool = new Tools.SelectionTool(this); // 选择工具
+  editToolbar = new Tools.EditToolbar(this); // 编辑条工具
+  zIndexTool = new Tools.ZIndexTool(this); // 层级工具
+  importExportTool = new Tools.ImportExportTool(this);   // 导入导出工具
+  historyTool = new Tools.HistoryTool(this); // 历史工具
+  // 复制工具
+  copyTool = new Tools.CopyTool(this);
   // 多选器层
   groupTransformer: Konva.Group = new Konva.Group();
 
   // 多选器
   transformer: Konva.Transformer = new Konva.Transformer({
-    // centeredScaling: true,
-    flipEnabled:false,
+    flipEnabled: false,
     shouldOverdrawWholeArea: true,
     borderDash: [4, 4],
     padding: 1,
     rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315, 360],
-   
   });
 
   // 选择框
@@ -61,15 +61,16 @@ export class Render {
     fill: "rgba(0,0,0,0.1)",
     visible: true,
   });
-  // 光标管理
-  cursor: Cursor;
+
   // 参数
   bgSize = 20;
   // 事件处理
-  handlersManager: {
-    [Handlers.DragHandlers.name]: Handlers.DragHandlers;
-    [Handlers.ZoomHandlers.name]: Handlers.ZoomHandlers;
-    [Handlers.SelectionHandlers.name]: Handlers.SelectionHandlers;
+  // 事件处理初始化
+  handlersManager = {
+    [Handlers.ZoomHandlers.name]: new Handlers.ZoomHandlers(this),
+    [Handlers.DragHandlers.name]: new Handlers.DragHandlers(this),
+    [Handlers.SelectionHandlers.name]: new Handlers.SelectionHandlers(this),
+    [Handlers.ShutcutHandlers.name]: new Handlers.ShutcutHandlers(this),
   };
 
   // 监听函数回调管理
@@ -82,8 +83,6 @@ export class Render {
       width: this.container.clientWidth,
       height: this.container.clientHeight,
     });
-    // 鼠标样式设置
-    this.cursor = new Cursor(this);
 
     // 附加工具
     this.draws = {
@@ -92,31 +91,17 @@ export class Render {
       }),
       contextmenu: new Draws.ContextmenuDraw(this, this.layerCover, {}),
     };
+    this.shape = new elements.Shape(this);
+    this.text = new elements.Text(this);
+    this.image = new elements.Image(this);
+    this.cursor = new Cursor(this); // 光标样式设置
     // 辅助层-顶层
     this.groupTransformer.add(this.transformer);
     this.groupTransformer.add(this.selectRect);
     this.layerCover.add(this.groupTransformer);
-    // 选择工具
-    this.selectionTool = new Tools.SelectionTool(this);
-    this.editToolbar = new Tools.EditToolbar(this);
-    // 画笔工具
-    this.paintTool = new Tools.PaintTool(this);
-    // 层级工具
-    this.zIndexTool = new Tools.ZIndexTool(this);
-    // 形状创建
-    this.shape = new elements.Shape(this);
-    // 文本创建
-    this.text = new elements.Text(this);
-    // 图片加载
-    this.image = new elements.Image(this);
-    // 事件处理初始化
-    this.handlersManager = {
-      [Handlers.ZoomHandlers.name]: new Handlers.ZoomHandlers(this),
-      [Handlers.DragHandlers.name]: new Handlers.DragHandlers(this),
-      [Handlers.SelectionHandlers.name]: new Handlers.SelectionHandlers(this),
-    };
 
     this.init();
+    this.historyTool.updateHistory();
   }
   init() {
     this.stage.add(this.layerFloor);
@@ -129,7 +114,6 @@ export class Render {
     // 事件绑定
     this.eventBind();
   }
-
   /**
    * @description 这里设置获取获取当前工作模式
    */
@@ -159,7 +143,7 @@ export class Render {
         console.log(_);
       }
     }
-   
+
     function setNewTool(this: Render) {
       if (!workMode) return this._workMode;
       this._workMode = workMode;
@@ -169,10 +153,9 @@ export class Render {
         this.cursor.set("grab");
       } else if (workMode === "brush") {
         this.paintTool.init();
-        this.cursor.set('brush');
+        this.cursor.set("brush");
       } else if (workMode === "earser") {
         console.log("earser工具待完成");
-        
       } else if (workMode === "createText") {
         this.cursor.set("crosshair");
       } else {
@@ -201,14 +184,14 @@ export class Render {
             const callback =
               this.handlersManager[handlerToolName].handlers[target][event];
             if (targetAfteCorrectedType === "dom") {
-              this.container.addEventListener(event, callback);
+              this.container.addEventListener(event as string, callback);
             } else if (
               targetAfteCorrectedType === "stage" ||
               targetAfteCorrectedType === "transformer"
             ) {
               // 增加事件修饰符
-              const eventName = event + "." + handlerToolName;
-              this[target].on(eventName, callback);
+              const eventName = event as string + "." + handlerToolName;
+              this[targetAfteCorrectedType].on(eventName, callback);
             } else {
               // 未处理的分支
               const a: never = targetAfteCorrectedType;
@@ -256,11 +239,6 @@ export class Render {
   toBoardValue(stagePos: number) {
     return stagePos * this.stage.scaleX();
   }
-  // setDraggable(draggable: boolean) {
-  //   this.stage.draggable(draggable);
-  //   if (draggable) this.cursor.set("grab");
-  //   else this.cursor.set("default");
-  // }
 
   // 忽略非素材
   ignore(node: Konva.Node) {
@@ -293,9 +271,9 @@ export class Render {
     this.shape.updatePreviewElementSize();
 
     // 更新工具条位置
-    this.editToolbar.init()
+    this.editToolbar.init();
     // 更新文本框位置
-    this.text.forcerUpdateTextarea()
+    this.text.forcerUpdateTextarea();
   }
 
   /**
@@ -326,9 +304,7 @@ export class Render {
 
       if (nodes.length > 0) {
         // 更新历史
-        // this.updateHistory()
-        // // 更新预览
-        // this.draws[Draws.PreviewDraw.name].draw()
+        this.historyTool.updateHistory();
       }
     };
     remove(this.selectionTool.selectingNodes);

@@ -43,6 +43,7 @@ export class PaintTool {
 
     this.render.stage.on("mouseup.paintTool touchend.paintTool", () => {
       this.isPaint = false;
+      this.render.historyTool.updateHistory();
     });
 
     this.render.stage.on(

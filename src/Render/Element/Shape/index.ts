@@ -93,11 +93,10 @@ export class Shape {
     this.render.workMode("default");
     this.hidePreviewElement();
     this.destory();
+    this.render.historyTool.updateHistory();
   };
   creatingMousemoveHandler = throttle(
     (e: GlobalEventHandlersEventMap["mousemove"]) => {
-      console.log('moving');
-      
       // 用于确定是否是第一次移动
       if (this._moveTimesAfterCreat < 3) this._moveTimesAfterCreat++;
       // 鼠标不在stage中，不显示

@@ -52,6 +52,7 @@ export class Text {
   }
   completeCreate() {
     // this.render.stage.off("click.createText");
+    this.render.historyTool.updateHistory();
     this.render.workMode("select");
   }
   destory() {

@@ -49,7 +49,7 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
         menus.push({
           name: "粘贴",
           action: () => {
-            // this.render.positionTool.positionReset()
+            this.render.copyTool.pasteStart();
           },
         });
       } else if (this.state.target.name() === "link-line") {
@@ -70,7 +70,7 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
           name: "复制",
           action: () => {
             if (target) {
-              // this.render.copyTool.copy([target])
+              this.render.copyTool.copy([target])
             }
           },
         });
