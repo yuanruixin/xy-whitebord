@@ -13,7 +13,6 @@ export class EditToolbar{
   initPickColorToolbar() {
     if (this.render.selectionTool.selectingNodes.length !== 0) {
       const transformerBound = this.render.transformer.getClientRect();
-      console.log(this.render.stage.scaleX());
       
       const pos ={
         x: transformerBound.x ,

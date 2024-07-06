@@ -40,6 +40,7 @@ export class DragHandlers {
               this.mousedownPointerPos = { x: pos.x, y: pos.y };
             }
           }
+          // 鼠标中键
         }
       },
       mouseup: () => {
@@ -67,14 +68,14 @@ export class DragHandlers {
           // 鼠标左键拖动
           const pos = this.render.stage.getPointerPosition();
           if (pos) {
-            // const offsetX = pos.x - this.mousedownPointerPos.x;
-            // const offsetY = pos.y - this.mousedownPointerPos.y;
+            const offsetX = pos.x - this.mousedownPointerPos.x;
+            const offsetY = pos.y - this.mousedownPointerPos.y;
 
             // 移动 stage
-            // this.render.stage.position({
-            //   x: this.mousedownStagePos.x + offsetX,
-            //   y: this.mousedownStagePos.y + offsetY,
-            // });
+            this.render.stage.position({
+              x: this.mousedownStagePos.x + offsetX,
+              y: this.mousedownStagePos.y + offsetY,
+            });
 
             // 更新背景
             this.render.draws.bg.draw();

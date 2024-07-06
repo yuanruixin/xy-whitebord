@@ -46,15 +46,13 @@ export class Render {
 
   // 多选器
   transformer: Konva.Transformer = new Konva.Transformer({
+    // centeredScaling: true,
     flipEnabled:false,
     shouldOverdrawWholeArea: true,
     borderDash: [4, 4],
     padding: 1,
     rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315, 360],
-    boundBoxFunc: function (oldBox, newBox) {
-      newBox.width = Math.max(30, newBox.width);
-      return newBox;
-    },
+   
   });
 
   // 选择框
@@ -136,9 +134,7 @@ export class Render {
    * @description 这里设置获取获取当前工作模式
    */
   workMode(workMode?: Types.MouseMode) {
-    
     if (!workMode) return this._workMode;
-   
     if (workMode === this._workMode) return workMode;
     // 清除正在使用的旧工具
     clearOldTool.apply(this);
@@ -297,8 +293,9 @@ export class Render {
     this.shape.updatePreviewElementSize();
 
     // 更新工具条位置
-    
     this.editToolbar.init()
+    // 更新文本框位置
+    this.text.forcerUpdateTextarea()
   }
 
   /**

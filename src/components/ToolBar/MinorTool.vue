@@ -113,6 +113,7 @@ function toggleTool(tool: "picture" | "brush" | "text") {
     renderStore.render?.workMode('brush')   
   } else if (tool === "text") {
     renderStore.render?.workMode('createText')
+    
   }
 }
 

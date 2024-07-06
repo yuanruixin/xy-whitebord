@@ -212,7 +212,7 @@ export class SelectionHandlers implements Types.Handler {
     },
     transformer: {
       // 记录初始状态
-      mousedown: (
+      click: (
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
         const anchor = this.render.transformer.getActiveAnchor();

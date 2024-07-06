@@ -25,7 +25,7 @@ export class Text {
   init(config?: TextConfig) {
     this.render.stage.on("click.createText", () => {
       if (this.render.workMode() !== "createText") return;
-      const pos = this.render.stage.getPointerPosition();
+      const pos = this.render.stage.getRelativePointerPosition();
       if (pos) {
         this.creatElement(pos, config);
       }
@@ -72,6 +72,53 @@ export class Text {
     };
     removeTextarea();
   }
+  createTextarea(selectingTextNode: Konva.Text) {
+    const textPosition = selectingTextNode.absolutePosition();
+
+    const areaPosition = {
+      x: this.render.stage.container().offsetLeft + textPosition.x,
+      y: this.render.stage.container().offsetTop + textPosition.y,
+    };
+    const textarea = this.textarea || document.createElement("textarea");
+
+    document.body.appendChild(textarea);
+    textarea.value = selectingTextNode.text();
+    textarea.style.position = "absolute";
+    textarea.style.top = areaPosition.y + "px";
+    textarea.style.left = areaPosition.x + "px";
+    textarea.style.width =
+      selectingTextNode.width() - selectingTextNode.padding() * 2 + "px";
+    textarea.style.height =
+      selectingTextNode.height() - selectingTextNode.padding() * 2 + 5 + "px";
+    textarea.style.fontSize = selectingTextNode.fontSize() + "px";
+    textarea.style.border = "none";
+    textarea.style.padding = "0px";
+    textarea.style.margin = "0px";
+    textarea.style.overflow = "hidden";
+    textarea.style.background = "none";
+    textarea.style.outline = "none";
+    textarea.style.resize = "none";
+    textarea.style.lineHeight = selectingTextNode.lineHeight() + "";
+    textarea.style.fontFamily = selectingTextNode.fontFamily();
+    textarea.style.transformOrigin = "left top";
+    textarea.style.textAlign = selectingTextNode.align();
+    textarea.style.color = selectingTextNode.fill();
+    const rotation = selectingTextNode.rotation();
+    let transform = "scale(" + this.render.stage.scaleX() + ")";
+    if (rotation) {
+      transform += "rotateZ(" + rotation + "deg)";
+    }
+
+    textarea.style.transform = transform;
+
+    // reset height
+    textarea.style.height = "auto";
+    // after browsers resized it we can set actual value
+    textarea.style.height = textarea.scrollHeight + 3 + "px";
+
+    textarea.focus();
+    return textarea;
+  }
   bindEvents() {
     this.render.transformer.on("click.createTextrea", (e) => {
       if (e.evt.button !== MouseButton.left) return;
@@ -86,63 +133,8 @@ export class Text {
       selectingTextNode.hide();
       this.render.transformer.hide();
 
-      const textPosition = selectingTextNode.absolutePosition();
+      this.textarea = this.createTextarea(selectingTextNode);
 
-      const areaPosition = {
-        x: this.render.stage.container().offsetLeft + textPosition.x,
-        y: this.render.stage.container().offsetTop + textPosition.y,
-      };
-
-      function createTextarea(this: Text) {
-        const textarea = this.textarea || document.createElement("textarea");
-
-        document.body.appendChild(textarea);
-        textarea.value = selectingTextNode.text();
-        textarea.style.position = "absolute";
-        textarea.style.top = areaPosition.y + "px";
-        textarea.style.left = areaPosition.x + "px";
-        textarea.style.width =
-          selectingTextNode.width() - selectingTextNode.padding() * 2 + "px";
-        textarea.style.height =
-          selectingTextNode.height() -
-          selectingTextNode.padding() * 2 +
-          5 +
-          "px";
-        textarea.style.fontSize = selectingTextNode.fontSize() + "px";
-        textarea.style.border = "none";
-        textarea.style.padding = "0px";
-        textarea.style.margin = "0px";
-        textarea.style.overflow = "hidden";
-        textarea.style.background = "none";
-        textarea.style.outline = "none";
-        textarea.style.resize = "none";
-        textarea.style.lineHeight = selectingTextNode.lineHeight() + "";
-        textarea.style.fontFamily = selectingTextNode.fontFamily();
-        textarea.style.transformOrigin = "left top";
-        textarea.style.textAlign = selectingTextNode.align();
-        textarea.style.color = selectingTextNode.fill();
-        const rotation = selectingTextNode.rotation();
-        let transform = "";
-        if (rotation) {
-          transform += "rotateZ(" + rotation + "deg)";
-        }
-
-        textarea.style.transform = transform;
-
-        // reset height
-        textarea.style.height = "auto";
-        // after browsers resized it we can set actual value
-        textarea.style.height = textarea.scrollHeight + 3 + "px";
-
-        textarea.focus();
-        return textarea;
-      }
-      this.textarea = createTextarea.apply(this);
-
-      const setTextareaWidth = (newWidth: number) => {
-        if (!this.textarea) return;
-        this.textarea.style.width = newWidth + "px";
-      };
       const removeTextarea = () => {
         if (!this.textarea) return;
         this.textarea.parentNode!.removeChild(this.textarea);
@@ -153,7 +145,7 @@ export class Text {
         this.textarea = null;
         this.render.transformer.show();
         this.currentTextNode?.show();
-        // this.render.transformer.forceUpdate();
+        this.render.transformer.forceUpdate();
       };
       this.textarea.addEventListener("keydown", (e) => {
         if (!selectingTextNode || !this.textarea) return;
@@ -168,8 +160,6 @@ export class Text {
 
       this.textarea.addEventListener("keydown", () => {
         if (!selectingTextNode || !this.textarea) return;
-        this.scale = selectingTextNode.getAbsoluteScale().x;
-        setTextareaWidth(selectingTextNode.width() * this.scale);
         this.textarea.style.height = "auto";
         this.textarea.style.height =
           this.textarea.scrollHeight + selectingTextNode?.fontSize() + "px";
@@ -178,37 +168,56 @@ export class Text {
       this.render.stage.on("click.outsideClick", (e) => {
         if (!selectingTextNode || !this.textarea) return;
         if (e.target === this.render.stage) {
-          // todo 这里有问题，selectingTextNode不是当前选择的节点，而是上次选择的节点
-          console.log(
-            this.textarea,
-            "移除textarea前",
-            this.currentTextNode?.text()
-          );
           this.currentTextNode?.text(this.textarea.value);
 
           removeTextarea();
-          console.log(
-            this.textarea,
-            "移除textarea后",
-            this.currentTextNode?.text()
-          );
         }
         // this.render.stage.off("click.outsideClick")
       });
     });
-
     this.render.transformer.on("transform", (e) => {
       const group = e.target;
       if (!(group instanceof Konva.Group)) return;
+      if (e.target.name() !== "text") return;
 
       const textNode = group.children[0] as Konva.Text;
 
       // 获取原始宽度和新宽度
       let newWidth = this.initialWidth * parseFloat("" + group.scaleX());
-      newWidth = Math.ceil(newWidth)
+      // let newWidth =
+      //   this.initialWidth +
+      //   this.initialWidth * parseFloat(group.scaleX() - 1 + "");
 
+      if (newWidth < 20) {
+        // this.render.transformer.stopTransform();
+        group.setAttrs({
+          scaleX: 1/textNode.scaleX(),
+        });
+        return;
+      }
+      if (group.scaleY() < 0.000001) {
+        // this.render.transformer.stopTransform();
+        group.setAttrs({
+          scaleY: 1/textNode.scaleY(),
+        });
+        return;
+      }
+      newWidth = Math.floor(newWidth);
       // 调整文本节点宽度
-      textNode.width(newWidth);
+      textNode.setAttrs({
+        width: newWidth,
+        scaleX: 1 / group.scaleX(),
+        scaleY: 1 / group.scaleY(),
+      });
+      // textNode.setAttrs({
+      //   width: newWidth,
+      //   scaleX: 1 ,
+      //   scaleY: 1 ,
+      // });
+
+      // throw new Error("bug待修复，原因缩放倍数太小,1/xxxxx=Infinity");
+      // 这样数字范围会超界限
+      // todo bug待修复，选择多个节点时，若包含text节点，从右下角拖拽到右上角会报错
     });
   }
   forcerMoveTextarea(selectingTextNode: Konva.Text) {
@@ -216,5 +225,25 @@ export class Text {
       selectingTextNode.text(this.textarea.value);
       // removeTextarea();
     }
+  }
+  // 舞台缩放时更新textarea
+  forcerUpdateTextarea() {
+    if (!this.textarea) return;
+    const initTransform = this.textarea.style.transform;
+    // 使用正则表达式替换其中的scale
+    this.textarea.style.transform = initTransform?.replace(
+      /scale\((\d+\.?\d*)\)/,
+      `scale(${this.render.stage.scaleX()})`
+    );
+    if (!this.currentTextNode) return;
+    const textPosition = this.currentTextNode.absolutePosition();
+
+    const areaPosition = {
+      x: this.render.stage.container().offsetLeft + textPosition.x,
+      y: this.render.stage.container().offsetTop + textPosition.y,
+    };
+
+    this.textarea.style.top = areaPosition.y + "px";
+    this.textarea.style.left = areaPosition.x + "px";
   }
 }
