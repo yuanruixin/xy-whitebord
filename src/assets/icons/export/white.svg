@@ -1,0 +1,9 @@
+<svg fill="none" viewBox="0 0 24 24" id="icon-fc-export-white">
+  <g style="mix-blend-mode:passthrough">
+    <g style="mix-blend-mode:passthrough">
+      <ellipse cx="12" cy="12" rx="10" ry="10" fill="#FFFFFF" fill-opacity="1"></ellipse>
+      <ellipse cx="12" cy="12" rx="9.5" ry="9.5" fill-opacity="0" stroke-opacity="1" stroke="currentColor" fill="none"
+        stroke-width="1"></ellipse>
+    </g>
+  </g>
+</svg>

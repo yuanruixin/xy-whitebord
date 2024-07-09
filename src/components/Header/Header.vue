@@ -4,20 +4,10 @@
   >
     <!-- tools -->
     <div class="flex items-center justify-center ml-auto">
-      <!-- import btn -->
-      <div
-      class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
-      @click="onImport"
-      >
-      <span
-      class="icon-[clarity--import-outline-alerted] text-2xl font-black select-none"
-      ></span>
-    </div>
-    
-    <!-- export btn -->
+      <!-- export btn -->
       <div
         class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
-        @click="onSave"
+        @click="openExportModal"
       >
         <span
           class="icon-[ph--export-light] text-2xl font-black select-none"
@@ -26,43 +16,66 @@
     </div>
     <ZoomTool></ZoomTool>
   </header>
+  <Modal v-model="showExportModal">
+    <div class="flex flex-col gap-y-5">
+      <h3 class="text-lg leading-6 text-gray-900 font-bold">导出文件</h3>
+      <ExportMenu @confirm="confirmExport"></ExportMenu>
+    </div>
+  </Modal>
 </template>
 
 <script setup lang="ts">
 import ZoomTool from "./ZoomTool.vue";
 import { defineRenderStore } from "@/store/render";
+import { downloadFile } from "@/utils/handleFile";
 
+import ExportMenu from "./ExportMenu.vue";
+import { ref } from "vue";
 const renderStore = defineRenderStore();
 
-function onSave() {
-  if (renderStore.render) {
-    const a = document.createElement('a')
-    const event = new MouseEvent('click')
-    a.download = 'data.json'
-    a.href = window.URL.createObjectURL(new Blob([renderStore.render.importExportTool.save()]))
-    a.dispatchEvent(event)
-    a.remove()
-  }
+const showExportModal = ref(false);
+function openExportModal() {
+  showExportModal.value = true;
 }
-function onImport(){
-  if (renderStore.render) {
-    const input = document.createElement('input')
-    // 限制只能选择json文件
-    input.accept = '.json'
-    input.type = 'file'
-    const event = new MouseEvent('click')
-    input.dispatchEvent(event)
-    input.remove()
-    input.onchange = () => {
-      const files = input.files
-      if (files) {
-        let reader = new FileReader()
-        reader.onload = function () {
-          // 读取为 json 文本
-          renderStore.render!.importExportTool.restore(this.result!.toString())
-        }
-        reader.readAsText(files[0])
-      }
+
+// function onImport() {
+//   if (renderStore.render) {
+//     const input = document.createElement("input");
+//     // 限制只能选择json文件
+//     input.accept = ".json";
+//     input.type = "file";
+//     const event = new MouseEvent("click");
+//     input.dispatchEvent(event);
+//     input.remove();
+//     input.onchange = () => {
+//       const files = input.files;
+//       if (files) {
+//         let reader = new FileReader();
+//         reader.onload = function () {
+//           // 读取为 json 文本
+//           renderStore.render!.importExportTool.restore(this.result!.toString());
+//         };
+//         reader.readAsText(files[0]);
+//       }
+//     };
+//   }
+// }
+
+interface ExportImageConfig {
+  type: "jpeg" | "png";
+  bg: "grid" | "transparent" | "white";
+}
+function confirmExport(config: ExportImageConfig): void {
+  showExportModal.value = false;
+  saveAsImage(config);
+  function saveAsImage(config: ExportImageConfig) {
+    if (renderStore.render) {
+      const url = renderStore.render.importExportTool.getImageBase64({
+        type: config.type ?? "jpeg",
+        bg: config.bg ?? "grid",
+        quality: 1,
+      });
+      downloadFile(url);
     }
   }
 }

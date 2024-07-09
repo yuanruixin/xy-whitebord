@@ -39,7 +39,7 @@ export class Render {
   selectionTool = new Tools.SelectionTool(this); // 选择工具
   editToolbar = new Tools.EditToolbar(this); // 编辑条工具
   zIndexTool = new Tools.ZIndexTool(this); // 层级工具
-  importExportTool = new Tools.ImportExportTool(this);   // 导入导出工具
+  importExportTool = new Tools.ImportExportTool(this); // 导入导出工具
   historyTool = new Tools.HistoryTool(this); // 历史工具
   // 复制工具
   copyTool = new Tools.CopyTool(this);
@@ -190,7 +190,7 @@ export class Render {
               targetAfteCorrectedType === "transformer"
             ) {
               // 增加事件修饰符
-              const eventName = event as string + "." + handlerToolName;
+              const eventName = (event as string) + "." + handlerToolName;
               this[targetAfteCorrectedType].on(eventName, callback);
             } else {
               // 未处理的分支

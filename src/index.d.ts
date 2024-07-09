@@ -1,4 +1,4 @@
-module 'canvas2svg' {
+declare module 'canvas2svg' {
   export default class C2S extends CanvasRenderingContext2D {
     constructor(opts: { ctx: CanvasRenderingContext2D }) {
       console.log(opts)

@@ -87,8 +87,9 @@ export class BgDraw extends Types.BaseDraw implements Types.Draw {
           );
         }
       };
+
       drawGrid();
-      this.group.add(group);
+      this.group.add(group);   
     }
   }
 }

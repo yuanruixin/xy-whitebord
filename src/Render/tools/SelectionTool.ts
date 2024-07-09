@@ -52,12 +52,8 @@ export class SelectionTool {
     if (nodes.length === 1 && isTextNode(nodes[0])) {
       this.render.transformer.enabledAnchors(["middle-left", "middle-right"]);
     } else {
-      this.render.transformer.enabledAnchors([
-        "top-left",
-        "top-right",
-        "bottom-left",
-        "bottom-right",
-      ]);
+      this.render.transformer.enabledAnchors(
+        ['top-left', 'top-center', 'top-right', 'middle-right', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right']);
     }
     this._selectingNodes = nodes;
   }

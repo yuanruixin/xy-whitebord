@@ -2,7 +2,12 @@ import Konva from 'konva'
 import C2S from 'canvas2svg'
 //
 import { Render } from '../index'
-
+interface ImageExportOption {
+  pixelRatio ?: number
+  type?:'png'|'jpeg'
+  bg:'white'|'grid'|'transparent'
+  quality?:number
+}
 export class ImportExportTool {
   static readonly name = 'ImportExportTool'
 
@@ -33,13 +38,14 @@ export class ImportExportTool {
     const layer = new Konva.Layer()
     layer.add(...nodes)
     nodes = layer.getChildren()
-
+    
     // 计算节点占用的区域
     let minX = 0
     let maxX = copy.width() - this.render.bgSize
     let minY = 0
     let maxY = copy.height() - this.render.bgSize
     for (const node of nodes) {
+      
       const x = node.x()
       const y = node.y()
       const width = node.width()
@@ -68,7 +74,6 @@ export class ImportExportTool {
 
     // 重新装载 layer
     copy.add(layer)
-
     // 节点占用的区域
     copy.setAttrs({
       x: -minX,
@@ -77,11 +82,41 @@ export class ImportExportTool {
       width: maxX - minX,
       height: maxY - minY
     })
-
     // 返回可视节点和 layer
     return copy
   }
-
+  getVisibleWindowView() {
+       // 复制画布
+       const copy = this.render.stage.clone()
+       // 提取 main layer 备用
+       const main = copy.find('#main')[0] as Konva.Layer
+       // 暂时清空所有 layer
+       copy.removeChildren()
+   
+       // 提取节点
+       let nodes = main.getChildren((node) => {
+         return !this.render.ignore(node)
+       })
+   
+       // 重新装载节点
+       const layer = new Konva.Layer()
+       layer.add(...nodes)
+       nodes = layer.getChildren()
+   
+       // 重新装载 layer
+       copy.add(layer)
+       
+       copy.setAttrs({
+         x: this.render.stage.x(),
+         y: this.render.stage.y(),
+         scale: this.render.stage.scale(),
+         width: this.render.stage.width(),
+         height: this.render.stage.height()
+       })
+       
+       // 返回可视节点和 layer
+       return copy
+  }
   // 保存
   save() {
     const copy = this.getView()
@@ -187,36 +222,41 @@ export class ImportExportTool {
     }
   }
 
-  // 获取图片
-  getImage(pixelRatio = 1, bgColor?: string) {
+  // 获取图片base64
+  getImageBase64(option:ImageExportOption) {
     // 获取可视节点和 layer
-    const copy = this.getView()
-
-    // 背景层
+    const copy = this.getVisibleWindowView()
+    // 背景层（默认为grid）
     const bgLayer = new Konva.Layer()
-
-    // 背景矩形
-    const bg = new Konva.Rect({
-      listening: false
-    })
-    bg.setAttrs({
-      x: -copy.x(),
-      y: -copy.y(),
-      width: copy.width(),
-      height: copy.height(),
-      fill: bgColor
-    })
-
-    // 添加背景
-    bgLayer.add(bg)
+    if (option.bg!=='transparent'){  
+      // 背景矩形
+      const bg = new Konva.Rect({
+        listening: false
+      })
+      bg.setAttrs({
+        x: -this.render.stage.x()/this.render.stage.scaleX(),
+        y: -this.render.stage.y()/this.render.stage.scaleX(),
+        width: copy.width()/this.render.stage.scaleX(),
+        height: copy.height()/this.render.stage.scaleY(),
+        fill: '#fff'
+      })
+      bgLayer.add(bg)
+      
+    }else if(option.bg==='transparent'){
+      bgLayer.removeChildren()
+    }
 
     // 插入背景
     const children = copy.getChildren()
     copy.removeChildren()
+    // 保证bg层在最底层
     copy.add(bgLayer)
+    if(option.bg==='grid'){
+      copy.add(this.render.layerFloor.clone())
+    }
     copy.add(children[0], ...children.slice(1))
 
-    const url = copy.toDataURL({ pixelRatio })
+    const url = copy.toDataURL({ pixelRatio:option.pixelRatio, mimeType: `image/${option.type??'jpeg'}`, quality: 1})
     copy.destroy()
 
     // 通过 stage api 导出图片
@@ -327,11 +367,8 @@ export class ImportExportTool {
 
       // 获得 svg
       const rawSvg = c2s.getSerializedSvg()
-      console.log(rawSvg)
       // 替换 image 链接
       const svg = await this.parseImage(rawSvg)
-      console.log(svg)
-
       copy.destroy()
 
       // 输出 svg
