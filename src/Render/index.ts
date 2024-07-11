@@ -115,9 +115,10 @@ export class Render {
     this.eventBind();
   }
   /**
-   * @description 这里设置获取获取当前工作模式
+   * @description 这里设置获取获取当前工作模式(特殊工具初始化时，需要传递参数)
    */
-  workMode(workMode?: Types.MouseMode) {
+
+  workMode<T extends Types.MouseMode>(workMode?: T ,config?:T extends 'brush'?Tools.PaintTool.InitPainConfig:undefined){
     if (!workMode) return this._workMode;
     if (workMode === this._workMode) return workMode;
     // 清除正在使用的旧工具
@@ -152,7 +153,7 @@ export class Render {
         this.stage.draggable(true);
         this.cursor.set("grab");
       } else if (workMode === "brush") {
-        this.paintTool.init();
+        this.paintTool.init(config!);
         this.cursor.set("brush");
       } else if (workMode === "earser") {
         console.log("earser工具待完成");

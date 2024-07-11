@@ -21,6 +21,50 @@ export class ImportExportTool {
    * @param withLink 是否包含线条
    * @returns
    */
+  async import(jsonStr:string,silent=false){
+    // 与restore类似，但是restore只能保存导入文件，会让之前已经绘制内容消失。此方法会保存已经绘制内容的同时，导入
+    // 以及，更新导出位置，为当前舞台中央
+    try {
+
+      // 加载 json，提取节点
+      const container = document.createElement('div')
+      const stage = Konva.Node.create(jsonStr, container)
+      const main = stage.getChildren()[0]
+      const nodes = main.getChildren()
+
+      // 恢复节点图片素材
+      await this.restoreImage(nodes)
+
+      for (const node of nodes) {
+        node.off('mouseenter')
+        node.on('mouseenter', () => {
+        })
+        node.off('mouseleave')
+        node.on('mouseleave', () => {
+
+          // 隐藏 hover 框
+          node.findOne('#hoverRect')?.visible(false)
+        })
+      }
+
+      // 往 main layer 插入新节点
+      this.render.layer.add(...nodes)
+
+      // Bug: 恢复 JSON 时候，如果存在已经被放大缩小点元素，点击选择无效
+      // 可能是 Konva 的 bug
+      this.render.selectionTool.select(this.render.layer.getChildren())
+      // 清空选择
+      this.render.selectionTool.selectingClear()
+
+      // 上一步、下一步 无需更新 history 记录
+      if(!silent){
+        this.render.historyTool.updateHistory()
+      }
+    } catch (e) {
+      console.error(e)
+    }
+        
+  }
   getView() {
     // 复制画布
     const copy = this.render.stage.clone()
@@ -175,55 +219,21 @@ export class ImportExportTool {
 
   // 恢复
   async restore(json: string, silent = false) {
+    // 清空选择
+    this.render.selectionTool.selectingClear()
+
+    // 清空 main layer 节点
+    this.render.layer.removeChildren()
+  
     try {
-      // 清空选择
-      this.render.selectionTool.selectingClear()
-
-      // 清空 main layer 节点
-      this.render.layer.removeChildren()
-
-      // 加载 json，提取节点
-      const container = document.createElement('div')
-      const stage = Konva.Node.create(json, container)
-      const main = stage.getChildren()[0]
-      const nodes = main.getChildren()
-
-      // 恢复节点图片素材
-      await this.restoreImage(nodes)
-
-      for (const node of nodes) {
-        node.off('mouseenter')
-        node.on('mouseenter', () => {
-        })
-        node.off('mouseleave')
-        node.on('mouseleave', () => {
-
-          // 隐藏 hover 框
-          node.findOne('#hoverRect')?.visible(false)
-        })
-      }
-
-      // 往 main layer 插入新节点
-      this.render.layer.add(...nodes)
-
-      // Bug: 恢复 JSON 时候，如果存在已经被放大缩小点元素，点击选择无效
-      // 可能是 Konva 的 bug
-      this.render.selectionTool.select(this.render.layer.getChildren())
-      // 清空选择
-      this.render.selectionTool.selectingClear()
-
-      // 上一步、下一步 无需更新 history 记录
-      if (!silent) {
-        // 更新历史
-        this.render.historyTool.updateHistory()
-      }
+      this.import(json,silent)
     } catch (e) {
       console.error(e)
     }
   }
 
-  // 获取图片base64
-  getImageBase64(option:ImageExportOption) {
+  // 导出图片base64
+  getExportImageBase64(option:ImageExportOption) {
     // 获取可视节点和 layer
     const copy = this.getVisibleWindowView()
     // 背景层（默认为grid）

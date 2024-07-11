@@ -4,7 +4,7 @@
   >
     <PopoverButton
       class="focus-visible:outline-none w-full h-full hover:bg-gray-700 rounded-sm overflow-hidden"
-      :class="{'bg-primary':isActiveTool('createShape')}"
+      :class="{'bg-primary hover:bg-primary':isActiveTool('createShape')}"
       @click="selectedTool='createShape'"
     >
       <svg-icon

@@ -13,10 +13,24 @@
           class="icon-[ph--export-light] text-2xl font-black select-none"
         ></span>
       </div>
+      <div class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
+        @click="saveAsJson"
+      >
+        <span
+          class="text-2xl font-black select-none"
+        >导出JSON</span>
+      </div>
+      <div class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
+        @click="onImport"
+      >
+        <span
+          class="text-2xl font-black select-none"
+        >导入</span>
+      </div>
     </div>
     <ZoomTool></ZoomTool>
   </header>
-  <Modal v-model="showExportModal">
+  <Modal v-model="showExportModal" >
     <div class="flex flex-col gap-y-5">
       <h3 class="text-lg leading-6 text-gray-900 font-bold">导出文件</h3>
       <ExportMenu @confirm="confirmExport"></ExportMenu>
@@ -38,28 +52,28 @@ function openExportModal() {
   showExportModal.value = true;
 }
 
-// function onImport() {
-//   if (renderStore.render) {
-//     const input = document.createElement("input");
-//     // 限制只能选择json文件
-//     input.accept = ".json";
-//     input.type = "file";
-//     const event = new MouseEvent("click");
-//     input.dispatchEvent(event);
-//     input.remove();
-//     input.onchange = () => {
-//       const files = input.files;
-//       if (files) {
-//         let reader = new FileReader();
-//         reader.onload = function () {
-//           // 读取为 json 文本
-//           renderStore.render!.importExportTool.restore(this.result!.toString());
-//         };
-//         reader.readAsText(files[0]);
-//       }
-//     };
-//   }
-// }
+function onImport() {
+  if (renderStore.render) {
+    const input = document.createElement("input");
+    // 限制只能选择json文件
+    input.accept = ".json";
+    input.type = "file";
+    const event = new MouseEvent("click");
+    input.dispatchEvent(event);
+    input.remove();
+    input.onchange = () => {
+      const files = input.files;
+      if (files) {
+        let reader = new FileReader();
+        reader.onload = function () {
+          // 读取为 json 文本
+          renderStore.render!.importExportTool.restore(this.result!.toString());
+        };
+        reader.readAsText(files[0]);
+      }
+    };
+  }
+}
 
 interface ExportImageConfig {
   type: "jpeg" | "png";
@@ -70,13 +84,20 @@ function confirmExport(config: ExportImageConfig): void {
   saveAsImage(config);
   function saveAsImage(config: ExportImageConfig) {
     if (renderStore.render) {
-      const url = renderStore.render.importExportTool.getImageBase64({
+      const url = renderStore.render.importExportTool.getExportImageBase64({
         type: config.type ?? "jpeg",
         bg: config.bg ?? "grid",
         quality: 1,
       });
       downloadFile(url);
     }
+  }
+}
+
+function saveAsJson() {
+  if (renderStore.render) {
+    const url = renderStore.render.importExportTool.save();
+    downloadFile(url);
   }
 }
 </script>

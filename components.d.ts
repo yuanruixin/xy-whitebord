@@ -16,7 +16,11 @@ declare module 'vue' {
     Modal: typeof import('./src/components/Modal/Modal.vue')['default']
     ShapesTool: typeof import('./src/components/ToolBar/ShapesTool.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon/SvgIcon.vue')['default']
+    TemplateModal: typeof import('./src/components/TemplateTool/TemplateTool.vue')['default']
+    TemplatesPanel: typeof import('./src/components/TemplateTool/templatesPanel.vue')['default']
+    TemplateTool: typeof import('./src/components/TemplateTool/TemplateTool.vue')['default']
     ToolBar: typeof import('./src/components/ToolBar/ToolBar.vue')['default']
+    XSelect: typeof import('./src/components/XSelect/XSelect.vue')['default']
     ZoomTool: typeof import('./src/components/Header/ZoomTool.vue')['default']
   }
 }

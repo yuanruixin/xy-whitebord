@@ -3,18 +3,26 @@ import { nanoid } from "nanoid";
 import { Render } from "../index";
 import { throttle } from "@/utils/throttle";
 type PaintMode = "brush" | "eraser";
+
+export declare namespace PaintTool {
+  interface InitPainConfig {
+    color?: string;
+    mode?: PaintMode;
+    lineWidth?: number;
+    lineStyle?: "dotted" | "solid";
+  }
+}
+
 export class PaintTool {
   static readonly name = "SelectionTool";
-  _color = "black";
   isPaint = false;
-  _mode: PaintMode = "brush";
   render: Render;
   currentLine: Konva.Line | null = null;
   constructor(render: Render) {
     this.render = render;
   }
 
-  init() {
+  init(config: PaintTool.InitPainConfig) {
     this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
       this.isPaint = true;
       const pos = this.render.stage.getPointerPosition();
@@ -25,14 +33,22 @@ export class PaintTool {
       const y = this.render.toStageValue(pos.y - stageState.y);
 
       this.currentLine = new Konva.Line({
-        stroke: this.color(),
-        strokeWidth: 5,
+        stroke: config?.color ?? "black",
+        strokeWidth: config?.lineWidth ?? 1,
         globalCompositeOperation:
-          this.mode() === "brush" ? "source-over" : "destination-out",
+          this.render.workMode() === "brush"
+            ? "source-over"
+            : "destination-out",
         lineCap: "round",
         lineJoin: "round",
         points: [x, y, x, y],
       });
+      if (config?.lineStyle === "dotted") {
+        this.currentLine.dash([
+          this.currentLine.strokeWidth() * 4,
+          this.currentLine.strokeWidth() * 2,
+        ]);
+      }
       const group = new Konva.Group({
         id: nanoid(),
         name: "paint",
@@ -60,21 +76,8 @@ export class PaintTool {
         const newPoints = this.currentLine.points().concat([x, y]);
 
         this.currentLine!.points(newPoints);
-      },10)
+      }, 10)
     );
-  }
-
-  mode(mode?: PaintMode) {
-    if (mode) {
-      this._mode = mode;
-    }
-    return this._mode;
-  }
-  color(color?: string) {
-    if (color) {
-      this._color = color;
-    }
-    return this._color;
   }
 
   destroy() {

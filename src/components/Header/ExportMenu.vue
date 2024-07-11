@@ -1,6 +1,6 @@
 <template>
-  <div class="export-menu flex flex-col gap-y-2 select-none">
-    <div class="export-option flex">
+  <div class="export-menu flex flex-col  gap-y-2 select-none">
+    <div class="export-option flex w-80 gap-x-4">
       <span class="w-[84px]">导出格式</span>
       <RadioGroup v-model="exportType" class="flex flex-col gap-y-2">
         <RadioGroupOption
@@ -19,7 +19,7 @@
         </RadioGroupOption>
       </RadioGroup>
     </div>
-    <div class="export-option flex">
+    <div class="export-option flex w-80 gap-x-4">
       <span class="w-[84px] flex items-center">背景</span>
       <Combobox v-model="selectedBgOption" class="relative">
         <div class="absolute mt-1">
