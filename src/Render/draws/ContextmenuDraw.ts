@@ -132,8 +132,13 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
       const lineHeight = 30;
       // 上下边距
       const paddingY = 10;
-      const pos = this.render.stage.getPointerPosition();
-      if (pos) {
+      const pointerPos = this.render.stage.getPointerPosition();
+      if (pointerPos) {
+        const menuSizeAbsulute={
+          width: 150,
+          height: lineHeight * menus.length + 2 * paddingY,
+        }
+        const pos = this.computeSmartPostion(pointerPos, menuSizeAbsulute)
         for (let i = 0; i < menus.length; i++) {
           // 框
           const menu = menus[i];
@@ -141,8 +146,8 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
             const contextmenuContainer = new Konva.Rect({
               width: this.render.toStageValue(150),
               height: lineHeight * menus.length + 2 * paddingY,
-              x: this.render.toStageValue(pos.x - stageState.x),
-              y: this.render.toStageValue(pos.y - stageState.y),
+              x: this.render.toStageValue(pos.x- stageState.x),
+              y: this.render.toStageValue(pos.y- stageState.y),
               cornerRadius: 5,
               listening: false,
               fill: "#fff",
@@ -156,7 +161,7 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
 
           const rect = new Konva.Rect({
             x: this.render.toStageValue(pos.x - stageState.x),
-            y: this.render.toStageValue(pos.y + top - stageState.y),
+            y: this.render.toStageValue(pos.y+ top  - stageState.y),
             width: this.render.toStageValue(150),
             height: this.render.toStageValue(lineHeight),
             fill: "#fff",
@@ -233,9 +238,33 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
       }
 
       this.group.add(group);
-    }
-  }
 
+    }
+    
+  }
+   computeSmartPostion(
+    click: { x: number; y: number },
+    menuSize: {
+      height: number;
+      width: number;
+    }
+  ) {
+    // 默认返回点击位置
+    const result = click;
+    
+    const offset ={
+      x: (- menuSize.width -10)*this.render.stage.scaleX(),
+      y: (- menuSize.height -10)*this.render.stage.scaleX(),
+    }
+    const containerWidth = this.render.stage.width();
+    const containertHeight = this.render.stage.height();
+    if (click.x + menuSize.width > containerWidth)
+      result.x = click.x + offset.x; //增加一些缓冲
+    if (click.y + menuSize.height > containertHeight)
+      result.y = click.y + offset.y; //增加一些缓冲
+    
+    return result;
+  }
   handlers = {
     stage: {
       mousedown: (

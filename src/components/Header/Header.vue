@@ -13,7 +13,7 @@
           class="icon-[ph--export-light] text-2xl font-black select-none"
         ></span>
       </div>
-      <div class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
+      <!-- <div class="flex items-center justify-center p-[2px] hover:bg-slate-600/10 rounded-md cursor-pointer"
         @click="saveAsJson"
       >
         <span
@@ -25,8 +25,8 @@
       >
         <span
           class="text-2xl font-black select-none"
-        >导入</span>
-      </div>
+        >导入</span> -->
+      <!-- </div> -->
     </div>
     <ZoomTool></ZoomTool>
   </header>
@@ -52,28 +52,28 @@ function openExportModal() {
   showExportModal.value = true;
 }
 
-function onImport() {
-  if (renderStore.render) {
-    const input = document.createElement("input");
-    // 限制只能选择json文件
-    input.accept = ".json";
-    input.type = "file";
-    const event = new MouseEvent("click");
-    input.dispatchEvent(event);
-    input.remove();
-    input.onchange = () => {
-      const files = input.files;
-      if (files) {
-        let reader = new FileReader();
-        reader.onload = function () {
-          // 读取为 json 文本
-          renderStore.render!.importExportTool.restore(this.result!.toString());
-        };
-        reader.readAsText(files[0]);
-      }
-    };
-  }
-}
+// function onImport() {
+//   if (renderStore.render) {
+//     const input = document.createElement("input");
+//     // 限制只能选择json文件
+//     input.accept = ".json";
+//     input.type = "file";
+//     const event = new MouseEvent("click");
+//     input.dispatchEvent(event);
+//     input.remove();
+//     input.onchange = () => {
+//       const files = input.files;
+//       if (files) {
+//         let reader = new FileReader();
+//         reader.onload = function () {
+//           // 读取为 json 文本
+//           renderStore.render!.importExportTool.restore(this.result!.toString());
+//         };
+//         reader.readAsText(files[0]);
+//       }
+//     };
+//   }
+// }
 
 interface ExportImageConfig {
   type: "jpeg" | "png";
@@ -94,12 +94,12 @@ function confirmExport(config: ExportImageConfig): void {
   }
 }
 
-function saveAsJson() {
-  if (renderStore.render) {
-    const url = renderStore.render.importExportTool.save();
-    downloadFile(url);
-  }
-}
+// function saveAsJson() {
+//   if (renderStore.render) {
+//     const url = renderStore.render.importExportTool.save();
+//     downloadFile(url);
+//   }
+// }
 </script>
 
 <style scoped></style>

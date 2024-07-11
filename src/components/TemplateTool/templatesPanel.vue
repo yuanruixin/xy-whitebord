@@ -58,10 +58,6 @@ interface TemplateItem {
 
 const templates: TemplateItem[] = [
   arrowTemplate,
-  arrowTemplate,
-  arrowTemplate,
-  arrowTemplate,
-  arrowTemplate,
 ].map((item) => {
   return {
     info: {
