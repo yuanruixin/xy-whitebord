@@ -52,14 +52,6 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
             this.render.copyTool.pasteStart();
           },
         });
-      } else if (this.state.target.name() === "link-line") {
-        menus.push({
-          name: "删除",
-          action: () => {
-            // 删除 连接线
-            // this.render.linkTool.remove(this.state.target as Konva.Line)
-          },
-        });
       } else {
         // 未选择：真实节点，即素材的容器 group
         // 已选择：transformer
@@ -110,7 +102,6 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
           name: "置底",
           action: () => {
             if (target) {
-              console.log(target);
               this.render.zIndexTool.bottom([target]);
             }
           },
@@ -144,8 +135,8 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
           const menu = menus[i];
           if (i === 0) {
             const contextmenuContainer = new Konva.Rect({
-              width: this.render.toStageValue(150),
-              height: lineHeight * menus.length + 2 * paddingY,
+              width: this.render.toStageValue(menuSizeAbsulute.width),
+              height: this.render.toStageValue(menuSizeAbsulute.height),
               x: this.render.toStageValue(pos.x- stageState.x),
               y: this.render.toStageValue(pos.y- stageState.y),
               cornerRadius: 5,

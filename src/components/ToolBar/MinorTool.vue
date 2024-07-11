@@ -85,7 +85,7 @@
       </a>
     </li>
     <!-- 折线 -->
-    <li
+    <!-- <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('elbowed') }"
       @click="selectedTool = 'elbowed'"
@@ -98,7 +98,7 @@
           class="hover:animate-swing-small"
         ></svg-icon>
       </a>
-    </li>
+    </li> -->
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('picture') }"
