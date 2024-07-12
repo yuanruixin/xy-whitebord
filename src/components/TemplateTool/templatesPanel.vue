@@ -41,6 +41,7 @@
 import { defineRenderStore } from "@/store/render";
 const renderStore = defineRenderStore();
 import arrowTemplate from "./templates/arrow.json";
+import { onMounted,ref } from "vue";
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -56,16 +57,17 @@ interface TemplateItem {
   data: object;
 }
 
-const templates: TemplateItem[] = [
-  arrowTemplate,
-].map((item) => {
-  return {
-    info: {
-      ...item.info,
-      cover: getURL(item.info.cover),
-    },
-    data: item.data,
-  };
+const templates = ref<TemplateItem[]>([]);
+onMounted(() => {
+  templates.value=[arrowTemplate].map((item) => {
+    return {
+      info: {
+        ...item.info,
+        cover: getURL(item.info.cover),
+      },
+      data: item.data,
+    };
+  });
 });
 
 function getURL(name: string) {
@@ -79,7 +81,7 @@ function importItemplate(jsonStr: string) {
   emit("close");
 }
 function confirmUseTemplate(index: number) {
-  importItemplate(JSON.stringify(templates[index].data));
+  importItemplate(JSON.stringify(templates.value[index].data));
 }
 </script>
 

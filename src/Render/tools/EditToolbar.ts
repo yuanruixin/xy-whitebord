@@ -66,6 +66,9 @@ export class EditToolbar{
     
   }
 
+  close(){
+    PickColor.close()
+  }
   // 文字编辑工具条
   initTextEdit() {
   

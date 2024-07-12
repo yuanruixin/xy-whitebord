@@ -1,8 +1,6 @@
 import Konva from "konva";
 import { Render } from "../index";
 import * as Types from "../types";
-import { PickColor } from "@/components/ColorPicker";
-
 interface SortItem {
   id?: number; // 有 id 就是其他节点，否则就是 选择目标
   value: number; // 左、垂直中、右的 x 坐标值; 上、水平中、下的 y 坐标值；
@@ -80,6 +78,7 @@ export class SelectionHandlers implements Types.Handler {
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
         const parent = e.target.getParent();
+        console.log(e.target,'stage click');
         if (
           this.render.workMode() === "default" ||
           this.render.workMode() === "select"
@@ -216,6 +215,8 @@ export class SelectionHandlers implements Types.Handler {
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
         const anchor = this.render.transformer.getActiveAnchor();
+        console.log(e.target,'transformer click');
+        
         if (!anchor) {
           // 非变换
           if (e.evt.ctrlKey) {
@@ -326,7 +327,7 @@ export class SelectionHandlers implements Types.Handler {
         }
       },
       transform: () => {
-        PickColor.close();
+        this.render.editToolbar.close()
       },
       transformend: () => {
         // 变换结束
@@ -346,7 +347,7 @@ export class SelectionHandlers implements Types.Handler {
         const pos = this.render.transformer.position();
         const { pos: transformerPos, isAttract } = this.attract(pos);
         // 变换过程中关闭颜色选择工具
-        PickColor.close();
+        this.render.editToolbar.close()
         if (isAttract) {
           // 磁吸偏移
           this.selectingNodesPositionByOffset({
