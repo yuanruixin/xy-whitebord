@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import { nanoid } from "nanoid";
 import { MouseButton } from "../types";
 interface TextConfig {
@@ -10,14 +10,14 @@ interface TextConfig {
 export class Text {
   // 实际konva元素
   currentTextNode: Konva.Text | null = null;
-  render: Render;
+  render: ICanvasContext;
   scale: number = 1;
   rotation: number = 0;
   // 初始文本宽度（不可变常量）
   initialWidth: number = 200;
   // 用于预览的textarea
   textarea: HTMLTextAreaElement | null = null;
-  constructor(render: Render) {
+  constructor(render: ICanvasContext) {
     this.render = render;
     this.init();
   }

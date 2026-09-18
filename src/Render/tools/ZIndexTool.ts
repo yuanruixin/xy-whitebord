@@ -1,11 +1,11 @@
 import Konva from 'konva'
-import { Render } from '../index'
+import type { ICanvasContext } from "../context"
 
 export class ZIndexTool {
   static readonly name = 'ZIndexTool'
 
-  private render: Render
-  constructor(render: Render) {
+  private render: ICanvasContext
+  constructor(render: ICanvasContext) {
     this.render = render
   }
 

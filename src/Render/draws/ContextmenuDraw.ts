@@ -1,5 +1,6 @@
 import Konva from "konva";
 import * as Types from "../types";
+import type { ICanvasContext } from "../context";
 
 export interface ContextmenuDrawOption {
   //
@@ -18,7 +19,7 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
   };
 
   constructor(
-    render: Types.Render,
+    render: ICanvasContext,
     layer: Konva.Layer,
     option: ContextmenuDrawOption
   ) {

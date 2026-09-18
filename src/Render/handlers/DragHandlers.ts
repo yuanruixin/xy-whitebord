@@ -1,14 +1,14 @@
 import Konva from "konva";
 
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import * as Types from "../types";
 import { throttle } from "@/utils/throttle";
 
 export class DragHandlers {
   static readonly name = "Drag";
 
-  private render: Render;
-  constructor(render: Render) {
+  private render: ICanvasContext;
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 

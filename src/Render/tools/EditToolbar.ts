@@ -1,9 +1,9 @@
-import { Render } from "../types";
+import type { ICanvasContext } from "../context";
 import Konva from "konva";
 import { PickColor } from "@/components/ColorPicker";
 export class EditToolbar{
-  render: Render
-  constructor(render: Render){
+  render: ICanvasContext
+  constructor(render: ICanvasContext){
     this.render = render
   }
   // 初始化编辑工具条

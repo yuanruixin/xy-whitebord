@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import { throttle } from "@/utils/throttle";
 type PaintMode = "brush" | "eraser";
 
@@ -16,9 +16,9 @@ export declare namespace PaintTool {
 export class PaintTool {
   static readonly name = "SelectionTool";
   isPaint = false;
-  render: Render;
+  render: ICanvasContext;
   currentLine: Konva.Line | null = null;
-  constructor(render: Render) {
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 

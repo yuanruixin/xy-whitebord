@@ -1,6 +1,7 @@
 import Konva from "konva";
 //
 import * as Types from "../types";
+import type { ICanvasContext } from "../context";
 
 export interface BgDrawOption {
   size: number;
@@ -10,7 +11,7 @@ export class BgDraw extends Types.BaseDraw implements Types.Draw {
   static override readonly name = "bg";
   option: BgDrawOption;
 
-  constructor(render: Types.Render, layer: Konva.Layer, option: BgDrawOption) {
+  constructor(render: ICanvasContext, layer: Konva.Layer, option: BgDrawOption) {
     super(render, layer);
 
     this.option = option;

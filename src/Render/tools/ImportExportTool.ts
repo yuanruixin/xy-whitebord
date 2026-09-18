@@ -1,7 +1,7 @@
 import Konva from 'konva'
 import C2S from 'canvas2svg'
 //
-import { Render } from '../index'
+import type { ICanvasContext } from "../context"
 interface ImageExportOption {
   pixelRatio ?: number
   type?:'png'|'jpeg'
@@ -11,8 +11,8 @@ interface ImageExportOption {
 export class ImportExportTool {
   static readonly name = 'ImportExportTool'
 
-  private render: Render
-  constructor(render: Render) {
+  private render: ICanvasContext
+  constructor(render: ICanvasContext) {
     this.render = render
   }
 

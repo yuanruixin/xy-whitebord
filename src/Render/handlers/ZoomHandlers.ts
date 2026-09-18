@@ -1,12 +1,12 @@
 import Konva from "konva";
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import * as Types from "../types";
 
 export class ZoomHandlers implements Types.Handler {
   static readonly name = "Zoom";
 
-  private render: Render;
-  constructor(render: Render) {
+  private render: ICanvasContext;
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 

@@ -1,5 +1,6 @@
 import Konva from "konva";
 import * as Types from "./types";
+import type { ICanvasContext } from "./context";
 import { Cursor } from "./Cursor";
 import * as Tools from "./tools";
 import * as Draws from "./draws";
@@ -9,7 +10,7 @@ import { getKeys } from "@/utils/secureTS";
 // 选择元素后出现的编辑工具条（目前只有颜色修改器）
 import { PickColor } from "@/components/ColorPicker";
 // 主类
-export class Render {
+export class Render implements ICanvasContext {
   container: HTMLDivElement;
   // 同一时间鼠标只能处理一个事件(创建元素、画笔、橡皮、选择模式、拖拽模式)
   private _workMode: Types.MouseMode = "select";
@@ -35,14 +36,14 @@ export class Render {
   image: elements.Image;
   cursor: Cursor; // 光标样式设置
 
-  paintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
-  selectionTool = new Tools.SelectionTool(this); // 选择工具
-  editToolbar = new Tools.EditToolbar(this); // 编辑条工具
-  zIndexTool = new Tools.ZIndexTool(this); // 层级工具
-  importExportTool = new Tools.ImportExportTool(this); // 导入导出工具
-  historyTool = new Tools.HistoryTool(this); // 历史工具
+  paintTool: Tools.PaintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
+  selectionTool: Tools.SelectionTool = new Tools.SelectionTool(this); // 选择工具
+  editToolbar: Tools.EditToolbar = new Tools.EditToolbar(this); // 编辑条工具
+  zIndexTool: Tools.ZIndexTool = new Tools.ZIndexTool(this); // 层级工具
+  importExportTool: Tools.ImportExportTool = new Tools.ImportExportTool(this); // 导入导出工具
+  historyTool: Tools.HistoryTool = new Tools.HistoryTool(this); // 历史工具
   // 复制工具
-  copyTool = new Tools.CopyTool(this);
+  copyTool: Tools.CopyTool = new Tools.CopyTool(this);
   // 多选器层
   groupTransformer: Konva.Group = new Konva.Group();
 

@@ -1,15 +1,15 @@
 import {cloneDeep} from 'lodash-es'
 import Konva from 'konva'
 //
-import { Render } from '../index'
+import type { ICanvasContext } from "../context"
 
 import { nanoid } from 'nanoid'
 
 export class CopyTool {
   static readonly name = 'CopyTool'
 
-  private render: Render
-  constructor(render: Render) {
+  private render: ICanvasContext
+  constructor(render: ICanvasContext) {
     this.render = render
   }
 

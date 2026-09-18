@@ -1,12 +1,12 @@
 import Konva from "konva";
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import { nanoid } from "nanoid";
 interface ImageConfig {
   src: string;
 }
 export class Image {
-  render: Render;
-  constructor( render: Render) {
+  render: ICanvasContext;
+  constructor( render: ICanvasContext) {
     this.render = render;
     
   }

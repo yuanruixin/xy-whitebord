@@ -1,10 +1,10 @@
-import {Render} from './index'
+import type { ICanvasContext } from './context'
 import type {CursorType} from './types'
 // 鼠标样式类
 export  class Cursor {
-  render:Render
+  render: ICanvasContext
   currentType:CursorType
-  constructor(render:Render) {
+  constructor(render: ICanvasContext) {
     this.render = render
     this.currentType = 'default'
   }

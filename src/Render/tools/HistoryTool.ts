@@ -1,6 +1,6 @@
 import { clone } from "lodash-es";
 import Konva from "konva";
-import { Render } from "../types";
+import type { ICanvasContext } from "../context";
 export class HistoryTool {
   config: {
     on?: {
@@ -9,10 +9,10 @@ export class HistoryTool {
       debugChange?: (v: boolean) => void;
     };
   } = {};
-  render: Render;
+  render: ICanvasContext;
   history: string[] = [];
   historyIndex = -1;
-  constructor(render: Render) {
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
   prevHistory() {

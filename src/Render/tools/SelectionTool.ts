@@ -1,12 +1,12 @@
 import Konva from "konva";
 //
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import { isTextNode } from "../utils/elementJudgment";
 export class SelectionTool {
   static readonly name = "SelectionTool";
 
-  private render: Render;
-  constructor(render: Render) {
+  private render: ICanvasContext;
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 

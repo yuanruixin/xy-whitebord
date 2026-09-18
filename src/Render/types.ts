@@ -1,6 +1,5 @@
 import Konva from "konva";
-
-import { Render } from "./index";
+import type { ICanvasContext } from "./context";
 
 export type ValueOf<T> = T[keyof T];
 
@@ -49,11 +48,11 @@ export interface Draw {
 }
 
 export class BaseDraw {
-  protected render: Render;
+  protected render: ICanvasContext;
   readonly layer: Konva.Layer;
   readonly group: Konva.Group;
 
-  constructor(render: Render, layer: Konva.Layer) {
+  constructor(render: ICanvasContext, layer: Konva.Layer) {
     this.render = render;
     this.layer = layer;
 
@@ -72,8 +71,6 @@ export class BaseDraw {
     this.group.removeChildren();
   }
 }
-
-export { Render };
 
 export interface AssetInfo {
   url: string;

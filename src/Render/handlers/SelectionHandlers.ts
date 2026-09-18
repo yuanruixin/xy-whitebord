@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Render } from "../index";
+import type { ICanvasContext } from "../context";
 import * as Types from "../types";
 interface SortItem {
   id?: number; // 有 id 就是其他节点，否则就是 选择目标
@@ -11,8 +11,8 @@ type SortItemPair = [SortItem, SortItem];
 export class SelectionHandlers implements Types.Handler {
   static readonly name = "Selection";
 
-  render: Render;
-  constructor(render: Render) {
+  render: ICanvasContext;
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 

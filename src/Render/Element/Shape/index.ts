@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
-import { Render } from "@/Render";
+import type { ICanvasContext } from "@/Render/context";
 import pathJSon from "./pathData.json";
 import { throttle } from "@/utils/throttle";
 import { loadImage } from "@/Render/utils/loadImage";
@@ -26,7 +26,7 @@ interface ShapeConfig {
   fill?: string;
 }
 export class Shape {
-  render: Render;
+  render: ICanvasContext;
   config: ShapeConfig | null = null;
   private _moveTimesAfterCreate = 0;
   // 预览元素
@@ -37,7 +37,7 @@ export class Shape {
     width: number;
     height: number;
   } | null = null;
-  constructor(render: Render) {
+  constructor(render: ICanvasContext) {
     this.render = render;
   }
 
