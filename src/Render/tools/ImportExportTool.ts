@@ -40,11 +40,19 @@ export class ImportExportTool {
       return
     }
 
-    // 旧格式：Konva JSON（含内置模板、历史缓存）
-    // 与restore类似，但是restore只能保存导入文件，会让之前已经绘制内容消失。此方法会保存已经绘制内容的同时，导入
-    // 以及，更新导出位置，为当前舞台中央
-    try {
+    // 旧格式：Konva JSON
+    await this.importLegacyKonva(jsonStr, silent)
+  }
 
+  /**
+   * 兼容旧版 Konva JSON。
+   *
+   * 保留原因：内置模板数据、旧版自定义模板，以及升级前已存在的本地缓存 / 导出文件。
+   * 新写入的数据一律为版本化文档，正常情况下不会进入此分支。
+   */
+  private async importLegacyKonva(jsonStr: string, silent: boolean) {
+    // 与restore类似，但此方法在保留已绘制内容的同时追加导入
+    try {
       // 加载 json，提取节点
       const container = document.createElement('div')
       const stage = Konva.Node.create(jsonStr, container)
@@ -57,7 +65,6 @@ export class ImportExportTool {
     } catch (e) {
       console.error(e)
     }
-        
   }
 
   // 恢复版本化文档

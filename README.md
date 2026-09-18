@@ -70,7 +70,7 @@
 
 | 键 | 内容 |
 | --- | --- |
-| `xy-whiteboard:scene` | 画布自动保存（JSON），刷新后恢复 |
+| `xy-whiteboard:scene` | 画布自动保存（版本化文档），刷新后恢复 |
 | `xy-whiteboard:ai-config` | AI 配置；API Key 为 AES-GCM 密文 |
 | `xy-whiteboard:ai-conversations` | AI 历史对话（最多 50 条） |
 | `xy-whiteboard:custom-templates` | 自定义模板（封面为链接或 base64） |
@@ -79,20 +79,39 @@
 
 ```
 src/
-  Render/            画布渲染与交互
-    handlers/        事件处理器（选择 / 拖拽 / 缩放 / 快捷键）
-    tools/           画布工具（选择、连接线、层级、成组、AI 画布命令等）
-    Element/         元素（形状 / 文本 / 图片）
+  scene/              文档模型（纯数据，不依赖 Konva / Vue / DOM）
+    types.ts          BoardElement / SceneDocument 定义
+    factory.ts        元素工厂与默认值
+    document.ts       版本化文档的序列化 / 解析 / 迁移
+    history.ts        增量历史（元素级 diff、引用复用、选中状态）
+    shapeTypes.ts     形状枚举与 SVG path 数据
+  Render/             画布渲染与交互
+    scene/            模型 <-> Konva 适配层
+      konva.ts        Scene -> Konva（elementToKonva）
+      fromKonva.ts    Konva -> Scene（konvaToScene）
+      label.ts        形状标签居中布局
+    handlers/         事件处理器（选择 / 拖拽 / 缩放 / 快捷键）
+    tools/            画布工具（选择、连接线、层级、成组、历史、AI 画布命令等）
+    Element/          元素（形状 / 文本 / 图片）
+  actions/            动作注册表（快捷键与右键菜单共用）
   components/
-    Board/           画布容器
-    ToolBar/         左侧工具栏
-    TemplateTool/    模板面板与导入弹层
-    AI/              AI 侧边栏、子组件与 composables
+    Board/            画布容器
+    ToolBar/          左侧工具栏
+    TemplateTool/     模板面板与导入弹层
+    AI/               AI 侧边栏、子组件与 composables
   utils/
-    ai/              AI 模块（类型、提示词、工具表、流式客户端）
-    konvaToSvg.ts    Konva JSON -> SVG 预览（模板封面）
-  store/             状态（render / ai / 选择 / 历史等）
+    ai/               AI 模块（类型、提示词、工具表、流式客户端）
+    konvaToSvg.ts     JSON / 文档 -> SVG 预览（模板封面）
+  store/              状态（render / ai / 选择 / 历史等）
 ```
+
+## 架构
+
+- **文档模型为真源**：`src/scene` 定义可序列化的 `BoardElement`（形状 / 文本 / 图片 / 画笔 / 连接线 / 分组），不依赖渲染引擎；元素创建统一走 `Render.createElement(element)`，由 `src/Render/scene` 适配层投影为 Konva 节点。
+- **版本化文档格式**：导出 / 自动保存输出 `{ type: "xy-whiteboard", version, elements }`。读取时 `parseSceneDocument` 优先按文档解析，失败才回退旧版 Konva JSON（用于内置模板、旧自定义模板与升级前的本地数据）。
+- **动作层**：`src/actions` 把复制 / 删除 / 层级 / 成组 / 撤销等操作集中定义一次，快捷键与右键菜单共同派生，行为一致。
+- **增量历史**：历史按元素记录，未变元素复用引用；撤销 / 重做仅重建变更元素，并恢复当时的选中状态。
+
 
 ## 技术栈
 
@@ -133,5 +152,7 @@ pnpm preview
 | `pnpm build` | 类型检查 + 构建 |
 | `pnpm build:nocheck` | 跳过类型检查的构建 |
 | `pnpm preview` | 预览构建产物 |
+| `pnpm test` | 运行单元测试（vitest） |
+| `pnpm test:watch` | 监听模式运行单元测试 |
 | `pnpm fix` | ESLint 修复 `src` 下代码 |
 | `pnpm prepare` | 安装 Husky 钩子 |

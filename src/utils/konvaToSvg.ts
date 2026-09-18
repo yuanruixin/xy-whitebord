@@ -164,7 +164,7 @@ export function konvaJsonToSvg(
     }
   }
 
-  // 旧格式：Konva JSON
+  // 旧格式：Konva JSON（内置模板与升级前的自定义模板）
   let stage: Konva.Stage | null = null;
   try {
     const container = document.createElement("div");
