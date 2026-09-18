@@ -13,7 +13,8 @@
     <div class="flex flex-col w-max gap-y-5">
       <h3 class="text-lg leading-6 text-gray-900 font-bold">选择模板</h3>
       <div
-        class="template-main h-[30rem] w-[54rem] p-4 bg-[#f2f4f7] overflow-y-auto"
+        class="template-main h-[32rem] w-[54rem] p-4 bg-[#f2f4f7] overflow-y-auto"
+        @wheel.stop
       >
         <templatesPanel v-if="isOpen" @close="isOpen = false"></templatesPanel>
       </div>

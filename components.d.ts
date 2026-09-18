@@ -24,6 +24,7 @@ declare module 'vue' {
     PropertiesPanel: typeof import('./src/components/PropertiesPanel/PropertiesPanel.vue')['default']
     ShapesTool: typeof import('./src/components/ToolBar/ShapesTool.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon/SvgIcon.vue')['default']
+    TemplateImportDialog: typeof import('./src/components/TemplateTool/TemplateImportDialog.vue')['default']
     TemplatesPanel: typeof import('./src/components/TemplateTool/templatesPanel.vue')['default']
     TemplateTool: typeof import('./src/components/TemplateTool/TemplateTool.vue')['default']
     ToolBar: typeof import('./src/components/ToolBar/ToolBar.vue')['default']
