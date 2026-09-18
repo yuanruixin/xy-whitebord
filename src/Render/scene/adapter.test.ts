@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
+import Konva from "konva";
 import {
   createConnectorElement,
   createGroupElement,
   createImageElement,
   createPaintElement,
   createShapeElement,
+  SHAPE_PATHS,
   type BoardElement,
   type ConnectorElement,
   type GroupElement,
@@ -92,6 +94,27 @@ describe("konva adapter round-trip", () => {
     expect(back.src).toBe("data:image/png;base64,AAAA");
     expect(back.width).toBeCloseTo(50);
     expect(back.height).toBeCloseTo(40);
+  });
+
+  it("兼容位置写在子节点上的结构（形状工具）", () => {
+    // 形状工具：group 在原点，位置写在 Path 上
+    const group = new Konva.Group({ id: "s1", name: "shape" });
+    group.add(
+      new Konva.Path({
+        data: SHAPE_PATHS.rectangle,
+        fill: "#123456",
+        x: 200,
+        y: 150,
+      })
+    );
+    const element = konvaToScene([group])[0] as ShapeElement;
+    expect(element.x).toBeCloseTo(200);
+    expect(element.y).toBeCloseTo(150);
+
+    // 正向转换后位置保持
+    const back = konvaToScene([elementToKonva(element)])[0] as ShapeElement;
+    expect(back.x).toBeCloseTo(200);
+    expect(back.y).toBeCloseTo(150);
   });
 
   it("分组递归保留子元素", () => {

@@ -1,6 +1,13 @@
 import Konva from 'konva'
 import C2S from 'canvas2svg'
-//
+import {
+  createSceneDocument,
+  parseSceneDocument,
+  serializeSceneDocument,
+  type SceneDocument,
+} from "@/scene"
+import { elementToKonva } from "../scene/konva"
+import { konvaToScene } from "../scene/fromKonva"
 import type { ICanvasContext } from "../context"
 interface ImageExportOption {
   pixelRatio ?: number
@@ -25,6 +32,14 @@ export class ImportExportTool {
    * @param silent 是否更新历史记录
    */
   async import(jsonStr:string,silent=false){
+    // 新格式：版本化文档
+    const sceneDocument = parseSceneDocument(jsonStr)
+    if (sceneDocument) {
+      await this.importDocument(sceneDocument, silent)
+      return
+    }
+
+    // 旧格式：Konva JSON（含内置模板、历史缓存）
     // 与restore类似，但是restore只能保存导入文件，会让之前已经绘制内容消失。此方法会保存已经绘制内容的同时，导入
     // 以及，更新导出位置，为当前舞台中央
     try {
@@ -37,36 +52,51 @@ export class ImportExportTool {
 
       // 恢复节点图片素材
       await this.restoreImage(nodes)
-
-      for (const node of nodes) {
-        node.off('mouseenter')
-        node.on('mouseenter', () => {
-        })
-        node.off('mouseleave')
-        node.on('mouseleave', () => {
-
-          // 隐藏 hover 框
-          node.findOne('#hoverRect')?.visible(false)
-        })
-      }
-
-      // 往 main layer 插入新节点
-      this.render.layer.add(...nodes)
-
-      // Bug: 恢复 JSON 时候，如果存在已经被放大缩小点元素，点击选择无效
-      // 可能是 Konva 的 bug
-      this.render.selectionTool.select(this.render.layer.getChildren())
-      // 清空选择
-      this.render.selectionTool.selectingClear()
-
-      // 上一步、下一步 无需更新 history 记录
-      if(!silent){
-        this.render.historyTool.updateHistory()
-      }
+      this.mountNodes(nodes, silent)
     } catch (e) {
       console.error(e)
     }
         
+  }
+
+  // 恢复版本化文档
+  private async importDocument(sceneDocument: SceneDocument, silent = false) {
+    try {
+      const nodes = sceneDocument.elements.map((element) => elementToKonva(element))
+      // 恢复节点图片素材
+      await this.restoreImage(nodes)
+      this.mountNodes(nodes, silent)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  // 把节点挂载到画布：绑定 hover、插入 main layer、清空选择、按需记录历史
+  private mountNodes(nodes: Konva.Node[], silent: boolean) {
+    for (const node of nodes) {
+      node.off('mouseenter')
+      node.on('mouseenter', () => {
+      })
+      node.off('mouseleave')
+      node.on('mouseleave', () => {
+
+        // 隐藏 hover 框
+        if (node instanceof Konva.Container) {
+          node.findOne('#hoverRect')?.visible(false)
+        }
+      })
+    }
+
+    // 往 main layer 插入新节点
+    this.render.layer.add(...(nodes as (Konva.Group | Konva.Shape)[]))
+    this.render.selectionTool.select(this.render.layer.getChildren())
+    // 清空选择
+    this.render.selectionTool.selectingClear()
+
+    // 上一步、下一步 无需更新 history 记录
+    if(!silent){
+      this.render.historyTool.updateHistory()
+    }
   }
   getView() {
     // 复制画布
@@ -164,14 +194,19 @@ export class ImportExportTool {
        // 返回可视节点和 layer
        return copy
   }
+  // 把当前画布转换为版本化文档
+  toSceneDocument(): SceneDocument {
+    const copy = this.getView()
+    const layer = copy.getLayers()[0]
+    const elements = layer ? konvaToScene(layer.getChildren()) : []
+    copy.destroy()
+    return createSceneDocument(elements)
+  }
+
   // 保存
   save() {
-    const copy = this.getView()
-    const json = copy.toJSON()
-    copy.destroy()
-
-    // 通过 stage api 导出 json
-    return json
+    // 输出与渲染引擎解耦的版本化文档（JSON 字符串）
+    return serializeSceneDocument(this.toSceneDocument())
   }
 
   // 加载 image（用于导入）

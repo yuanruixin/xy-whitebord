@@ -22,13 +22,15 @@ type CommonBase = Omit<BoardElementBase, "type">;
 
 function baseOf(
   group: Konva.Group,
+  x: number,
+  y: number,
   width: number,
   height: number
 ): CommonBase {
   return {
     id: group.id() || nanoid(),
-    x: group.x(),
-    y: group.y(),
+    x,
+    y,
     width,
     height,
     angle: group.rotation(),
@@ -37,6 +39,14 @@ function baseOf(
     versionNonce: randomVersionNonce(),
     groupIds: [],
   };
+}
+
+// 把组内包围盒左上角映射到 layer 坐标（考虑分组自身的位移 / 缩放 / 旋转）
+function layerTopLeft(
+  group: Konva.Group,
+  box: { x: number; y: number }
+): Konva.Vector2d {
+  return group.getTransform().point({ x: box.x, y: box.y });
 }
 
 /**
@@ -79,10 +89,17 @@ function shapeFromKonva(group: Konva.Group): ShapeElement | null {
   const data = path.data();
   const shapeType = shapeTypeOfPath(data);
   const box = path.getClientRect({ relativeTo: group });
+  const topLeft = layerTopLeft(group, box);
   const label = group.findOne(".shape-label") as Konva.Text | null;
 
   return {
-    ...baseOf(group, box.width * group.scaleX(), box.height * group.scaleY()),
+    ...baseOf(
+      group,
+      topLeft.x,
+      topLeft.y,
+      box.width * group.scaleX(),
+      box.height * group.scaleY()
+    ),
     type: "shape",
     shape: shapeType ?? "path",
     path: shapeType ? undefined : data,
@@ -97,9 +114,16 @@ function textFromKonva(group: Konva.Group): TextElement | null {
   if (!textNode) return null;
 
   const box = textNode.getClientRect({ relativeTo: group });
+  const topLeft = layerTopLeft(group, box);
 
   return {
-    ...baseOf(group, box.width * group.scaleX(), box.height * group.scaleY()),
+    ...baseOf(
+      group,
+      topLeft.x,
+      topLeft.y,
+      box.width * group.scaleX(),
+      box.height * group.scaleY()
+    ),
     type: "text",
     text: textNode.text(),
     fontSize: textNode.fontSize(),
@@ -114,9 +138,17 @@ function imageFromKonva(group: Konva.Group): ImageElement | null {
 
   const src = image.getAttr("src");
   const svgXML = image.getAttr("svgXML");
+  const box = image.getClientRect({ relativeTo: group });
+  const topLeft = layerTopLeft(group, box);
 
   return {
-    ...baseOf(group, image.width() * group.scaleX(), image.height() * group.scaleY()),
+    ...baseOf(
+      group,
+      topLeft.x,
+      topLeft.y,
+      box.width * group.scaleX(),
+      box.height * group.scaleY()
+    ),
     type: "image",
     src: typeof src === "string" ? src : "",
     svgXML: typeof svgXML === "string" ? svgXML : undefined,
@@ -131,7 +163,7 @@ function paintFromKonva(group: Konva.Group): PaintElement | null {
   const dash = line.dash();
 
   return {
-    ...baseOf(group, box.width, box.height),
+    ...baseOf(group, group.x(), group.y(), box.width, box.height),
     type: "paint",
     points: line.points(),
     stroke: String(line.stroke() || "#000000"),
@@ -155,7 +187,13 @@ function connectorFromKonva(group: Konva.Group): ConnectorElement | null {
   const ys = [ends[0].y, ends[1].y];
 
   return {
-    ...baseOf(group, Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)),
+    ...baseOf(
+      group,
+      group.x(),
+      group.y(),
+      Math.max(...xs) - Math.min(...xs),
+      Math.max(...ys) - Math.min(...ys)
+    ),
     type: "connector",
     ends,
     stroke: String(arrow.stroke() || DEFAULT_CONNECTOR_STROKE),
@@ -171,7 +209,7 @@ function groupFromKonva(group: Konva.Group): GroupElement {
   const box = group.getClientRect({ relativeTo: group });
 
   return {
-    ...baseOf(group, box.width, box.height),
+    ...baseOf(group, group.x(), group.y(), box.width, box.height),
     type: "group",
     scaleX: group.scaleX(),
     scaleY: group.scaleY(),
