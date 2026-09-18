@@ -27,9 +27,8 @@ export const useRender = (container: Ref<HTMLDivElement|null>) => {
     // 同步撤销/重做可用状态
     const syncHistoryState = () => {
       setHistoryState({
-        canUndo: board.historyTool.historyIndex > 0,
-        canRedo:
-          board.historyTool.historyIndex < board.historyTool.history.length - 1,
+        canUndo: board.historyTool.canUndo,
+        canRedo: board.historyTool.canRedo,
       });
     };
     board.historyTool.config.on = {

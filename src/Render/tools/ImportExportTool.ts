@@ -4,6 +4,7 @@ import {
   createSceneDocument,
   parseSceneDocument,
   serializeSceneDocument,
+  type BoardElement,
   type SceneDocument,
 } from "@/scene"
 import { elementToKonva } from "../scene/konva"
@@ -68,6 +69,59 @@ export class ImportExportTool {
       this.mountNodes(nodes, silent)
     } catch (e) {
       console.error(e)
+    }
+  }
+
+  /**
+   * 按元素列表增量更新画布：
+   * 未变化的元素（引用相同）复用现有节点，仅重建新增 / 变更的元素，
+   * 移除已删除元素，并恢复目标顺序。
+   */
+  applyElements(from: BoardElement[], to: BoardElement[]) {
+    try {
+      const layer = this.render.layer
+      const fromById = new Map(from.map((element) => [element.id, element]))
+      const toIds = new Set(to.map((element) => element.id))
+
+      // 移除目标中不存在的节点
+      for (const node of [...layer.getChildren()]) {
+        if (this.render.ignore(node)) continue
+        if (!toIds.has(node.id())) node.destroy()
+      }
+
+      const nodes: Konva.Node[] = []
+      const changed: Konva.Node[] = []
+      for (const element of to) {
+        const existing = layer.findOne(
+          (node: Konva.Node) => node.id() === element.id
+        ) as Konva.Node | null
+        const isChanged = fromById.get(element.id) !== element
+        if (existing && !isChanged) {
+          nodes.push(existing)
+          continue
+        }
+        existing?.destroy()
+        const node = elementToKonva(element)
+        nodes.push(node)
+        changed.push(node)
+      }
+
+      // 按目标顺序重新挂载
+      layer.add(...(nodes as (Konva.Group | Konva.Shape)[]))
+
+      // 图片素材异步恢复
+      if (changed.length > 0) {
+        void this.restoreImage(changed)
+      }
+
+      // 沿用导入时对已缩放节点的兼容处理
+      this.render.selectionTool.select(this.render.layer.getChildren())
+      this.render.selectionTool.selectingClear()
+      this.render.transformer.forceUpdate()
+      this.render.connectorTool.refreshAll()
+    } catch (e) {
+      console.error('增量更新失败，回退到全量恢复', e)
+      void this.restore(serializeSceneDocument(createSceneDocument(to)), true)
     }
   }
 

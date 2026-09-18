@@ -1,22 +1,32 @@
-import { clone, debounce } from "lodash-es";
-import Konva from "konva";
+import { debounce } from "lodash-es";
+import { SceneHistory, type BoardElement } from "@/scene";
 import type { ICanvasContext } from "../context";
+
 export class HistoryTool {
   static readonly name = "HistoryTool";
-  // 历史记录上限，避免快照（含 base64 图片）无限增长
-  static readonly MAX = 100;
+  // 历史记录上限，超出后丢弃最旧记录
+  static readonly MAX = SceneHistory.DEFAULT_LIMIT;
+
   config: {
     on?: {
-      historyChange?: (history: string[], historyIndex: number) => void;
-      selectionChange?: (selection: Konva.Node[]) => void;
-      debugChange?: (v: boolean) => void;
+      historyChange?: () => void;
     };
   } = {};
   render: ICanvasContext;
-  history: string[] = [];
-  historyIndex = -1;
+
+  // 增量历史：按元素记录，未变元素复用引用
+  private history = new SceneHistory(HistoryTool.MAX);
+
   constructor(render: ICanvasContext) {
     this.render = render;
+  }
+
+  get canUndo() {
+    return this.history.canUndo;
+  }
+
+  get canRedo() {
+    return this.history.canRedo;
   }
 
   // 防抖自动保存，避免连续操作频繁写入本地存储
@@ -24,52 +34,41 @@ export class HistoryTool {
     this.render.importExportTool.saveToLocalStorage();
   }, 400);
 
-  prevHistory() {
-    const record = this.history[this.historyIndex - 1];
-    if (record) {
-      this.render.importExportTool.restore(record, true);
-      this.historyIndex--;
-      this.persist();
-      // 历史变化事件
-      this.config.on?.historyChange?.(clone(this.history), this.historyIndex)
-    }
-  }
-
-  nextHistory() {
-    const record = this.history[this.historyIndex + 1];
-
-    if (record) {
-      this.render.importExportTool.restore(record, true)
-      this.historyIndex++;
-      this.persist();
-      // 历史变化事件
-      this.config.on?.historyChange?.(clone(this.history), this.historyIndex)
-    }
+  // 记录当前画面
+  updateHistory() {
+    const elements = this.render.importExportTool.toSceneDocument().elements;
+    this.history.record(elements);
+    this.persist();
+    // 历史变化事件
+    this.config.on?.historyChange?.();
   }
 
   // 重置历史，将当前画面作为唯一记录
   reset() {
-    this.history = [];
-    this.historyIndex = -1;
-    this.updateHistory();
+    const elements = this.render.importExportTool.toSceneDocument().elements;
+    this.history.reset(elements);
+    this.persist();
+    this.config.on?.historyChange?.();
   }
 
-  updateHistory() {
-    this.history.splice(this.historyIndex + 1);
-    this.history.push(this.render.importExportTool.save());
+  prevHistory() {
+    const from = this.history.current;
+    const target = this.history.undo();
+    if (!from || !target) return;
+    this.apply(from, target);
+  }
 
-    // 超出上限时丢弃最旧的记录
-    if (this.history.length > HistoryTool.MAX) {
-      this.history.splice(0, this.history.length - HistoryTool.MAX);
-    }
+  nextHistory() {
+    const from = this.history.current;
+    const target = this.history.redo();
+    if (!from || !target) return;
+    this.apply(from, target);
+  }
 
-    this.historyIndex = this.history.length - 1;
-    // 自动保存当前状态
+  private apply(from: BoardElement[], target: BoardElement[]) {
+    this.render.importExportTool.applyElements(from, target);
     this.persist();
     // 历史变化事件
-    this.config.on?.historyChange?.(
-      clone(this.history),
-      this.historyIndex
-    );
+    this.config.on?.historyChange?.();
   }
 }
