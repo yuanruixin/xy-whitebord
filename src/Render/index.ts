@@ -41,6 +41,7 @@ export class Render implements ICanvasContext {
   cursor: Cursor; // 光标样式设置
 
   paintTool: Tools.PaintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
+  eraserTool: Tools.EraserTool = new Tools.EraserTool(this); // 橡皮擦工具(对象擦除)
   selectionTool: Tools.SelectionTool = new Tools.SelectionTool(this); // 选择工具
   editToolbar: Tools.EditToolbar = new Tools.EditToolbar(this); // 编辑条工具
   zIndexTool: Tools.ZIndexTool = new Tools.ZIndexTool(this); // 层级工具

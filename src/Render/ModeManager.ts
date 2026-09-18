@@ -39,8 +39,10 @@ export class ModeManager {
         ctx.shape.destroy();
         break;
       case "brush":
-      case "eraser":
         ctx.paintTool.destroy();
+        break;
+      case "eraser":
+        ctx.eraserTool.destroy();
         break;
       case "select":
       case "default":
@@ -68,7 +70,7 @@ export class ModeManager {
         ctx.cursor.set("brush");
         break;
       case "eraser":
-        console.log("eraser工具待完成");
+        ctx.eraserTool.init();
         break;
       case "createText":
         ctx.cursor.set("crosshair");

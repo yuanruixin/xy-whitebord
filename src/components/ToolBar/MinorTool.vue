@@ -70,6 +70,22 @@
         </div>
       </a>
     </li>
+    <!-- 橡皮擦工具 -->
+    <li
+      class="cursor-pointer hover:bg-gray-700 rounded-md"
+      :class="{ 'bg-primary hover:bg-primary': isActiveTool('eraser') }"
+      @click="toggleTool('eraser')"
+    >
+      <a class="w-10 h-10 p-0 flex justify-center items-center">
+        <svg-icon
+          prefix="menu"
+          name="eraser"
+          :size="48"
+          class="hover:animate-swing-small"
+          v-tooltip="'橡皮擦'"
+        ></svg-icon>
+      </a>
+    </li>
     <!-- 文本工具 -->
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
@@ -160,7 +176,7 @@ watch(
     render.value?.paintTool.init(newVal);
   }
 );
-function toggleTool(tool: "picture" | "brush" | "text") {
+function toggleTool(tool: "picture" | "brush" | "text" | "eraser") {
   if (isActiveTool(tool)) {
     clearSelectedTool();
   }
@@ -172,6 +188,8 @@ function toggleTool(tool: "picture" | "brush" | "text") {
     }, 500);
   } else if (tool === "brush") {
     render.value?.workMode("brush", brushOption);
+  } else if (tool === "eraser") {
+    render.value?.workMode("eraser");
   } else if (tool === "text") {
     render.value?.workMode("createText");
 
