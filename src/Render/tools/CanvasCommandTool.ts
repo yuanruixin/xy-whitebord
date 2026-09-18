@@ -1,7 +1,12 @@
 import Konva from "konva";
-import { nanoid } from "nanoid";
-import pathData from "../Element/Shape/pathData.json";
-import type { ShapeType } from "../Element/Shape";
+import {
+  createConnectorElement,
+  createShapeElement,
+  createTextElement,
+  shapeTypeOfPath,
+  type ShapeType,
+} from "@/scene";
+import { elementToKonva } from "../scene/konva";
 import type { ICanvasContext } from "../context";
 import { nearestAnchorPair } from "../utils/anchors";
 import type { Rect } from "../utils/anchors";
@@ -28,10 +33,6 @@ const TYPE_TO_SHAPE: Partial<Record<AISceneNode["type"], ShapeType>> = {
   arrow: "arrowRight",
 };
 
-const SHAPE_PATHS: { [k in ShapeType]: string } = pathData;
-
-const DEFAULT_SHAPE_FILL = "#4e95ff";
-const DEFAULT_TEXT_FILL = "#1d293a";
 const LABEL_FILL = "#1d293a";
 const LABEL_FONT_SIZE = 20;
 
@@ -356,12 +357,8 @@ export class CanvasCommandTool implements CanvasExecutor {
       (child) => child instanceof Konva.Path
     ) as Konva.Path | undefined;
     if (path) {
-      const data = path.data();
-      for (const key of Object.keys(SHAPE_PATHS) as ShapeType[]) {
-        if (SHAPE_PATHS[key] === data) return key;
-      }
       // 未匹配内置形状：视为自定义 path
-      return "path";
+      return shapeTypeOfPath(path.data()) ?? "path";
     }
     return "shape";
   }
@@ -378,36 +375,30 @@ export class CanvasCommandTool implements CanvasExecutor {
 
   private createShape(data: AISceneNode): Konva.Group | null {
     // 自定义形状：直接使用模型给出的 SVG path 数据
-    let pathData: string;
+    let shape: ShapeType | "path";
+    let path: string | undefined;
     if (data.type === "path") {
       if (!data.d) return null;
-      pathData = data.d;
+      shape = "path";
+      path = data.d;
     } else {
       const shapeType = TYPE_TO_SHAPE[data.type];
       if (!shapeType) return null;
-      pathData = SHAPE_PATHS[shapeType];
+      shape = shapeType;
     }
 
-    const width = data.width ?? 160;
-    const height = data.height ?? 80;
-    const group = new Konva.Group({ id: nanoid(), name: "shape" });
-    const path = new Konva.Path({
-      data: pathData,
-      fill: data.fill ?? DEFAULT_SHAPE_FILL,
+    const element = createShapeElement({
+      shape,
+      path,
+      x: data.x ?? 120,
+      y: data.y ?? 120,
+      width: data.width ?? 160,
+      height: data.height ?? 80,
+      fill: data.fill,
+      text: data.text,
+      fontSize: data.fontSize,
     });
-
-    // 按目标宽高缩放 path，并让包围盒左上角对齐到 (x, y)
-    const box = path.getClientRect();
-    const scaleX = width / (box.width || 1);
-    const scaleY = height / (box.height || 1);
-    path.setAttrs({
-      x: -box.x * scaleX,
-      y: -box.y * scaleY,
-      scaleX,
-      scaleY,
-    });
-    group.add(path);
-    group.position({ x: data.x ?? 120, y: data.y ?? 120 });
+    const group = elementToKonva(element);
 
     if (data.text) {
       const label = new Konva.Text({
@@ -426,15 +417,14 @@ export class CanvasCommandTool implements CanvasExecutor {
   }
 
   private createText(data: AISceneNode): Konva.Group {
-    const group = new Konva.Group({ id: nanoid(), name: "text" });
-    const textNode = new Konva.Text({
-      text: data.text ?? "文本",
-      fontSize: data.fontSize ?? LABEL_FONT_SIZE,
-      fill: data.fill ?? DEFAULT_TEXT_FILL,
+    const element = createTextElement({
+      text: data.text,
+      fontSize: data.fontSize,
+      fill: data.fill,
+      x: data.x ?? 120,
+      y: data.y ?? 120,
     });
-    group.add(textNode);
-    group.position({ x: data.x ?? 120, y: data.y ?? 120 });
-    return group;
+    return elementToKonva(element);
   }
 
   private createEdge(from: Konva.Node, to: Konva.Node): Konva.Group {
@@ -442,34 +432,27 @@ export class CanvasCommandTool implements CanvasExecutor {
     const { from: fromAnchor, to: toAnchor, fromPoint, toPoint } =
       nearestAnchorPair(this.layerRectOf(from), this.layerRectOf(to));
 
-    const group = new Konva.Group({ id: nanoid(), name: "connector" });
-    const arrow = new Konva.Arrow({
-      points: [fromPoint.x, fromPoint.y, toPoint.x, toPoint.y],
-      stroke: DEFAULT_TEXT_FILL,
-      fill: DEFAULT_TEXT_FILL,
-      strokeWidth: 2,
-      pointerLength: 10,
-      pointerWidth: 10,
+    const element = createConnectorElement({
+      ends: [
+        {
+          nodeId: from.id(),
+          anchor: fromAnchor.id,
+          offsetX: 0,
+          offsetY: 0,
+          x: fromPoint.x,
+          y: fromPoint.y,
+        },
+        {
+          nodeId: to.id(),
+          anchor: toAnchor.id,
+          offsetX: 0,
+          offsetY: 0,
+          x: toPoint.x,
+          y: toPoint.y,
+        },
+      ],
     });
-    group.add(arrow);
-    group.setAttr("ends", [
-      {
-        nodeId: from.id(),
-        anchor: fromAnchor.id,
-        offsetX: 0,
-        offsetY: 0,
-        x: fromPoint.x,
-        y: fromPoint.y,
-      },
-      {
-        nodeId: to.id(),
-        anchor: toAnchor.id,
-        offsetX: 0,
-        offsetY: 0,
-        x: toPoint.x,
-        y: toPoint.y,
-      },
-    ]);
+    const group = elementToKonva(element);
     this.render.layer.add(group);
     return group;
   }

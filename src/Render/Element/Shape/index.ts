@@ -1,26 +1,10 @@
 import Konva from "konva";
 import { nanoid } from "nanoid";
 import type { ICanvasContext } from "@/Render/context";
-import pathJSon from "./pathData.json";
+import { SHAPE_PATHS, type ShapeType } from "@/scene";
 import { throttle } from "@/utils/throttle";
 import { loadImage } from "@/Render/utils/loadImage";
-export type ShapeType =
-  | "arrowLeft"
-  | "arrowRight"
-  | "diamond"
-  | "ellipse"
-  | "endFile"
-  | "engDatabase"
-  | "engQueue"
-  | "parallelogramLeft"
-  | "parallelogramRight"
-  | "rectangle"
-  | "triangleDown"
-  | "triangleUp";
-// 创建元素使用path，方便修改颜色
-const pathData: {
-  [k in ShapeType]: string;
-} = pathJSon;
+export type { ShapeType } from "@/scene";
 interface ShapeConfig {
   shape: ShapeType;
   fill?: string;
@@ -75,7 +59,7 @@ export class Shape {
     this.shapeElement = new Konva.Path({
       x: 0,
       y: 0,
-      data: pathData[this.config.shape],
+      data: SHAPE_PATHS[this.config.shape],
       fill,
     });
     const pos = this.render.stage.getRelativePointerPosition();
