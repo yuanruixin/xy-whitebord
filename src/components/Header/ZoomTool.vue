@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center h-min select-none rounded-md border-solid border-2 border-slate-600/10"
+    class="flex items-center h-min select-none rounded-md border-solid border-2 border-slate-600/10 bg-white shadow-sm"
   >
     <button
       class="text-xl grid place-items-center size-7 hover:bg-slate-600/10"
@@ -33,7 +33,7 @@
             leave-to-class="opacity-0"
           >
             <ListboxOptions
-              class="absolute z-20 mt-1 max-h-60 w-[160px] right-1/2 translate-x-1/2 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+              class="absolute z-20 mb-1 bottom-full max-h-60 w-[160px] right-1/2 translate-x-1/2 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
             >
               <ListboxOption
                 v-slot="{ active, selected }"
