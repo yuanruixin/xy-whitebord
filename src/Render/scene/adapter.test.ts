@@ -81,6 +81,15 @@ describe("konva adapter round-trip", () => {
     expect(back.strokeWidth).toBe(3);
   });
 
+  it("橡皮笔迹保留混合模式", () => {
+    const element = createPaintElement({
+      points: [0, 0, 5, 5],
+      globalCompositeOperation: "destination-out",
+    });
+    const back = roundTrip(element) as PaintElement;
+    expect(back.globalCompositeOperation).toBe("destination-out");
+  });
+
   it("图片保留 src 与尺寸", () => {
     const element = createImageElement({
       src: "data:image/png;base64,AAAA",

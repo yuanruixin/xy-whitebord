@@ -125,6 +125,7 @@ export interface CreatePaintInput extends BaseInput {
   stroke?: string;
   strokeWidth?: number;
   dash?: number[];
+  globalCompositeOperation?: "source-over" | "destination-out";
 }
 
 export function createPaintElement(input: CreatePaintInput): PaintElement {
@@ -135,6 +136,7 @@ export function createPaintElement(input: CreatePaintInput): PaintElement {
     stroke: input.stroke ?? "#000000",
     strokeWidth: input.strokeWidth ?? 1,
     dash: input.dash,
+    globalCompositeOperation: input.globalCompositeOperation,
   };
 }
 

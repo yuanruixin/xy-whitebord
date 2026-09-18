@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { nanoid } from "nanoid";
+import { createPaintElement } from "@/scene";
 import type { ICanvasContext } from "../context";
 import { throttle } from "@/utils/throttle";
 type PaintMode = "brush" | "eraser";
@@ -32,29 +32,24 @@ export class PaintTool {
       const x = this.render.toStageValue(pos.x - stageState.x);
       const y = this.render.toStageValue(pos.y - stageState.y);
 
-      this.currentLine = new Konva.Line({
+      const strokeWidth = config?.lineWidth ?? 1;
+      const element = createPaintElement({
+        points: [x, y, x, y],
         stroke: config?.color ?? "black",
-        strokeWidth: config?.lineWidth ?? 1,
+        strokeWidth,
+        dash:
+          config?.lineStyle === "dotted"
+            ? [strokeWidth * 4, strokeWidth * 2]
+            : undefined,
         globalCompositeOperation:
           this.render.workMode() === "brush"
             ? "source-over"
             : "destination-out",
-        lineCap: "round",
-        lineJoin: "round",
-        points: [x, y, x, y],
       });
-      if (config?.lineStyle === "dotted") {
-        this.currentLine.dash([
-          this.currentLine.strokeWidth() * 4,
-          this.currentLine.strokeWidth() * 2,
-        ]);
-      }
-      const group = new Konva.Group({
-        id: nanoid(),
-        name: "paint",
-      });
-      group.add(this.currentLine);
-      this.render.layer.add(group);
+
+      // 通过模型创建节点；绘制过程中直接改点，结束时再统一记录历史
+      const group = this.render.createElement(element, { record: false });
+      this.currentLine = group.findOne("Line") as Konva.Line | null;
     });
 
     this.render.events.on("paintTool", "stage", "mouseup touchend", () => {
