@@ -9,7 +9,13 @@ import type { ShapeType } from "./shapeTypes";
 
 export type ElementId = string;
 
-export type ElementType = "shape" | "text" | "image" | "paint" | "connector";
+export type ElementType =
+  | "shape"
+  | "text"
+  | "image"
+  | "paint"
+  | "connector"
+  | "group";
 
 /** 所有元素共有的字段。x / y 为画布坐标下的包围盒左上角 */
 export interface BoardElementBase {
@@ -53,6 +59,8 @@ export interface ImageElement extends BoardElementBase {
   type: "image";
   /** 图片地址（本地导入时为 base64） */
   src: string;
+  /** 旧版内联 SVG 素材（无 src 时使用） */
+  svgXML?: string;
 }
 
 export interface PaintElement extends BoardElementBase {
@@ -62,6 +70,8 @@ export interface PaintElement extends BoardElementBase {
   stroke: string;
   strokeWidth: number;
   dash?: number[];
+  /** 橡皮擦笔迹使用 destination-out */
+  globalCompositeOperation?: "source-over" | "destination-out";
 }
 
 /** 连接线端点。绑定图形时以 nodeId + 锚点 / 相对中心偏移记录，board 坐标 */
@@ -81,12 +91,21 @@ export interface ConnectorElement extends BoardElementBase {
   strokeWidth: number;
 }
 
+/** 分组容器：保留子元素结构与自身变换，便于无损映射现有 Konva 分组 */
+export interface GroupElement extends BoardElementBase {
+  type: "group";
+  scaleX: number;
+  scaleY: number;
+  children: BoardElement[];
+}
+
 export type BoardElement =
   | ShapeElement
   | TextElement
   | ImageElement
   | PaintElement
-  | ConnectorElement;
+  | ConnectorElement
+  | GroupElement;
 
 /** 文档结构。后续增量历史、协作都在此之上演进 */
 export interface Scene {

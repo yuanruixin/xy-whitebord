@@ -1,13 +1,16 @@
 import Konva from "konva";
 import {
+  DEFAULT_TEXT_FILL,
   SHAPE_PATHS,
   type BoardElement,
   type ConnectorElement,
+  type GroupElement,
   type ImageElement,
   type PaintElement,
   type ShapeElement,
   type TextElement,
 } from "@/scene";
+import { layoutShapeLabel } from "./label";
 
 /**
  * Scene 模型 -> Konva 节点。
@@ -28,6 +31,8 @@ export function elementToKonva(element: BoardElement): Konva.Group {
       return paintToKonva(element);
     case "connector":
       return connectorToKonva(element);
+    case "group":
+      return groupToKonva(element);
     default: {
       const exhaustive: never = element;
       throw new Error(`不支持的画布元素类型: ${JSON.stringify(exhaustive)}`);
@@ -53,6 +58,19 @@ function shapeToKonva(element: ShapeElement): Konva.Group {
       scaleY,
     });
     group.add(path);
+  }
+
+  if (element.text) {
+    const label = new Konva.Text({
+      name: "shape-label",
+      text: element.text,
+      align: "center",
+      fontSize: element.fontSize,
+      fill: DEFAULT_TEXT_FILL,
+      listening: false,
+    });
+    group.add(label);
+    layoutShapeLabel(group, label);
   }
 
   group.position({ x: element.x, y: element.y });
@@ -89,7 +107,8 @@ function imageToKonva(element: ImageElement): Konva.Group {
     width: element.width,
     height: element.height,
   });
-  image.setAttr("src", element.src);
+  if (element.src) image.setAttr("src", element.src);
+  if (element.svgXML) image.setAttr("svgXML", element.svgXML);
   group.add(image);
   group.position({ x: element.x, y: element.y });
   if (element.angle) group.rotation(element.angle);
@@ -106,6 +125,7 @@ function paintToKonva(element: PaintElement): Konva.Group {
     lineCap: "round",
     lineJoin: "round",
     dash: element.dash,
+    globalCompositeOperation: element.globalCompositeOperation,
   });
   group.add(line);
   group.position({ x: element.x, y: element.y });
@@ -127,6 +147,18 @@ function connectorToKonva(element: ConnectorElement): Konva.Group {
   group.add(arrow);
   group.setAttr("ends", element.ends);
   group.position({ x: element.x, y: element.y });
+  group.opacity(element.opacity);
+  return group;
+}
+
+function groupToKonva(element: GroupElement): Konva.Group {
+  const group = new Konva.Group({ id: element.id, name: "group" });
+  for (const child of element.children) {
+    group.add(elementToKonva(child));
+  }
+  group.position({ x: element.x, y: element.y });
+  group.scale({ x: element.scaleX, y: element.scaleY });
+  if (element.angle) group.rotation(element.angle);
   group.opacity(element.opacity);
   return group;
 }

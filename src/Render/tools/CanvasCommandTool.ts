@@ -398,22 +398,7 @@ export class CanvasCommandTool implements CanvasExecutor {
       text: data.text,
       fontSize: data.fontSize,
     });
-    const group = elementToKonva(element);
-
-    if (data.text) {
-      const label = new Konva.Text({
-        name: "shape-label",
-        text: data.text,
-        align: "center",
-        fontSize: data.fontSize ?? LABEL_FONT_SIZE,
-        fill: LABEL_FILL,
-        listening: false,
-      });
-      group.add(label);
-      this.render.text.layoutShapeLabel(group, label);
-    }
-
-    return group;
+    return elementToKonva(element);
   }
 
   private createText(data: AISceneNode): Konva.Group {

@@ -2,10 +2,12 @@ import { nanoid } from "nanoid";
 import { DEFAULT_FONT_SIZE } from "@/constants/fontSize";
 import type { ShapeType } from "./shapeTypes";
 import type {
+  BoardElement,
   BoardElementBase,
   ConnectorElement,
   ConnectorEnd,
   ElementType,
+  GroupElement,
   ImageElement,
   PaintElement,
   ShapeElement,
@@ -168,5 +170,21 @@ export function createConnectorElement(
     ends: input.ends,
     stroke: input.stroke ?? DEFAULT_CONNECTOR_STROKE,
     strokeWidth: input.strokeWidth ?? 2,
+  };
+}
+
+export interface CreateGroupInput extends BaseInput {
+  children: BoardElement[];
+  scaleX?: number;
+  scaleY?: number;
+}
+
+export function createGroupElement(input: CreateGroupInput): GroupElement {
+  return {
+    ...createBase("group", input, { width: 0, height: 0 }),
+    type: "group",
+    scaleX: input.scaleX ?? 1,
+    scaleY: input.scaleY ?? 1,
+    children: input.children,
   };
 }
