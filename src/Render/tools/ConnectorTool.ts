@@ -2,10 +2,14 @@ import Konva from "konva";
 import { nanoid } from "nanoid";
 import type { ICanvasContext } from "../context";
 import { MouseButton } from "../types";
+import { ANCHORS, anchorPoint, getAnchor } from "../utils/anchors";
+import type { Anchor, Rect } from "../utils/anchors";
 
 // 连接线端点：绑定图形时以「图形中心 + 偏移」记录，未绑定时记录 board 坐标
 interface ConnectorEnd {
   nodeId?: string;
+  // 吸附到图形的关键锚点（存在时按锚点实时计算，忽略 offset）
+  anchor?: string;
   offsetX: number;
   offsetY: number;
   x: number;
@@ -20,6 +24,8 @@ interface ConnectorEnd {
 export class ConnectorTool {
   static readonly name = "ConnectorTool";
   private static readonly COLOR = "#1d293a";
+  // 端点吸附到锚点的屏幕像素阈值
+  private static readonly SNAP_PX = 24;
 
   private render: ICanvasContext;
   private drawing = false;
@@ -161,17 +167,20 @@ export class ConnectorTool {
     const arrow = group.children[0] as Konva.Arrow | undefined;
     if (!arrow) return;
 
-    const x = circle.x();
-    const y = circle.y();
+    // 靠近图形时吸附到最近的关键锚点
+    const boardPos = this.boardPointer();
+    const snap = boardPos ? this.snapTarget(boardPos) : null;
+    const point = snap ? snap.point : { x: circle.x(), y: circle.y() };
+    if (snap) circle.position(point);
 
     // 拖动时先解除绑定，落点再决定是否重新绑定
     const ends = group.getAttr("ends") as ConnectorEnd[];
-    ends[index] = { offsetX: 0, offsetY: 0, x, y };
+    ends[index] = { offsetX: 0, offsetY: 0, x: point.x, y: point.y };
     group.setAttr("ends", ends);
 
     const points = [...arrow.points()];
-    points[index * 2] = x - group.x();
-    points[index * 2 + 1] = y - group.y();
+    points[index * 2] = point.x - group.x();
+    points[index * 2 + 1] = point.y - group.y();
     arrow.points(points);
     // 同步选择框
     this.render.transformer.forceUpdate();
@@ -184,17 +193,32 @@ export class ConnectorTool {
     const ends = group.getAttr("ends") as ConnectorEnd[];
     const end = ends[index];
 
-    // 落点落在图形上则绑定，否则保持自由端点
-    const node = this.elementAt();
-    if (node) {
-      const center = this.centerOf(node);
-      end.nodeId = node.id();
-      end.offsetX = end.x - center.x;
-      end.offsetY = end.y - center.y;
-    } else {
-      end.nodeId = undefined;
+    // 落点靠近图形则吸附到最近锚点并绑定
+    const boardPos = this.boardPointer();
+    const snap = boardPos ? this.snapTarget(boardPos) : null;
+
+    if (snap) {
+      end.nodeId = snap.node.id();
+      end.anchor = snap.anchor.id;
       end.offsetX = 0;
       end.offsetY = 0;
+      end.x = snap.point.x;
+      end.y = snap.point.y;
+    } else {
+      // 未吸附：落在图形上则按相对偏移绑定，否则保持自由端点
+      const node = this.elementAt();
+      if (node) {
+        const center = this.centerOf(node);
+        end.nodeId = node.id();
+        end.anchor = undefined;
+        end.offsetX = end.x - center.x;
+        end.offsetY = end.y - center.y;
+      } else {
+        end.nodeId = undefined;
+        end.anchor = undefined;
+        end.offsetX = 0;
+        end.offsetY = 0;
+      }
     }
     group.setAttr("ends", ends);
 
@@ -215,16 +239,77 @@ export class ConnectorTool {
     let changed = false;
 
     ends.forEach((end, i) => {
-      if (!end.nodeId) return;
-      const node = this.findElement(end.nodeId);
-      if (!node) return;
-      const center = this.centerOf(node);
-      points[i * 2] = center.x + end.offsetX - gx;
-      points[i * 2 + 1] = center.y + end.offsetY - gy;
+      const point = this.endPoint(end);
+      if (!point) return;
+      points[i * 2] = point.x - gx;
+      points[i * 2 + 1] = point.y - gy;
       changed = true;
     });
 
     if (changed) arrow.points(points);
+  }
+
+  // 解析端点在画布中的位置（锚点优先，其次中心 + 偏移）
+  private endPoint(end: ConnectorEnd): Konva.Vector2d | null {
+    if (!end.nodeId) return null;
+    const node = this.findElement(end.nodeId);
+    if (!node) return null;
+
+    if (end.anchor) {
+      const anchor = getAnchor(end.anchor);
+      if (anchor) return anchorPoint(this.layerRectOf(node), anchor);
+    }
+
+    const center = this.centerOf(node);
+    return { x: center.x + end.offsetX, y: center.y + end.offsetY };
+  }
+
+  // 顶层图形在 layer 坐标系下的包围盒
+  private layerRectOf(node: Konva.Node): Rect {
+    return node.getClientRect({ relativeTo: this.render.layer });
+  }
+
+  /**
+   * 查找指针附近的图形锚点，用于连线时自动吸附。
+   * 当指针落在图形（含阈值扩张）范围内，返回距离最近的关键锚点。
+   */
+  private snapTarget(boardPos: Konva.Vector2d): {
+    node: Konva.Group;
+    anchor: Anchor;
+    point: Konva.Vector2d;
+  } | null {
+    const threshold = this.render.toStageValue(ConnectorTool.SNAP_PX);
+    let best: { node: Konva.Group; anchor: Anchor; point: Konva.Vector2d } | null =
+      null;
+    let bestDistance = Infinity;
+
+    const nodes = this.render.layer.getChildren(
+      (node) => !this.render.ignore(node) && node.name() !== "connector"
+    );
+
+    for (const node of nodes) {
+      const rect = this.layerRectOf(node);
+      const outside =
+        boardPos.x < rect.x - threshold ||
+        boardPos.x > rect.x + rect.width + threshold ||
+        boardPos.y < rect.y - threshold ||
+        boardPos.y > rect.y + rect.height + threshold;
+      if (outside) continue;
+
+      for (const anchor of ANCHORS) {
+        const point = anchorPoint(rect, anchor);
+        const distance = Math.hypot(
+          point.x - boardPos.x,
+          point.y - boardPos.y
+        );
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = { node: node as Konva.Group, anchor, point };
+        }
+      }
+    }
+
+    return best;
   }
 
   private cancel() {
@@ -267,6 +352,19 @@ export class ConnectorTool {
   }
 
   private makeEnd(boardPos: Konva.Vector2d): ConnectorEnd {
+    // 优先吸附到指针附近的关键锚点
+    const snap = this.snapTarget(boardPos);
+    if (snap) {
+      return {
+        nodeId: snap.node.id(),
+        anchor: snap.anchor.id,
+        offsetX: 0,
+        offsetY: 0,
+        x: snap.point.x,
+        y: snap.point.y,
+      };
+    }
+
     const node = this.elementAt();
     if (node) {
       const center = this.centerOf(node);
@@ -324,7 +422,10 @@ export class ConnectorTool {
     if (!this.drawing || !this.preview || !this.startEnd) return;
     const pos = this.boardPointer();
     if (!pos) return;
-    this.preview.points([this.startEnd.x, this.startEnd.y, pos.x, pos.y]);
+    // 预览时同样吸附到附近锚点，方便对齐
+    const snap = this.snapTarget(pos);
+    const end = snap ? snap.point : pos;
+    this.preview.points([this.startEnd.x, this.startEnd.y, end.x, end.y]);
   };
 
   private onUp = () => {

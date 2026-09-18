@@ -89,6 +89,7 @@ export class CopyTool {
         const ends = cloneDeep(copy.getAttr('ends') ?? [])
         for (const end of ends) {
           end.nodeId = undefined
+          end.anchor = undefined
           end.offsetX = 0
           end.offsetY = 0
         }

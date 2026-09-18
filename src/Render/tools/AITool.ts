@@ -3,6 +3,8 @@ import { nanoid } from "nanoid";
 import pathData from "../Element/Shape/pathData.json";
 import type { ShapeType } from "../Element/Shape";
 import type { ICanvasContext } from "../context";
+import { nearestAnchorPair } from "../utils/anchors";
+import type { Rect } from "../utils/anchors";
 import type { AIScene, AISceneNode } from "@/utils/ai";
 
 // AI 节点类型 -> 内置形状
@@ -37,22 +39,31 @@ export class AITool {
     this.render.selectionTool.selectingClear();
 
     const groups = new Map<string, Konva.Group>();
+    let added = false;
 
-    for (const node of scene.nodes) {
-      const group =
-        node.type === "text" ? this.createText(node) : this.createShape(node);
-      if (!group) continue;
-      this.render.layer.add(group);
-      if (node.id) groups.set(node.id, group);
-    }
+    try {
+      for (const node of scene.nodes) {
+        const group =
+          node.type === "text" ? this.createText(node) : this.createShape(node);
+        if (!group) continue;
+        this.render.layer.add(group);
+        if (node.id) groups.set(node.id, group);
+        added = true;
+      }
 
-    for (const edge of scene.edges ?? []) {
-      this.createEdge(edge.from, edge.to, groups);
-    }
-
-    if (groups.size > 0) {
-      this.render.connectorTool.refreshAll();
-      this.render.historyTool.updateHistory();
+      for (const edge of scene.edges ?? []) {
+        this.createEdge(edge.from, edge.to, groups);
+      }
+    } finally {
+      // 无论连线是否创建成功，都要把本次生成记录为一次可撤销/重做的历史
+      if (added) {
+        try {
+          this.render.connectorTool.refreshAll();
+        } catch (error) {
+          console.warn("刷新连接线失败", error);
+        }
+        this.render.historyTool.updateHistory();
+      }
     }
   }
 
@@ -118,12 +129,13 @@ export class AITool {
     const to = groups.get(toId);
     if (!from || !to) return;
 
-    const start = this.centerOf(from);
-    const end = this.centerOf(to);
+    // 选择两图形间距离最近的一对关键锚点作为连线端点
+    const { from: fromAnchor, to: toAnchor, fromPoint, toPoint } =
+      nearestAnchorPair(this.layerRectOf(from), this.layerRectOf(to));
 
     const group = new Konva.Group({ id: nanoid(), name: "connector" });
     const arrow = new Konva.Arrow({
-      points: [start.x, start.y, end.x, end.y],
+      points: [fromPoint.x, fromPoint.y, toPoint.x, toPoint.y],
       stroke: DEFAULT_TEXT_FILL,
       fill: DEFAULT_TEXT_FILL,
       strokeWidth: 2,
@@ -132,15 +144,28 @@ export class AITool {
     });
     group.add(arrow);
     group.setAttr("ends", [
-      { nodeId: from.id(), offsetX: 0, offsetY: 0, x: start.x, y: start.y },
-      { nodeId: to.id(), offsetX: 0, offsetY: 0, x: end.x, y: end.y },
+      {
+        nodeId: from.id(),
+        anchor: fromAnchor.id,
+        offsetX: 0,
+        offsetY: 0,
+        x: fromPoint.x,
+        y: fromPoint.y,
+      },
+      {
+        nodeId: to.id(),
+        anchor: toAnchor.id,
+        offsetX: 0,
+        offsetY: 0,
+        x: toPoint.x,
+        y: toPoint.y,
+      },
     ]);
     this.render.layer.add(group);
   }
 
-  // 节点中心（layer 坐标）
-  private centerOf(node: Konva.Node): Konva.Vector2d {
-    const box = node.getClientRect({ relativeTo: this.render.layer });
-    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  // 节点在 layer 坐标系下的包围盒
+  private layerRectOf(node: Konva.Node): Rect {
+    return node.getClientRect({ relativeTo: this.render.layer });
   }
 }
