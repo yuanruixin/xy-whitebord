@@ -76,7 +76,7 @@ export class SelectionTool {
   }
 
   selectAll() {
-    const nodeNames = [".text", ".shape", ".image",'.paint'];
+    const nodeNames = [".text", ".shape", ".image", ".paint", ".connector"];
     const nodes: Konva.Node[][] = [];
     nodeNames.forEach((name) => {
       nodes.push(this.render.layer.find(name) as Konva.Node[]);

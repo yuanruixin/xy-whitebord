@@ -86,6 +86,22 @@
         ></svg-icon>
       </a>
     </li>
+    <!-- 连接线工具 -->
+    <li
+      class="cursor-pointer hover:bg-gray-700 rounded-md"
+      :class="{ 'bg-primary hover:bg-primary': isActiveTool('elbowed') }"
+      @click="toggleTool('elbowed')"
+    >
+      <a class="w-10 h-10 p-0 flex justify-center items-center">
+        <svg-icon
+          prefix="menu"
+          name="elbowed"
+          :size="48"
+          class="hover:animate-swing-small"
+          v-tooltip="'连接线'"
+        ></svg-icon>
+      </a>
+    </li>
     <!-- 文本工具 -->
     <li
       class="relative cursor-pointer hover:bg-gray-700 rounded-md"
@@ -216,7 +232,7 @@ watch(textOption, (val) => {
     fontSize: Number.isFinite(size) && size > 0 ? size : DEFAULT_FONT_SIZE,
   });
 });
-function toggleTool(tool: "picture" | "brush" | "text" | "eraser") {
+function toggleTool(tool: "picture" | "brush" | "text" | "eraser" | "elbowed") {
   // 再次点击当前工具：关闭它
   if (isActiveTool(tool)) {
     clearSelectedTool();
@@ -236,6 +252,8 @@ function toggleTool(tool: "picture" | "brush" | "text" | "eraser") {
     render.value?.workMode("brush", brushOption);
   } else if (tool === "eraser") {
     render.value?.workMode("eraser");
+  } else if (tool === "elbowed") {
+    render.value?.workMode("connector");
   } else if (tool === "text") {
     render.value?.workMode("createText");
 

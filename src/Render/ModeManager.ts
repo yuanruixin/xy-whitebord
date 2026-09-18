@@ -44,6 +44,9 @@ export class ModeManager {
       case "eraser":
         ctx.eraserTool.destroy();
         break;
+      case "connector":
+        ctx.connectorTool.destroy();
+        break;
       case "select":
       case "default":
         ctx.selectionTool.selectingClear();
@@ -71,6 +74,9 @@ export class ModeManager {
         break;
       case "eraser":
         ctx.eraserTool.init();
+        break;
+      case "connector":
+        ctx.connectorTool.init();
         break;
       case "createText":
         ctx.cursor.set("crosshair");

@@ -42,6 +42,7 @@ export class Render implements ICanvasContext {
 
   paintTool: Tools.PaintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
   eraserTool: Tools.EraserTool = new Tools.EraserTool(this); // 橡皮擦工具(对象擦除)
+  connectorTool: Tools.ConnectorTool = new Tools.ConnectorTool(this); // 连接线工具
   selectionTool: Tools.SelectionTool = new Tools.SelectionTool(this); // 选择工具
   editToolbar: Tools.EditToolbar = new Tools.EditToolbar(this); // 编辑条工具
   zIndexTool: Tools.ZIndexTool = new Tools.ZIndexTool(this); // 层级工具
@@ -134,6 +135,9 @@ export class Render implements ICanvasContext {
     this.stage.add(this.layer);
 
     this.stage.add(this.layerCover);
+
+    // 连接线在图形变换时跟随（需先于 SelectionHandlers 注册，确保拖动结束先归一化再记录历史）
+    this.connectorTool.initEvents();
 
     // 事件绑定
     this.eventBind();
@@ -283,5 +287,7 @@ export class Render implements ICanvasContext {
     };
     remove(this.selectionTool.selectingNodes);
     this.selectionTool.selectingClear();
+    // 刷新连接线（绑定图形被删除后保留在最后位置）
+    this.connectorTool.refreshAll();
   }
 }

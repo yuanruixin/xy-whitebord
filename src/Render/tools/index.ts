@@ -1,6 +1,7 @@
 export { SelectionTool } from "./SelectionTool";
 export {PaintTool} from './PaintTool'
 export {EraserTool} from './EraserTool'
+export {ConnectorTool} from './ConnectorTool'
 export {ZIndexTool} from './ZIndexTool'
 export {EditToolbar} from './EditToolbar'
 export {HistoryTool} from './HistoryTool'

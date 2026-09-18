@@ -9,6 +9,7 @@ import type { BgDraw } from "./draws/BgDraw";
 import type { ContextmenuDraw } from "./draws/ContextmenuDraw";
 import type { PaintTool } from "./tools/PaintTool";
 import type { EraserTool } from "./tools/EraserTool";
+import type { ConnectorTool } from "./tools/ConnectorTool";
 import type { SelectionTool } from "./tools/SelectionTool";
 import type { EditToolbar } from "./tools/EditToolbar";
 import type { ZIndexTool } from "./tools/ZIndexTool";
@@ -50,6 +51,7 @@ export interface ICanvasContext {
   image: Image;
   paintTool: PaintTool;
   eraserTool: EraserTool;
+  connectorTool: ConnectorTool;
   selectionTool: SelectionTool;
   editToolbar: EditToolbar;
   zIndexTool: ZIndexTool;

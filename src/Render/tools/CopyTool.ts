@@ -84,6 +84,17 @@ export class CopyTool {
       groupIdChanges[copy.id()] = gid
       copy.id(gid)
 
+      // 连接线复制后解除绑定，避免指向原图形
+      if (copy.name() === 'connector') {
+        const ends = cloneDeep(copy.getAttr('ends') ?? [])
+        for (const end of ends) {
+          end.nodeId = undefined
+          end.offsetX = 0
+          end.offsetY = 0
+        }
+        copy.setAttr('ends', ends)
+      }
+
       const pointsClone = cloneDeep(copy.getAttr('points') ?? [])
       copy.setAttr('points', pointsClone)
 

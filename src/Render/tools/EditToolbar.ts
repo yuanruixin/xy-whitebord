@@ -69,6 +69,10 @@ export class EditToolbar {
           item.children.forEach((node) => {
             if (node instanceof Konva.Line) {
               node.stroke(color);
+              // 连接线箭头：同步箭头填充色
+              if (node instanceof Konva.Arrow) {
+                node.fill(color);
+              }
             } else if (node instanceof Konva.Path) {
               node.fill(color);
             } else if (node instanceof Konva.Text) {
