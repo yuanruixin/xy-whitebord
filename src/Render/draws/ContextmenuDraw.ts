@@ -44,86 +44,16 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
         action: (e: Konva.KonvaEventObject<MouseEvent>) => void;
       }> = [];
 
-      // 右键画布
-      if (this.state.target === this.render.stage) {
-        // 空白处
+      // 空白画布 / 命中节点，均从动作注册表派生菜单项
+      const isCanvas = this.state.target === this.render.stage;
+      const target = isCanvas
+        ? null
+        : ((this.state.target?.parent ?? null) as Konva.Node | null);
+      for (const menuAction of this.render.actions.menu(target)) {
         menus.push({
-          name: "粘贴",
-          action: () => {
-            this.render.copyTool.pasteStart();
-          },
+          name: menuAction.label,
+          action: () => this.render.actions.run(menuAction, { target }),
         });
-      } else {
-        // 未选择：真实节点，即素材的容器 group
-        // 已选择：transformer
-        const target = this.state.target.parent;
-
-        // 目标
-        menus.push({
-          name: "复制",
-          action: () => {
-            if (target) {
-              this.render.copyTool.copy([target])
-            }
-          },
-        });
-        menus.push({
-          name: "删除",
-          action: () => {
-            if (target) {
-              this.render.deleteSelectingElement();
-            }
-          },
-        });
-        menus.push({
-          name: "上移",
-          action: () => {
-            if (target) {
-              this.render.zIndexTool.up([target]);
-            }
-          },
-        });
-        menus.push({
-          name: "下移",
-          action: () => {
-            if (target) {
-              this.render.zIndexTool.down([target]);
-            }
-          },
-        });
-        menus.push({
-          name: "置顶",
-          action: () => {
-            if (target) {
-              this.render.zIndexTool.top([target]);
-            }
-          },
-        });
-        menus.push({
-          name: "置底",
-          action: () => {
-            if (target) {
-              this.render.zIndexTool.bottom([target]);
-            }
-          },
-        });
-        // 成组 / 解组（依据当前选择）
-        if (this.render.groupTool.canGroup()) {
-          menus.push({
-            name: "成组",
-            action: () => {
-              this.render.groupTool.group();
-            },
-          });
-        }
-        if (this.render.groupTool.canUngroup()) {
-          menus.push({
-            name: "解组",
-            action: () => {
-              this.render.groupTool.ungroup();
-            },
-          });
-        }
       }
 
       // stage 状态

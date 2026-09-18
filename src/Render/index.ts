@@ -9,6 +9,7 @@ import * as Draws from "./draws";
 import * as Handlers from "./handlers";
 import * as elements from "./Element";
 import { getKeys } from "@/utils/secureTS";
+import { ActionManager } from "@/actions/ActionManager";
 // 主类
 export class Render implements ICanvasContext {
   container: HTMLDivElement;
@@ -55,6 +56,8 @@ export class Render implements ICanvasContext {
   canvasTool: Tools.CanvasCommandTool = new Tools.CanvasCommandTool(this);
   // 成组 / 解组
   groupTool: Tools.GroupTool = new Tools.GroupTool(this);
+  // 动作注册表（快捷键 / 右键菜单共用）
+  actions: ActionManager = new ActionManager(this);
   // 多选器层
   groupTransformer: Konva.Group = new Konva.Group();
 
