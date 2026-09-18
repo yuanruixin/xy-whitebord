@@ -7,563 +7,445 @@
     "cover": "pelican.svg"
   },
   "data": {
-    "attrs": {
-      "width": 1708,
-      "height": 942
-    },
-    "className": "Stage",
-    "children": [
+    "type": "xy-whiteboard",
+    "version": 1,
+    "elements": [
       {
-        "attrs": {},
-        "className": "Layer",
+        "id": "WYi8r3R8VMOYQwW7NoG8f",
+        "x": 0,
+        "y": 0,
+        "width": 845,
+        "height": 503,
+        "angle": 0,
+        "opacity": 1,
+        "version": 1,
+        "versionNonce": 4197242865,
+        "groupIds": [],
+        "type": "group",
+        "scaleX": 1,
+        "scaleY": 1,
         "children": [
           {
-            "attrs": {
-              "id": "WYi8r3R8VMOYQwW7NoG8f",
-              "name": "group"
-            },
-            "className": "Group",
-            "children": [
-              {
-                "attrs": {
-                  "id": "GJASS64h9aae3rQN1wmtt",
-                  "name": "shape",
-                  "x": 900,
-                  "y": 125
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#FFD54F",
-                      "scaleX": 0.37109375,
-                      "scaleY": 0.37109375
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "KgQNdtz-j7E6tL10J4EPP",
-                  "name": "shape",
-                  "x": 150,
-                  "y": 150
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M10 52 C0 38 15 24 30 27 C36 10 64 8 74 21 C84 10 108 12 113 26 C133 24 142 42 128 52 Z",
-                      "fill": "#E3F2FD",
-                      "x": -7.3965881761562,
-                      "y": -18.452173031343868,
-                      "scaleX": 1.0936319304715063,
-                      "scaleY": 1.4702340967566128
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "eOphJg60J6Os9nGv3i-ha",
-                  "name": "shape",
-                  "x": 770,
-                  "y": 205
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M8 40 C0 30 12 19 24 22 C28 8 50 6 58 17 C66 8 85 10 89 21 C104 20 111 33 100 40 Z",
-                      "fill": "#E3F2FD",
-                      "x": -6.224750145008032,
-                      "y": -15.214155494002062,
-                      "scaleX": 1.150460414257786,
-                      "scaleY": 1.5303538873500515
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "iEjBDZqn32l2EXdyqn9Bk",
-                  "name": "shape",
-                  "x": 170,
-                  "y": 593
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M10 0 H246 Q256 0 256 10 V246 Q256 256 246 256 H10 Q0 256 0 246 V10 Q0 0 10 0",
-                      "fill": "#B0BEC5",
-                      "scaleX": 2.265625,
-                      "scaleY": 0.0390625
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "hOhgok3phq0wRMDv7E3kM",
-                  "name": "shape",
-                  "x": 222,
-                  "y": 250
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M62 6 L2 20 L56 44 Z",
-                      "fill": "#CFD8DC",
-                      "x": -2.2,
-                      "y": -7.578947368421052,
-                      "scaleX": 1.1,
-                      "scaleY": 1.263157894736842
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "ZH9AsheGL4015SD1JXMSt",
-                  "name": "shape",
-                  "x": 225,
-                  "y": 445
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#37474F",
-                      "scaleX": 0.5859375,
-                      "scaleY": 0.5859375
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "4rPZuRsIFdyZ-pJAHkJYs",
-                  "name": "shape",
-                  "x": 278,
-                  "y": 498
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#B0BEC5",
-                      "scaleX": 0.171875,
-                      "scaleY": 0.171875
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "Eb6W6m0-WXq3Y4N94EdZ9",
-                  "name": "shape",
-                  "x": 565,
-                  "y": 445
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#37474F",
-                      "scaleX": 0.5859375,
-                      "scaleY": 0.5859375
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "A7VoVeA48kBxw7cWYRrgJ",
-                  "name": "shape",
-                  "x": 618,
-                  "y": 498
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#B0BEC5",
-                      "scaleX": 0.171875,
-                      "scaleY": 0.171875
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "Hy2pRhBEwXj1GEhHBtlhW",
-                  "name": "shape",
-                  "x": 292,
-                  "y": 372
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M85 14 L95 12 L175 134 L165 140 Z M83 18 L93 10 L12 144 L2 152 Z M4 144 L12 152 L174 142 L166 132 Z M88 11 L92 23 L328 12 L324 0 Z M164 134 L176 142 L330 12 L322 0 Z M320 4 L328 8 L350 144 L342 150 Z",
-                      "fill": "#E53935",
-                      "x": -2.0114942528735633,
-                      "scaleX": 1.0057471264367817,
-                      "scaleY": 1.0263157894736843
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "EuyVwUgazw_7yGaDYvNVD",
-                  "name": "shape",
-                  "x": 438,
-                  "y": 488
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#616161",
-                      "scaleX": 0.1875,
-                      "scaleY": 0.1875
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "KSUyCXxWWIjWCYqsmg5FP",
-                  "name": "shape",
-                  "x": 414,
-                  "y": 450
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M43 56 L53 62 L94 10 L88 4 Z M43 62 L53 56 L12 106 L4 100 Z",
-                      "fill": "#616161",
-                      "x": -4.177777777777778,
-                      "y": -4.1568627450980395,
-                      "scaleX": 1.0444444444444445,
-                      "scaleY": 1.0392156862745099
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "T2Y4o-k75BtMhejT3qq5R",
-                  "name": "shape",
-                  "x": 485,
-                  "y": 455
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M10 0 H246 Q256 0 256 10 V246 Q256 256 246 256 H10 Q0 256 0 246 V10 Q0 0 10 0",
-                      "fill": "#263238",
-                      "scaleX": 0.1640625,
-                      "scaleY": 0.05078125
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "SidljPflwuG7JFpN-Oh3b",
-                  "name": "shape",
-                  "x": 398,
-                  "y": 545
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M10 0 H246 Q256 0 256 10 V246 Q256 256 246 256 H10 Q0 256 0 246 V10 Q0 0 10 0",
-                      "fill": "#263238",
-                      "scaleX": 0.1640625,
-                      "scaleY": 0.05078125
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "_BGZSw6bW8FTI2CDZ3oI4",
-                  "name": "shape",
-                  "x": 344,
-                  "y": 374
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M4 12 L14 2 L76 2 L80 14 Z",
-                      "fill": "#5D4037",
-                      "x": -4.2105263157894735,
-                      "y": -2.3333333333333335,
-                      "scaleX": 1.0526315789473684,
-                      "scaleY": 1.1666666666666667
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "v4ZfE5AGmxZt4bYZzXKKI",
-                  "name": "shape",
-                  "x": 578,
-                  "y": 318
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M36 60 L44 58 L38 12 L32 14 Z M34 10 L38 20 L10 12 L6 2 Z",
-                      "fill": "#455A64",
-                      "x": -7.2631578947368425,
-                      "y": -2.1379310344827585,
-                      "scaleX": 1.2105263157894737,
-                      "scaleY": 1.0689655172413792
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "GGwHdV8A3GEAEvg-XR3Yu",
-                  "name": "shape",
-                  "x": 648,
-                  "y": 340
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M3 8 L85 8 L76 60 L12 60 Z",
-                      "fill": "#8D6E63",
-                      "x": -3.2195121951219514,
-                      "y": -9.846153846153847,
-                      "scaleX": 1.0731707317073171,
-                      "scaleY": 1.2307692307692308
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "hkQ3NnK2Ob3YTVw8J1jAo",
-                  "name": "shape",
-                  "x": 245,
-                  "y": 100
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M17 260 C30 275 75 282 105 278 C150 272 190 268 210 255 C222 235 228 185 240 135 C246 108 262 80 283 65 C272 52 270 32 280 20 C288 10 295 6 303 8 C315 9 325 15 330 25 C332 38 331 48 327 55 C318 75 298 92 275 105 C252 120 228 138 210 150 C170 140 120 138 85 145 C60 150 35 155 25 165 C12 200 10 240 17 260 Z",
-                      "fill": "#F4F4F4",
-                      "x": -13.520391748345217,
-                      "y": -7.676678640603751,
-                      "scaleX": 1.0378262704863208,
-                      "scaleY": 1.0235298579509549
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "rZjlA9tUH4ppHQsb5DhrW",
-                  "name": "shape",
-                  "x": 518,
-                  "y": 158
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M6 4 C60 14 130 10 204 18 C170 45 140 80 105 88 C60 94 18 60 6 4 Z",
-                      "fill": "#FB8C00",
-                      "x": -6.181818181818182,
-                      "y": -4.487417847188212,
-                      "scaleX": 1.0303030303030303,
-                      "scaleY": 1.121854461797053
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "F1vGHVHKtF8VLFKl-vG1p",
-                  "name": "shape",
-                  "x": 532,
-                  "y": 118
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M6 6 C70 8 140 30 186 50 L188 58 C135 40 70 20 4 18 Z",
-                      "fill": "#FDD835",
-                      "x": -6.307539426190598,
-                      "y": -6.9230769230769225,
-                      "scaleX": 1.0548273373733543,
-                      "scaleY": 1.1538461538461537
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "636Z8rdQGqGEiBus3vg5p",
-                  "name": "shape",
-                  "x": 549,
-                  "y": 117
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
-                      "fill": "#263238",
-                      "scaleX": 0.0546875,
-                      "scaleY": 0.0546875
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "mMEWy-5j0B3JLiNp3a3s9",
-                  "name": "shape",
-                  "x": 272,
-                  "y": 232
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M135 18 C90 4 40 12 14 52 C10 70 18 88 40 94 C75 100 110 88 122 62 C130 45 134 30 135 18 Z",
-                      "fill": "#CFD8DC",
-                      "x": -14.717175463788042,
-                      "y": -13.282953071618545,
-                      "scaleX": 1.1312383367688004,
-                      "scaleY": 1.1440958718017693
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "XPdiuT4UmfXav4tBoF0C8",
-                  "name": "shape",
-                  "x": 428,
-                  "y": 246
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M8 14 C60 4 120 30 164 72 L158 84 C120 48 62 32 6 32 Z",
-                      "fill": "#CFD8DC",
-                      "x": -8.424150728406318,
-                      "y": -14.470151686876054,
-                      "scaleX": 1.0968120795604757,
-                      "scaleY": 1.219882758177096
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "mhXPEPCZ9RXgFPEruRfA1",
-                  "name": "shape",
-                  "x": 408,
-                  "y": 340
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M6 6 L22 2 L70 56 L58 66 Z M58 58 L70 52 L96 112 L84 118 Z M78 112 L104 106 L102 122 Z",
-                      "fill": "#FB8C00",
-                      "x": -6.612244897959183,
-                      "y": -2.033333333333333,
-                      "scaleX": 1.1020408163265305,
-                      "scaleY": 1.0166666666666666
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "KQZLqUWWwA6i4xiFj2Oj1",
-                  "name": "shape",
-                  "x": 398,
-                  "y": 348
-                },
-                "className": "Group",
-                "children": [
-                  {
-                    "attrs": {
-                      "data": "M4 4 L20 8 L58 84 L46 92 Z M46 84 L58 78 L34 196 L22 190 Z M16 192 L40 188 L38 204 Z",
-                      "fill": "#F57C00",
-                      "x": -4.7407407407407405,
-                      "y": -4.24,
-                      "scaleX": 1.1851851851851851,
-                      "scaleY": 1.06
-                    },
-                    "className": "Path"
-                  }
-                ]
-              },
-              {
-                "attrs": {
-                  "id": "GDcxc7wjk1g83j4qdyvdO",
-                  "name": "text",
-                  "x": 430,
-                  "y": 52
-                },
-                "className": "Group",
-                "children": []
-              }
-            ]
+            "id": "GJASS64h9aae3rQN1wmtt",
+            "x": 900,
+            "y": 125,
+            "width": 95,
+            "height": 95,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242840,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#FFD54F",
+            "fontSize": 20
+          },
+          {
+            "id": "KgQNdtz-j7E6tL10J4EPP",
+            "x": 150,
+            "y": 150,
+            "width": 140.00000000000003,
+            "height": 57.99999999999999,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242841,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M10 52 C0 38 15 24 30 27 C36 10 64 8 74 21 C84 10 108 12 113 26 C133 24 142 42 128 52 Z",
+            "fill": "#E3F2FD",
+            "fontSize": 20
+          },
+          {
+            "id": "eOphJg60J6Os9nGv3i-ha",
+            "x": 770,
+            "y": 205,
+            "width": 115,
+            "height": 45.99999999999999,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242842,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M8 40 C0 30 12 19 24 22 C28 8 50 6 58 17 C66 8 85 10 89 21 C104 20 111 33 100 40 Z",
+            "fill": "#E3F2FD",
+            "fontSize": 20
+          },
+          {
+            "id": "iEjBDZqn32l2EXdyqn9Bk",
+            "x": 170,
+            "y": 593,
+            "width": 580,
+            "height": 10,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242843,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "#B0BEC5",
+            "fontSize": 20
+          },
+          {
+            "id": "hOhgok3phq0wRMDv7E3kM",
+            "x": 222,
+            "y": 250,
+            "width": 66,
+            "height": 47.99999999999999,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242844,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M62 6 L2 20 L56 44 Z",
+            "fill": "#CFD8DC",
+            "fontSize": 20
+          },
+          {
+            "id": "ZH9AsheGL4015SD1JXMSt",
+            "x": 225,
+            "y": 445,
+            "width": 150,
+            "height": 150,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242845,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#37474F",
+            "fontSize": 20
+          },
+          {
+            "id": "4rPZuRsIFdyZ-pJAHkJYs",
+            "x": 278,
+            "y": 498,
+            "width": 44,
+            "height": 44,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242846,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#B0BEC5",
+            "fontSize": 20
+          },
+          {
+            "id": "Eb6W6m0-WXq3Y4N94EdZ9",
+            "x": 565,
+            "y": 445,
+            "width": 150,
+            "height": 150,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242847,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#37474F",
+            "fontSize": 20
+          },
+          {
+            "id": "A7VoVeA48kBxw7cWYRrgJ",
+            "x": 618,
+            "y": 498,
+            "width": 44,
+            "height": 44,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242848,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#B0BEC5",
+            "fontSize": 20
+          },
+          {
+            "id": "Hy2pRhBEwXj1GEhHBtlhW",
+            "x": 292,
+            "y": 372,
+            "width": 350.00000000000006,
+            "height": 156,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242849,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M85 14 L95 12 L175 134 L165 140 Z M83 18 L93 10 L12 144 L2 152 Z M4 144 L12 152 L174 142 L166 132 Z M88 11 L92 23 L328 12 L324 0 Z M164 134 L176 142 L330 12 L322 0 Z M320 4 L328 8 L350 144 L342 150 Z",
+            "fill": "#E53935",
+            "fontSize": 20
+          },
+          {
+            "id": "EuyVwUgazw_7yGaDYvNVD",
+            "x": 438,
+            "y": 488,
+            "width": 48,
+            "height": 48,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242850,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#616161",
+            "fontSize": 20
+          },
+          {
+            "id": "KSUyCXxWWIjWCYqsmg5FP",
+            "x": 414,
+            "y": 450,
+            "width": 94,
+            "height": 106.00000000000001,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242851,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M43 56 L53 62 L94 10 L88 4 Z M43 62 L53 56 L12 106 L4 100 Z",
+            "fill": "#616161",
+            "fontSize": 20
+          },
+          {
+            "id": "T2Y4o-k75BtMhejT3qq5R",
+            "x": 485,
+            "y": 455,
+            "width": 42,
+            "height": 13,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242852,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "#263238",
+            "fontSize": 20
+          },
+          {
+            "id": "SidljPflwuG7JFpN-Oh3b",
+            "x": 398,
+            "y": 545,
+            "width": 42,
+            "height": 13,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242853,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "rectangle",
+            "fill": "#263238",
+            "fontSize": 20
+          },
+          {
+            "id": "_BGZSw6bW8FTI2CDZ3oI4",
+            "x": 344,
+            "y": 374,
+            "width": 79.99999999999999,
+            "height": 14.000000000000002,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242854,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M4 12 L14 2 L76 2 L80 14 Z",
+            "fill": "#5D4037",
+            "fontSize": 20
+          },
+          {
+            "id": "v4ZfE5AGmxZt4bYZzXKKI",
+            "x": 578,
+            "y": 318,
+            "width": 46,
+            "height": 61.999999999999986,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242855,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M36 60 L44 58 L38 12 L32 14 Z M34 10 L38 20 L10 12 L6 2 Z",
+            "fill": "#455A64",
+            "fontSize": 20
+          },
+          {
+            "id": "GGwHdV8A3GEAEvg-XR3Yu",
+            "x": 648,
+            "y": 340,
+            "width": 88,
+            "height": 64,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242856,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M3 8 L85 8 L76 60 L12 60 Z",
+            "fill": "#8D6E63",
+            "fontSize": 20
+          },
+          {
+            "id": "hkQ3NnK2Ob3YTVw8J1jAo",
+            "x": 245,
+            "y": 100,
+            "width": 330,
+            "height": 277.99999999999994,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242857,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M17 260 C30 275 75 282 105 278 C150 272 190 268 210 255 C222 235 228 185 240 135 C246 108 262 80 283 65 C272 52 270 32 280 20 C288 10 295 6 303 8 C315 9 325 15 330 25 C332 38 331 48 327 55 C318 75 298 92 275 105 C252 120 228 138 210 150 C170 140 120 138 85 145 C60 150 35 155 25 165 C12 200 10 240 17 260 Z",
+            "fill": "#F4F4F4",
+            "fontSize": 20
+          },
+          {
+            "id": "rZjlA9tUH4ppHQsb5DhrW",
+            "x": 518,
+            "y": 158,
+            "width": 204,
+            "height": 95,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242858,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M6 4 C60 14 130 10 204 18 C170 45 140 80 105 88 C60 94 18 60 6 4 Z",
+            "fill": "#FB8C00",
+            "fontSize": 20
+          },
+          {
+            "id": "F1vGHVHKtF8VLFKl-vG1p",
+            "x": 532,
+            "y": 118,
+            "width": 192,
+            "height": 60,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242859,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M6 6 C70 8 140 30 186 50 L188 58 C135 40 70 20 4 18 Z",
+            "fill": "#FDD835",
+            "fontSize": 20
+          },
+          {
+            "id": "636Z8rdQGqGEiBus3vg5p",
+            "x": 549,
+            "y": 117,
+            "width": 14,
+            "height": 14,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242860,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M128 0 C57.307 0, 0 57.307, 0 128S57.307 256, 128 256S256 198.693 256 128S198.693 0, 128 0",
+            "fill": "#263238",
+            "fontSize": 20
+          },
+          {
+            "id": "mMEWy-5j0B3JLiNp3a3s9",
+            "x": 272,
+            "y": 232,
+            "width": 138,
+            "height": 95.99999999999999,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242861,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M135 18 C90 4 40 12 14 52 C10 70 18 88 40 94 C75 100 110 88 122 62 C130 45 134 30 135 18 Z",
+            "fill": "#CFD8DC",
+            "fontSize": 20
+          },
+          {
+            "id": "XPdiuT4UmfXav4tBoF0C8",
+            "x": 428,
+            "y": 246,
+            "width": 170,
+            "height": 88,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242862,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M8 14 C60 4 120 30 164 72 L158 84 C120 48 62 32 6 32 Z",
+            "fill": "#CFD8DC",
+            "fontSize": 20
+          },
+          {
+            "id": "mhXPEPCZ9RXgFPEruRfA1",
+            "x": 408,
+            "y": 340,
+            "width": 107.99999999999999,
+            "height": 122,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242863,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M6 6 L22 2 L70 56 L58 66 Z M58 58 L70 52 L96 112 L84 118 Z M78 112 L104 106 L102 122 Z",
+            "fill": "#FB8C00",
+            "fontSize": 20
+          },
+          {
+            "id": "KQZLqUWWwA6i4xiFj2Oj1",
+            "x": 398,
+            "y": 348,
+            "width": 63.99999999999999,
+            "height": 212,
+            "angle": 0,
+            "opacity": 1,
+            "version": 1,
+            "versionNonce": 4197242864,
+            "groupIds": [],
+            "type": "shape",
+            "shape": "path",
+            "path": "M4 4 L20 8 L58 84 L46 92 Z M46 84 L58 78 L34 196 L22 190 Z M16 192 L40 188 L38 204 Z",
+            "fill": "#F57C00",
+            "fontSize": 20
           }
         ]
       }

@@ -113,8 +113,7 @@ function textFromKonva(group: Konva.Group): TextElement | null {
   const textNode = group.findOne("Text") as Konva.Text | null;
   if (!textNode) return null;
 
-  const box = textNode.getClientRect({ relativeTo: group });
-  const topLeft = layerTopLeft(group, box);
+  const topLeft = layerTopLeft(group, { x: textNode.x(), y: textNode.y() });
   const fontStyle = textNode.fontStyle();
   const fontWeight = /^\d+$/.test(fontStyle) ? Number(fontStyle) : undefined;
 
@@ -123,8 +122,8 @@ function textFromKonva(group: Konva.Group): TextElement | null {
       group,
       topLeft.x,
       topLeft.y,
-      box.width * group.scaleX(),
-      box.height * group.scaleY()
+      textNode.width() * group.scaleX(),
+      textNode.height() * group.scaleY()
     ),
     type: "text",
     text: textNode.text(),
@@ -141,16 +140,15 @@ function imageFromKonva(group: Konva.Group): ImageElement | null {
 
   const src = image.getAttr("src");
   const svgXML = image.getAttr("svgXML");
-  const box = image.getClientRect({ relativeTo: group });
-  const topLeft = layerTopLeft(group, box);
+  const topLeft = layerTopLeft(group, { x: image.x(), y: image.y() });
 
   return {
     ...baseOf(
       group,
       topLeft.x,
       topLeft.y,
-      box.width * group.scaleX(),
-      box.height * group.scaleY()
+      image.width() * group.scaleX(),
+      image.height() * group.scaleY()
     ),
     type: "image",
     src: typeof src === "string" ? src : "",

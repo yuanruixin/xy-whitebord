@@ -89,6 +89,7 @@ src/
     scene/            模型 <-> Konva 适配层
       konva.ts        Scene -> Konva（elementToKonva）
       fromKonva.ts    Konva -> Scene（konvaToScene）
+      legacy.ts       旧 Konva JSON -> 文档（仅用于一次性迁移）
       label.ts        形状标签居中布局
     handlers/         事件处理器（选择 / 拖拽 / 缩放 / 快捷键）
     tools/            画布工具（选择、连接线、层级、成组、历史、AI 画布命令等）
@@ -108,7 +109,7 @@ src/
 ## 架构
 
 - **文档模型为真源**：`src/scene` 定义可序列化的 `BoardElement`（形状 / 文本 / 图片 / 画笔 / 连接线 / 分组），不依赖渲染引擎；元素创建统一走 `Render.createElement(element)`，由 `src/Render/scene` 适配层投影为 Konva 节点。
-- **版本化文档格式**：导出 / 自动保存输出 `{ type: "xy-whiteboard", version, elements }`。读取时 `parseSceneDocument` 优先按文档解析，失败才回退旧版 Konva JSON（用于内置模板、旧自定义模板与升级前的本地数据）。
+- **版本化文档格式**：导出 / 自动保存输出 `{ type: "xy-whiteboard", version, elements }`；读取只接受该格式。升级前的旧 Konva JSON（本地缓存、自定义模板）会在加载时**一次性迁移**为文档并回写，内置模板已转为文档格式。
 - **动作层**：`src/actions` 把复制 / 删除 / 层级 / 成组 / 撤销等操作集中定义一次，快捷键与右键菜单共同派生，行为一致。
 - **增量历史**：历史按元素记录，未变元素复用引用；撤销 / 重做仅重建变更元素，并恢复当时的选中状态。
 - **版本协调**：元素内容变化时自动 `version + 1` 并生成新的 `versionNonce`，为后续协作的「高版本优先、同版本比 nonce」做准备。

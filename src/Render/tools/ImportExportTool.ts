@@ -10,6 +10,7 @@ import {
 } from "@/scene"
 import { elementToKonva } from "../scene/konva"
 import { konvaToScene } from "../scene/fromKonva"
+import { legacyKonvaToDocument } from "../scene/legacy"
 import type { ICanvasContext } from "../context"
 interface ImageExportOption {
   pixelRatio ?: number
@@ -36,38 +37,13 @@ export class ImportExportTool {
    * @param silent 是否更新历史记录
    */
   async import(jsonStr:string,silent=false){
-    // 新格式：版本化文档
+    // 仅接受版本化文档
     const sceneDocument = parseSceneDocument(jsonStr)
-    if (sceneDocument) {
-      await this.importDocument(sceneDocument, silent)
+    if (!sceneDocument) {
+      console.warn('仅支持版本化文档格式，已忽略该内容')
       return
     }
-
-    // 旧格式：Konva JSON
-    await this.importLegacyKonva(jsonStr, silent)
-  }
-
-  /**
-   * 兼容旧版 Konva JSON。
-   *
-   * 保留原因：内置模板数据、旧版自定义模板，以及升级前已存在的本地缓存 / 导出文件。
-   * 新写入的数据一律为版本化文档，正常情况下不会进入此分支。
-   */
-  private async importLegacyKonva(jsonStr: string, silent: boolean) {
-    // 与restore类似，但此方法在保留已绘制内容的同时追加导入
-    try {
-      // 加载 json，提取节点
-      const container = document.createElement('div')
-      const stage = Konva.Node.create(jsonStr, container)
-      const main = stage.getChildren()[0]
-      const nodes = main.getChildren()
-
-      // 恢复节点图片素材
-      await this.restoreImage(nodes)
-      this.mountNodes(nodes, silent)
-    } catch (e) {
-      console.error(e)
-    }
+    await this.importDocument(sceneDocument, silent)
   }
 
   // 恢复版本化文档
@@ -357,10 +333,19 @@ export class ImportExportTool {
     }
   }
 
-  // 从 localStorage 读取
+  // 从 localStorage 读取（旧版 Konva JSON 会一次性迁移为版本化文档并回写）
   loadFromLocalStorage(): string | null {
     try {
-      return localStorage.getItem(ImportExportTool.storageKey)
+      const raw = localStorage.getItem(ImportExportTool.storageKey)
+      if (!raw) return null
+      if (parseSceneDocument(raw)) return raw
+
+      // 旧版缓存：迁移后回写，之后不再走旧格式
+      const document = legacyKonvaToDocument(raw)
+      if (!document) return null
+      const migrated = serializeSceneDocument(document)
+      localStorage.setItem(ImportExportTool.storageKey, migrated)
+      return migrated
     } catch (e) {
       console.warn('读取本地缓存失败', e)
       return null

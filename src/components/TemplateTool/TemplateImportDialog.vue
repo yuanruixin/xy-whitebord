@@ -299,7 +299,7 @@ function submit() {
     return;
   }
 
-  let data: { className?: string; type?: string };
+  let data: { type?: string };
   try {
     data = JSON.parse(jsonText);
   } catch {
@@ -307,10 +307,8 @@ function submit() {
     return;
   }
 
-  const isKonvaStage = data?.className === "Stage";
-  const isSceneDocument = data?.type === "xy-whiteboard";
-  if (!data || typeof data !== "object" || (!isKonvaStage && !isSceneDocument)) {
-    error.value = "不是有效的画布导出 JSON（应为 Stage 或 xy-whiteboard 文档）";
+  if (!data || typeof data !== "object" || data.type !== "xy-whiteboard") {
+    error.value = "不是有效的画布导出文档";
     return;
   }
 

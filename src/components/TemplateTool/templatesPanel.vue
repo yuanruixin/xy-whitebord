@@ -133,6 +133,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRenderStore } from "@/store/render";
+import { isSceneDocument } from "@/scene";
+import { legacyKonvaToDocument } from "@/Render/scene/legacy";
 import TemplateImportDialog, {
   type TemplateDraft,
 } from "./TemplateImportDialog.vue";
@@ -202,7 +204,29 @@ function loadCustom(): TemplateItem[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const list = JSON.parse(raw);
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list)) return [];
+
+    // 旧版自定义模板一次性迁移为版本化文档并回写
+    let migrated = false;
+    const items = list.map((item: TemplateItem) => {
+      if (item?.data && !isSceneDocument(item.data)) {
+        const document = legacyKonvaToDocument(JSON.stringify(item.data));
+        if (document) {
+          migrated = true;
+          return { ...item, data: document };
+        }
+      }
+      return item;
+    });
+
+    if (migrated) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch {
+        // 忽略配额错误，内存中仍使用迁移后的数据
+      }
+    }
+    return items;
   } catch {
     return [];
   }

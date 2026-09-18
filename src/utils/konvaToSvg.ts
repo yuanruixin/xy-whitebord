@@ -139,8 +139,8 @@ function nodesToSvg(
 }
 
 /**
- * 把画布导出的 JSON 转成 SVG 预览（用于模板封面）。
- * 支持版本化文档与旧版 Konva JSON；节点类型覆盖 Path / Text / Image / Line / Rect / Ellipse 及分组。
+ * 把版本化文档转成 SVG 预览（用于模板封面）。
+ * 支持 Path / Text / Image / Line / Rect / Ellipse 及分组。
  * 返回 data URL，无法解析时返回 null。
  */
 export function konvaJsonToSvg(
@@ -150,31 +150,17 @@ export function konvaJsonToSvg(
 ): string | null {
   if (!jsonStr.trim()) return null;
 
-  // 新格式：版本化文档，先还原为 Konva 节点（用 Group 作参照，避免依赖画布）
   const sceneDocument = parseSceneDocument(jsonStr);
-  if (sceneDocument) {
-    const group = new Konva.Group();
-    group.add(...sceneDocument.elements.map((element) => elementToKonva(element)));
-    try {
-      return nodesToSvg(group.getChildren(), group, aspect, padding);
-    } catch {
-      return null;
-    } finally {
-      group.destroy();
-    }
-  }
+  if (!sceneDocument) return null;
 
-  // 旧格式：Konva JSON（内置模板与升级前的自定义模板）
-  let stage: Konva.Stage | null = null;
+  // 还原为 Konva 节点（用 Group 作参照，避免依赖画布）
+  const group = new Konva.Group();
+  group.add(...sceneDocument.elements.map((element) => elementToKonva(element)));
   try {
-    const container = document.createElement("div");
-    stage = Konva.Node.create(jsonStr, container) as Konva.Stage;
-    const layer = stage.getChildren()[0] as Konva.Layer | undefined;
-    if (!layer) return null;
-    return nodesToSvg(layer.getChildren(), layer, aspect, padding);
+    return nodesToSvg(group.getChildren(), group, aspect, padding);
   } catch {
     return null;
   } finally {
-    stage?.destroy();
+    group.destroy();
   }
 }
