@@ -7,6 +7,11 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AIChatComposer: typeof import('./src/components/AI/AIChatComposer.vue')['default']
+    AIDangerConfirmDialog: typeof import('./src/components/AI/AIDangerConfirmDialog.vue')['default']
+    AIHistoryPanel: typeof import('./src/components/AI/AIHistoryPanel.vue')['default']
+    AIMessageItem: typeof import('./src/components/AI/AIMessageItem.vue')['default']
+    AISettingsPanel: typeof import('./src/components/AI/AISettingsPanel.vue')['default']
     AISidebar: typeof import('./src/components/AI/AISidebar.vue')['default']
     Board: typeof import('./src/components/Board/Board.vue')['default']
     ComboBox: typeof import('./src/components/AI/ComboBox.vue')['default']
