@@ -26,6 +26,8 @@ export class Render implements ICanvasContext {
   layerCover: Konva.Layer = new Konva.Layer();
   // 配置
   config: Types.RenderConfig;
+  // 一次性工具（如连接线）绘制完成后回调，用于同步外部 UI 状态
+  onToolFinish: (() => void) | null = null;
 
   // 附加工具
   draws: {

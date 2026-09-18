@@ -26,6 +26,9 @@ export class ConnectorTool {
   private startEnd: ConnectorEnd | null = null;
   // 绘制中的预览箭头
   private preview: Konva.Arrow | null = null;
+  // 选中连接线时显示的端点手柄
+  private handles: Konva.Circle[] = [];
+  private activeConnector: Konva.Group | null = null;
 
   constructor(render: ICanvasContext) {
     this.render = render;
@@ -79,6 +82,125 @@ export class ConnectorTool {
     for (const group of connectors) {
       this.refreshConnector(group);
     }
+    // 手柄跟随端点
+    if (this.activeConnector) this.positionHandles();
+  }
+
+  // ===== 端点编辑手柄 =====
+
+  // 根据当前选中刷新端点手柄（仅单选连接线时显示）
+  updateHandles() {
+    const nodes = this.render.selectionTool.selectingNodes;
+    const connector =
+      nodes.length === 1 && nodes[0].name() === "connector"
+        ? (nodes[0] as Konva.Group)
+        : null;
+
+    if (connector === this.activeConnector) {
+      if (connector) this.positionHandles();
+      return;
+    }
+
+    this.clearHandles();
+    if (!connector) return;
+
+    this.activeConnector = connector;
+    const ends = connector.getAttr("ends") as ConnectorEnd[] | undefined;
+    if (!ends) return;
+
+    ends.forEach((_, index) => {
+      const circle = new Konva.Circle({
+        name: "connector-handle",
+        radius: this.render.toStageValue(5),
+        fill: "#ffffff",
+        stroke: "#4e95ff",
+        strokeWidth: this.render.toStageValue(2),
+        draggable: true,
+      });
+      circle.on("dragmove", () => this.onHandleDragMove(index, circle));
+      circle.on("dragend", () => this.onHandleDragEnd(index));
+      circle.on("mouseenter", () => this.render.cursor.setMove());
+      circle.on("mouseleave", () => this.render.cursor.reset());
+      this.handles.push(circle);
+      this.render.layerCover.add(circle);
+    });
+    this.positionHandles();
+  }
+
+  private clearHandles() {
+    this.handles.forEach((circle) => circle.destroy());
+    this.handles = [];
+    this.activeConnector = null;
+  }
+
+  private positionHandles() {
+    const group = this.activeConnector;
+    if (!group) return;
+    const arrow = group.children[0] as Konva.Arrow | undefined;
+    if (!arrow) return;
+
+    const points = arrow.points();
+    const gx = group.x();
+    const gy = group.y();
+    const radius = this.render.toStageValue(5);
+    const strokeWidth = this.render.toStageValue(2);
+
+    this.handles.forEach((circle, index) => {
+      circle.position({
+        x: gx + points[index * 2],
+        y: gy + points[index * 2 + 1],
+      });
+      circle.radius(radius);
+      circle.strokeWidth(strokeWidth);
+    });
+  }
+
+  private onHandleDragMove(index: number, circle: Konva.Circle) {
+    const group = this.activeConnector;
+    if (!group) return;
+    const arrow = group.children[0] as Konva.Arrow | undefined;
+    if (!arrow) return;
+
+    const x = circle.x();
+    const y = circle.y();
+
+    // 拖动时先解除绑定，落点再决定是否重新绑定
+    const ends = group.getAttr("ends") as ConnectorEnd[];
+    ends[index] = { offsetX: 0, offsetY: 0, x, y };
+    group.setAttr("ends", ends);
+
+    const points = [...arrow.points()];
+    points[index * 2] = x - group.x();
+    points[index * 2 + 1] = y - group.y();
+    arrow.points(points);
+    // 同步选择框
+    this.render.transformer.forceUpdate();
+  }
+
+  private onHandleDragEnd(index: number) {
+    const group = this.activeConnector;
+    if (!group) return;
+
+    const ends = group.getAttr("ends") as ConnectorEnd[];
+    const end = ends[index];
+
+    // 落点落在图形上则绑定，否则保持自由端点
+    const node = this.elementAt();
+    if (node) {
+      const center = this.centerOf(node);
+      end.nodeId = node.id();
+      end.offsetX = end.x - center.x;
+      end.offsetY = end.y - center.y;
+    } else {
+      end.nodeId = undefined;
+      end.offsetX = 0;
+      end.offsetY = 0;
+    }
+    group.setAttr("ends", ends);
+
+    this.refreshConnector(group);
+    this.positionHandles();
+    this.render.historyTool.updateHistory();
   }
 
   private refreshConnector(group: Konva.Group) {
@@ -172,6 +294,7 @@ export class ConnectorTool {
     group.add(arrow);
     group.setAttr("ends", [start, end]);
     this.render.layer.add(group);
+    return group;
   }
 
   private onDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -215,7 +338,12 @@ export class ConnectorTool {
     // 距离过短不创建
     if (Math.hypot(pos.x - start.x, pos.y - start.y) < 5) return;
 
-    this.createConnector(start, this.makeEnd(pos));
+    const group = this.createConnector(start, this.makeEnd(pos));
+    // 自动选中刚创建的连接线，方便直接移动
+    this.render.selectionTool.select([group]);
     this.render.historyTool.updateHistory();
+    // 绘制完成退出连接线模式，切回选择状态
+    this.render.workMode("select");
+    this.render.onToolFinish?.();
   };
 }

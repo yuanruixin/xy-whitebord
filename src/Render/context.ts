@@ -39,6 +39,8 @@ export interface ICanvasContext {
   layerFloor: Konva.Layer;
   layerCover: Konva.Layer;
   config: RenderConfig;
+  // 一次性工具绘制完成回调
+  onToolFinish: (() => void) | null;
   bgSize: number;
   transformer: Konva.Transformer;
   selectRect: Konva.Rect;

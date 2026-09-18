@@ -254,6 +254,8 @@ function toggleTool(tool: "picture" | "brush" | "text" | "eraser" | "elbowed") {
     render.value?.workMode("eraser");
   } else if (tool === "elbowed") {
     render.value?.workMode("connector");
+    // 绘制完成后自动切回选择工具
+    if (render.value) render.value.onToolFinish = clearSelectedTool;
   } else if (tool === "text") {
     render.value?.workMode("createText");
 

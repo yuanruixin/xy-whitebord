@@ -14,9 +14,11 @@ export class EditToolbar {
   init() {
     if (this.render.selectionTool.selectingNodes.length === 0) {
       resetSelectionStyle();
-      return;
+    } else {
+      setSelectionStyle(this.render.styleTool.getStyle());
     }
-    setSelectionStyle(this.render.styleTool.getStyle());
+    // 单选连接线时显示端点手柄
+    this.render.connectorTool.updateHandles();
   }
 
   // 关闭属性面板

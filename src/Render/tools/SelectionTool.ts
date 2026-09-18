@@ -45,11 +45,24 @@ export class SelectionTool {
     this.render.editToolbar.init();
   }
   set selectingNodes(nodes: Konva.Node[]) {
-    if (nodes.length === 1 && isTextNode(nodes[0])) {
-      this.render.transformer.enabledAnchors(["middle-left", "middle-right"]);
+    const transformer = this.render.transformer;
+    const onlyConnectors =
+      nodes.length > 0 && nodes.every((node) => node.name() === "connector");
+
+    if (onlyConnectors) {
+      // 连接线：去掉缩放锚点与旋转，仅保留可拖动轮廓 + 端点手柄
+      transformer.enabledAnchors([]);
+      transformer.rotateEnabled(false);
+      transformer.resizeEnabled(false);
+    } else if (nodes.length === 1 && isTextNode(nodes[0])) {
+      transformer.enabledAnchors(["middle-left", "middle-right"]);
+      transformer.rotateEnabled(true);
+      transformer.resizeEnabled(true);
     } else {
-      this.render.transformer.enabledAnchors(
-        ['top-left', 'top-center', 'top-right', 'middle-right', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right']);
+      transformer.enabledAnchors([
+        'top-left', 'top-center', 'top-right', 'middle-right', 'middle-left', 'bottom-left', 'bottom-center', 'bottom-right']);
+      transformer.rotateEnabled(true);
+      transformer.resizeEnabled(true);
     }
     this._selectingNodes = nodes;
   }
