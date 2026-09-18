@@ -42,6 +42,7 @@ import { useRenderStore } from "@/store/render";
 const { render } = useRenderStore();
 import arrowTemplate from "./templates/arrow.json";
 import rabbitTemplate from "./templates/rabbit.json";
+import pelicanTemplate from "./templates/pelican.json";
 import { onMounted,ref } from "vue";
 
 const emit = defineEmits<{
@@ -60,7 +61,7 @@ interface TemplateItem {
 
 const templates = ref<TemplateItem[]>([]);
 onMounted(() => {
-  templates.value=[arrowTemplate, rabbitTemplate].map((item) => {
+  templates.value=[arrowTemplate, rabbitTemplate, pelicanTemplate].map((item) => {
     return {
       info: {
         ...item.info,
@@ -77,8 +78,8 @@ function getURL(name: string) {
 
 function importItemplate(jsonStr: string) {
   if (!render.value) return;
-  // 读取为 json 文本，模板整体作为一个分组导入
-  render.value!.importExportTool.import(jsonStr, false, true);
+  // 读取为 json 文本（模板数据本身已是一个整体分组）
+  render.value!.importExportTool.import(jsonStr);
   emit("close");
 }
 function confirmUseTemplate(index: number) {

@@ -21,11 +21,10 @@ export class ImportExportTool {
   }
 
   /**
-   * 导入 JSON 内容
+   * 获得显示内容
    * @param silent 是否更新历史记录
-   * @param group 是否把导入的节点合并为一个分组（模板导入用）
    */
-  async import(jsonStr:string,silent=false,group=false){
+  async import(jsonStr:string,silent=false){
     // 与restore类似，但是restore只能保存导入文件，会让之前已经绘制内容消失。此方法会保存已经绘制内容的同时，导入
     // 以及，更新导出位置，为当前舞台中央
     try {
@@ -51,17 +50,8 @@ export class ImportExportTool {
         })
       }
 
-      // 注意：getChildren() 返回的是 main 的子节点数组本身，
-      // layer.add 会把节点移出 main 从而清空该数组，因此先拷贝一份。
-      const importedNodes = [...nodes]
-
       // 往 main layer 插入新节点
       this.render.layer.add(...nodes)
-
-      // 模板导入：整体作为一个分组，便于整体移动
-      if (group) {
-        this.render.groupTool.groupNodes(importedNodes)
-      }
 
       // Bug: 恢复 JSON 时候，如果存在已经被放大缩小点元素，点击选择无效
       // 可能是 Konva 的 bug
