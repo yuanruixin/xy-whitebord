@@ -62,8 +62,8 @@ import {
 import { useTool } from "./useTool";
 import SvgIcon from "@/components/SvgIcon/SvgIcon.vue";
 import type { ShapeType } from "@/Render/Element/Shape";
-import { defineRenderStore } from "@/store/render";
-const renderStore = defineRenderStore();
+import { useRenderStore } from "@/store/render";
+const { render } = useRenderStore();
 type Shape = { name: ShapeType; tip: string };
 // 当前选中元素，是否激活
 const {selectedTool,isActiveTool} = useTool()
@@ -127,12 +127,12 @@ const currentIndex = ref(0);
 function selectShape(close: () => void) {
   setTimeout(() => {
     close();
-    renderStore.render?.shape.init({shape:shapes[currentIndex.value].name})
-    renderStore.render?.container.addEventListener("click", handleClick);
+    render.value?.shape.init({shape:shapes[currentIndex.value].name})
+    render.value?.container.addEventListener("click", handleClick);
   }, 100);
 
   function handleClick() {
-    renderStore.render?.container.removeEventListener("click", handleClick);
+    render.value?.container.removeEventListener("click", handleClick);
     selectedTool.value='select'
   }
 }

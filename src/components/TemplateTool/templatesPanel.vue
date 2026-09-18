@@ -38,8 +38,8 @@
 </template>
 
 <script setup lang="ts">
-import { defineRenderStore } from "@/store/render";
-const renderStore = defineRenderStore();
+import { useRenderStore } from "@/store/render";
+const { render } = useRenderStore();
 import arrowTemplate from "./templates/arrow.json";
 import { onMounted,ref } from "vue";
 
@@ -75,9 +75,9 @@ function getURL(name: string) {
 }
 
 function importItemplate(jsonStr: string) {
-  if (!renderStore.render) return;
+  if (!render.value) return;
   // 读取为 json 文本
-  renderStore.render!.importExportTool.import(jsonStr);
+  render.value!.importExportTool.import(jsonStr);
   emit("close");
 }
 function confirmUseTemplate(index: number) {

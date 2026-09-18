@@ -1,10 +1,8 @@
 import { onMounted, onUnmounted ,Ref} from "vue";
-import { defineRenderStore } from "@/store/render";
+import { setRender } from "@/store/render";
 import { Render } from "@/Render";
 
 export const useRender = (container: Ref<HTMLDivElement|null>) => {
-  const boardStore = defineRenderStore();
-
   const defaultEventHandle = {
     preventDefaultEvent(e: Event) {
       e.preventDefault();
@@ -24,7 +22,7 @@ export const useRender = (container: Ref<HTMLDivElement|null>) => {
   onMounted(() => {
     defaultEventHandle.addEventListeners();
     const board = new Render(container.value!, {showBg:true});
-    boardStore.render = board;
+    setRender(board);
   });
   onUnmounted(() => {
     defaultEventHandle.removeEventListeners();

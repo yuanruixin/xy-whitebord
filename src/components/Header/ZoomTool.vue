@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from "vue";
-import { defineRenderStore } from "@/store/render";
+import { useRenderStore } from "@/store/render";
 import {
   Listbox,
   ListboxButton,
@@ -82,7 +82,7 @@ import {
   ListboxOption,
 } from "@headlessui/vue";
 import { useNumChange } from "@/hooks/anime/useNumChange";
-const renderStore = defineRenderStore();
+const { render } = useRenderStore();
 
 const scaleOption = [25, 50, 100, 200, 400];
 const realScalePercent = ref(100);
@@ -109,7 +109,7 @@ function increaseScale() {
   return;
 }
 function setStageScale(scale: number) {
-  renderStore.render?.setStageScale(scale/100)
+  render.value?.setStageScale(scale/100)
 }
 
 // 用于缩放比变化过程的显示
@@ -125,7 +125,7 @@ watch(
 
 // 监听滚轮缩放事件，更新真实值 和 用于显示变化的值
 function changeScaleWhenWheelEvent() {
-  const scale = renderStore.render?.getStageState().scale ?? 1;
+  const scale = render.value?.getStageState().scale ?? 1;
   realScalePercent.value = scale * 100;
   showChangeScale.value = scale * 100;
 }

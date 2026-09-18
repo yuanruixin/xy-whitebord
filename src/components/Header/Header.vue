@@ -40,12 +40,12 @@
 
 <script setup lang="ts">
 import ZoomTool from "./ZoomTool.vue";
-import { defineRenderStore } from "@/store/render";
+import { useRenderStore } from "@/store/render";
 import { downloadFile } from "@/utils/handleFile";
 
 import ExportMenu from "./ExportMenu.vue";
 import { ref } from "vue";
-const renderStore = defineRenderStore();
+const { render } = useRenderStore();
 
 const showExportModal = ref(false);
 function openExportModal() {
@@ -53,7 +53,7 @@ function openExportModal() {
 }
 
 // function onImport() {
-//   if (renderStore.render) {
+//   if (render.value) {
 //     const input = document.createElement("input");
 //     // 限制只能选择json文件
 //     input.accept = ".json";
@@ -67,7 +67,7 @@ function openExportModal() {
 //         let reader = new FileReader();
 //         reader.onload = function () {
 //           // 读取为 json 文本
-//           renderStore.render!.importExportTool.restore(this.result!.toString());
+//           render.value!.importExportTool.restore(this.result!.toString());
 //         };
 //         reader.readAsText(files[0]);
 //       }
@@ -83,8 +83,8 @@ function confirmExport(config: ExportImageConfig): void {
   showExportModal.value = false;
   saveAsImage(config);
   function saveAsImage(config: ExportImageConfig) {
-    if (renderStore.render) {
-      const url = renderStore.render.importExportTool.getExportImageBase64({
+    if (render.value) {
+      const url = render.value.importExportTool.getExportImageBase64({
         type: config.type ?? "jpeg",
         bg: config.bg ?? "grid",
         quality: 1,
@@ -95,8 +95,8 @@ function confirmExport(config: ExportImageConfig): void {
 }
 
 // function saveAsJson() {
-//   if (renderStore.render) {
-//     const url = renderStore.render.importExportTool.save();
+//   if (render.value) {
+//     const url = render.value.importExportTool.save();
 //     downloadFile(url);
 //   }
 // }

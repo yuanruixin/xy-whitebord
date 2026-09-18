@@ -63,11 +63,11 @@ import { ref } from "vue";
 import SvgIcon from "@/components/SvgIcon/SvgIcon.vue";
 import ShapesTool from "./ShapesTool.vue";
 import MinorTool from "./MinorTool.vue";
-import { defineRenderStore } from "@/store/render";
+import { useRenderStore } from "@/store/render";
 import { useTool } from "./useTool";
 import TemplateTool from "@/components/TemplateTool/TemplateTool.vue";
 
-const renderStore = defineRenderStore();
+const { render } = useRenderStore();
 const stageDraggable = ref(false);
 const { selectedTool,isActiveTool } = useTool();
 
@@ -77,7 +77,7 @@ function toggleStageDragable() {
     stageDraggable.value = !stageDraggable.value;
   }
   selectedTool.value=stageDraggable.value ? "drag" : "select"
-  renderStore.render?.workMode(stageDraggable.value ? "drag" : "default");
+  render.value?.workMode(stageDraggable.value ? "drag" : "default");
 }
 </script>
 

@@ -125,17 +125,17 @@
 <script setup lang="ts">
 import { watch, ref } from "vue";
 import { useTool } from "./useTool";
-import { defineRenderStore } from "@/store/render";
+import { useRenderStore } from "@/store/render";
 import { onMounted, reactive } from "vue";
 const { selectedTool, isActiveTool, clearSelectedTool } = useTool();
-const renderStore = defineRenderStore();
+const { render } = useRenderStore();
 
 // 工具切换时，销毁旧工具（事件监听、样式等）
 watch(
   () => selectedTool.value,
   (newVal, oldVal) => {
     if (oldVal === "brush" && newVal !== oldVal) {
-      renderStore.render?.paintTool.destroy();
+      render.value?.paintTool.destroy();
     }
   }
 );
@@ -147,7 +147,7 @@ onMounted(() => {
     if (!target.files) return;
     // 如果需要持久化，需要使用base64，而不是objectURL
     const url = URL.createObjectURL(target.files[0]);
-    renderStore.render?.image.create({ src: url });
+    render.value?.image.create({ src: url });
     clearSelectedTool();
   });
 });
@@ -167,7 +167,7 @@ watch(
   (newVal) => {
     console.log(brushOption);
     
-    renderStore.render?.paintTool.init(newVal);
+    render.value?.paintTool.init(newVal);
   }
 );
 function toggleTool(tool: "picture" | "brush" | "text") {
@@ -181,15 +181,15 @@ function toggleTool(tool: "picture" | "brush" | "text") {
       clearSelectedTool();
     }, 500);
   } else if (tool === "brush") {
-    renderStore.render?.workMode("brush", brushOption);
+    render.value?.workMode("brush", brushOption);
   } else if (tool === "text") {
-    renderStore.render?.workMode("createText");
+    render.value?.workMode("createText");
 
-    renderStore.render?.container.addEventListener("click", completeCreate);
+    render.value?.container.addEventListener("click", completeCreate);
   }
   function completeCreate() {
     clearSelectedTool();
-    renderStore.render?.container.removeEventListener("click", completeCreate);
+    render.value?.container.removeEventListener("click", completeCreate);
   }
 }
 </script>
