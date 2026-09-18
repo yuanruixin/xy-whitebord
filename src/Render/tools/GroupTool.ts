@@ -28,11 +28,27 @@ export class GroupTool {
     const selected = this.selectedTopNodes();
     if (selected.length < 2) return;
 
-    // 按层级排序，成组后保持原有前后顺序
-    const sorted = [...selected].sort((a, b) => a.zIndex() - b.zIndex());
-    const topIndex = sorted[sorted.length - 1].zIndex();
-
     this.render.selectionTool.selectingClear();
+
+    const group = this.groupNodes(selected);
+    if (!group) return;
+
+    this.render.selectionTool.select([group]);
+    this.render.connectorTool.refreshAll();
+    this.render.historyTool.updateHistory();
+  }
+
+  /**
+   * 把一组顶层节点包进新的 group（不改动选中状态），返回新 group。
+   * 用于 AI 一次生成、模板导入等场景，少于 2 个节点时返回 null。
+   */
+  groupNodes(nodes: Konva.Node[]): Konva.Group | null {
+    const list = nodes.filter((node) => node.getParent() === this.render.layer);
+    if (list.length < 2) return null;
+
+    // 按层级排序，成组后保持原有前后顺序
+    const sorted = [...list].sort((a, b) => a.zIndex() - b.zIndex());
+    const topIndex = sorted[sorted.length - 1].zIndex();
 
     const group = new Konva.Group({ id: nanoid(), name: "group" });
     this.render.layer.add(group);
@@ -43,9 +59,7 @@ export class GroupTool {
       node.moveTo(group);
     }
 
-    this.render.selectionTool.select([group]);
-    this.render.connectorTool.refreshAll();
-    this.render.historyTool.updateHistory();
+    return group;
   }
 
   // 解组

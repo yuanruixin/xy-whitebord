@@ -54,6 +54,8 @@ export class CanvasCommandTool implements CanvasExecutor {
 
     const groups = new Map<string, Konva.Group>();
     const idMap: Record<string, string> = {};
+    // 本次创建的所有顶层节点，用于最后成组
+    const createdNodes: Konva.Node[] = [];
     let created = 0;
 
     for (const node of nodes) {
@@ -61,6 +63,7 @@ export class CanvasCommandTool implements CanvasExecutor {
         node.type === "text" ? this.createText(node) : this.createShape(node);
       if (!group) continue;
       this.render.layer.add(group);
+      createdNodes.push(group);
       const clientId = node.id || `n${created}`;
       idMap[clientId] = group.id();
       groups.set(clientId, group);
@@ -70,7 +73,18 @@ export class CanvasCommandTool implements CanvasExecutor {
 
     let edgeCount = 0;
     for (const edge of edges ?? []) {
-      if (this.connectEdge(edge, groups)) edgeCount++;
+      const connector = this.connectEdge(edge, groups);
+      if (connector) {
+        createdNodes.push(connector);
+        edgeCount++;
+      }
+    }
+
+    // 一次生成的内容作为一个整体，便于整体移动
+    let groupId: string | undefined;
+    if (createdNodes.length > 1) {
+      const group = this.render.groupTool.groupNodes(createdNodes);
+      groupId = group?.id();
     }
 
     if (created > 0) {
@@ -84,7 +98,7 @@ export class CanvasCommandTool implements CanvasExecutor {
         created > 0
           ? `已创建 ${created} 个节点、${edgeCount} 条连接线`
           : "未能创建节点，请检查图形类型",
-      data: { created, edges: edgeCount, idMap },
+      data: { created, edges: edgeCount, idMap, groupId },
     };
   }
 
@@ -101,8 +115,7 @@ export class CanvasCommandTool implements CanvasExecutor {
         if (!to) notFound.push(edge.to);
         continue;
       }
-      if (this.connectEdge(edge, new Map())) edgeCount++;
-    }
+      if (this.connectEdge(edge, new Map())) edgeCount++;    }
 
     if (edgeCount > 0) {
       this.render.connectorTool.refreshAll();
@@ -322,8 +335,12 @@ export class CanvasCommandTool implements CanvasExecutor {
   }
 
   private findById(id: string): Konva.Group | null {
-    const list = this.render.layer.getChildren((node) => node.id() === id);
-    return (list[0] as Konva.Group) ?? null;
+    // 递归查找：支持被成组的节点（如 AI 一次生成、模板导入的 group）
+    return (
+      (this.render.layer.findOne(
+        (node: Konva.Node) => node.id() === id
+      ) as Konva.Group) ?? null
+    );
   }
 
   /**
@@ -350,12 +367,11 @@ export class CanvasCommandTool implements CanvasExecutor {
   private connectEdge(
     edge: AISceneEdge,
     groups: Map<string, Konva.Group>
-  ): boolean {
+  ): Konva.Group | null {
     const from = groups.get(edge.from) ?? this.findById(edge.from);
     const to = groups.get(edge.to) ?? this.findById(edge.to);
-    if (!from || !to) return false;
-    this.createEdge(from, to);
-    return true;
+    if (!from || !to) return null;
+    return this.createEdge(from, to);
   }
 
   private createShape(data: AISceneNode): Konva.Group | null {

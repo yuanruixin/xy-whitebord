@@ -69,7 +69,7 @@ export const CANVAS_TOOLS: OpenAITool[] = [
     function: {
       name: "create_nodes",
       description:
-        "在画布上批量创建图形或文本节点，可同时建立带箭头的连接线。用于首次绘制或追加内容。",
+        "在画布上批量创建图形或文本节点，可同时建立带箭头的连接线。用于首次绘制或追加内容。一次创建的内容会自动合并为一个分组，结果里的 groupId 可用于整体移动/删除。",
       parameters: {
         type: "object",
         properties: {

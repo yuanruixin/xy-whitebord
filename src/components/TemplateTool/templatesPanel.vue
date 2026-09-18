@@ -77,8 +77,8 @@ function getURL(name: string) {
 
 function importItemplate(jsonStr: string) {
   if (!render.value) return;
-  // 读取为 json 文本
-  render.value!.importExportTool.import(jsonStr);
+  // 读取为 json 文本，模板整体作为一个分组导入
+  render.value!.importExportTool.import(jsonStr, false, true);
   emit("close");
 }
 function confirmUseTemplate(index: number) {
