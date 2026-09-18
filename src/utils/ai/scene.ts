@@ -7,6 +7,7 @@ const VALID_TYPES: AISceneNodeType[] = [
   "triangle",
   "parallelogram",
   "arrow",
+  "path",
   "text",
 ];
 
@@ -28,6 +29,8 @@ const TYPE_ALIASES: Record<string, AISceneNodeType> = {
   edge: "arrow",
   connector: "arrow",
   label: "text",
+  svg: "path",
+  custom: "path",
 };
 
 // 从模型返回内容中提取 JSON（兼容代码块、前后说明文字）
@@ -87,6 +90,7 @@ function normalizeScene(raw: unknown): AIScene {
       width: toPositive(node.width, type === "text" ? 200 : 160),
       height: toPositive(node.height, type === "text" ? 30 : 80),
       fill: typeof node.fill === "string" ? node.fill : undefined,
+      d: typeof node.d === "string" ? node.d : undefined,
       text: typeof node.text === "string" ? node.text : undefined,
       fontSize: toPositive(node.fontSize, 20),
     });

@@ -2,7 +2,7 @@
 // 该文件不依赖 Konva / Vue，保证 AI 模块可以独立复用与测试。
 import type { AIConfig } from "@/store/ai";
 
-// AI 生成的图形类型（对应项目内置形状 + 文本节点）
+// AI 生成的图形类型（对应项目内置形状 + 自定义 path + 文本节点）
 export type AISceneNodeType =
   | "rectangle"
   | "ellipse"
@@ -10,6 +10,7 @@ export type AISceneNodeType =
   | "triangle"
   | "parallelogram"
   | "arrow"
+  | "path"
   | "text";
 
 export interface AISceneNode {
@@ -20,6 +21,8 @@ export interface AISceneNode {
   width?: number;
   height?: number;
   fill?: string;
+  // type 为 "path" 时的 SVG path 数据（d 属性），会按 width/height 缩放
+  d?: string;
   text?: string;
   fontSize?: number;
 }

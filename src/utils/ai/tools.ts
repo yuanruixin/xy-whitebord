@@ -35,15 +35,22 @@ const NODE_SCHEMA = {
         "triangle",
         "parallelogram",
         "arrow",
+        "path",
         "text",
       ],
-      description: "图形类型",
+      description:
+        "图形类型；path 为自定义 SVG 形状（需同时提供 d）",
     },
     x: { type: "number", description: "左上角画布坐标 x" },
     y: { type: "number", description: "左上角画布坐标 y" },
     width: { type: "number", description: "宽度，默认矩形/菱形 160、文本 200" },
     height: { type: "number", description: "高度，默认 80、文本 30" },
     fill: { type: "string", description: "填充色 / 文字颜色（#十六进制）" },
+    d: {
+      type: "string",
+      description:
+        'SVG path 数据（d 属性），仅 type="path" 时使用；坐标系会被缩放到 width×height，例如 "M0 0 L100 0 L50 100 Z"',
+    },
     text: { type: "string", description: "图形内文字或文本内容" },
     fontSize: { type: "number", description: "字号，默认 20" },
   },

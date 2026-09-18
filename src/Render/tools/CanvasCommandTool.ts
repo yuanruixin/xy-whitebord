@@ -360,6 +360,8 @@ export class CanvasCommandTool implements CanvasExecutor {
       for (const key of Object.keys(SHAPE_PATHS) as ShapeType[]) {
         if (SHAPE_PATHS[key] === data) return key;
       }
+      // 未匹配内置形状：视为自定义 path
+      return "path";
     }
     return "shape";
   }
@@ -375,14 +377,22 @@ export class CanvasCommandTool implements CanvasExecutor {
   }
 
   private createShape(data: AISceneNode): Konva.Group | null {
-    const shapeType = TYPE_TO_SHAPE[data.type];
-    if (!shapeType) return null;
+    // 自定义形状：直接使用模型给出的 SVG path 数据
+    let pathData: string;
+    if (data.type === "path") {
+      if (!data.d) return null;
+      pathData = data.d;
+    } else {
+      const shapeType = TYPE_TO_SHAPE[data.type];
+      if (!shapeType) return null;
+      pathData = SHAPE_PATHS[shapeType];
+    }
 
     const width = data.width ?? 160;
     const height = data.height ?? 80;
     const group = new Konva.Group({ id: nanoid(), name: "shape" });
     const path = new Konva.Path({
-      data: SHAPE_PATHS[shapeType],
+      data: pathData,
       fill: data.fill ?? DEFAULT_SHAPE_FILL,
     });
 
