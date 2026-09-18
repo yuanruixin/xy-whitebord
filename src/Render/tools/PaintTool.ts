@@ -23,7 +23,7 @@ export class PaintTool {
   }
 
   init(config: PaintTool.InitPaintConfig) {
-    this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
+    this.render.events.on("paintTool", "stage", "mousedown touchstart", () => {
       this.isPaint = true;
       const pos = this.render.stage.getPointerPosition();
 
@@ -57,13 +57,15 @@ export class PaintTool {
       this.render.layer.add(group);
     });
 
-    this.render.stage.on("mouseup.paintTool touchend.paintTool", () => {
+    this.render.events.on("paintTool", "stage", "mouseup touchend", () => {
       this.isPaint = false;
       this.render.historyTool.updateHistory();
     });
 
-    this.render.stage.on(
-      "mousemove.paintTool touchmove.paintTool",
+    this.render.events.on(
+      "paintTool",
+      "stage",
+      "mousemove touchmove",
       throttle((e) => {
         if (!this.isPaint || !this.currentLine) return;
         e.evt.preventDefault();
@@ -81,13 +83,7 @@ export class PaintTool {
   }
 
   destroy() {
-    this.removeEvents();
+    this.render.events.off("paintTool");
     this.render.cursor.reset();
-  }
-
-  removeEvents() {
-    this.render.stage.off("mousedown.paintTool touchstart.paintTool");
-    this.render.stage.off("mouseup.paintTool touchend.paintTool");
-    this.render.stage.off("mousemove.paintTool touchmove.paintTool");
   }
 }

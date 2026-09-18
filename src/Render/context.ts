@@ -1,5 +1,6 @@
 import type Konva from "konva";
 import type { RenderConfig, MouseMode } from "./types";
+import type { EventManager } from "./EventManager";
 import type { Cursor } from "./Cursor";
 import type { Shape } from "./Element/Shape";
 import type { Text } from "./Element/Text";
@@ -41,6 +42,7 @@ export interface ICanvasContext {
   groupTransformer: Konva.Group;
 
   draws: { bg: BgDraw; contextmenu: ContextmenuDraw };
+  events: EventManager;
   cursor: Cursor;
   shape: Shape;
   text: Text;

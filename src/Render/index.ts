@@ -1,6 +1,8 @@
 import Konva from "konva";
 import * as Types from "./types";
 import type { ICanvasContext } from "./context";
+import { ModeManager } from "./ModeManager";
+import { EventManager } from "./EventManager";
 import { Cursor } from "./Cursor";
 import * as Tools from "./tools";
 import * as Draws from "./draws";
@@ -13,9 +15,11 @@ import { PickColor } from "@/components/ColorPicker";
 export class Render implements ICanvasContext {
   container: HTMLDivElement;
   // 同一时间鼠标只能处理一个事件(创建元素、画笔、橡皮、选择模式、拖拽模式)
-  private _workMode: Types.MouseMode = "select";
+  private modeManager: ModeManager = new ModeManager(this);
 
   stage: Konva.Stage;
+  // 事件管理器（统一命名空间绑定/解绑）
+  events: EventManager;
   // 主要层
   layer: Konva.Layer = new Konva.Layer({ id: "main" });
   // 辅助层 - 底层
@@ -84,6 +88,7 @@ export class Render implements ICanvasContext {
       width: this.container.clientWidth,
       height: this.container.clientHeight,
     });
+    this.events = new EventManager(this.container, this.stage, this.transformer);
 
     // 附加工具
     this.draws = {
@@ -118,54 +123,11 @@ export class Render implements ICanvasContext {
   /**
    * @description 这里设置获取获取当前工作模式(特殊工具初始化时，需要传递参数)
    */
-
-  workMode<T extends Types.MouseMode>(workMode?: T ,config?:T extends 'brush'?Tools.PaintTool.InitPaintConfig:undefined){
-    if (!workMode) return this._workMode;
-    if (workMode === this._workMode) return workMode;
-    // 清除正在使用的旧工具
-    clearOldTool.apply(this);
-    setNewTool.apply(this);
-    function clearOldTool(this: Render) {
-      const oldMouseMode = this._workMode;
-      if (oldMouseMode === "createElement") {
-        this.shape.destroy();
-      } else if (oldMouseMode === "brush") {
-        this.paintTool.destroy();
-      } else if (oldMouseMode === "select" || oldMouseMode === "default") {
-        this.selectionTool.selectingClear();
-      } else if (oldMouseMode === "createText") {
-        this.text.destroy();
-      } else if (oldMouseMode === "drag") {
-        this.stage.draggable(false);
-        this.cursor.reset();
-      } else if (oldMouseMode === "eraser") {
-        this.paintTool.destroy();
-      } else {
-        const _: never = oldMouseMode;
-        console.log(_);
-      }
-    }
-
-    function setNewTool(this: Render) {
-      if (!workMode) return this._workMode;
-      this._workMode = workMode;
-      // 设置新工具
-      if (workMode === "drag") {
-        this.stage.draggable(true);
-        this.cursor.set("grab");
-      } else if (workMode === "brush") {
-        this.paintTool.init(config!);
-        this.cursor.set("brush");
-      } else if (workMode === "eraser") {
-        console.log("eraser工具待完成");
-      } else if (workMode === "createText") {
-        this.cursor.set("crosshair");
-      } else {
-        this.cursor.reset();
-      }
-    }
-
-    return this._workMode;
+  workMode<T extends Types.MouseMode>(
+    workMode?: T,
+    config?: T extends "brush" ? Tools.PaintTool.InitPaintConfig : undefined
+  ): Types.MouseMode {
+    return this.modeManager.switch(workMode, config);
   }
   eventBind() {
     // handlers事件绑定
@@ -185,20 +147,12 @@ export class Render implements ICanvasContext {
           ).forEach((event) => {
             const callback =
               this.handlersManager[handlerToolName].handlers[target][event];
-            if (targetAfteCorrectedType === "dom") {
-              this.container.addEventListener(event as string, callback);
-            } else if (
-              targetAfteCorrectedType === "stage" ||
-              targetAfteCorrectedType === "transformer"
-            ) {
-              // 增加事件修饰符
-              const eventName = (event as string) + "." + handlerToolName;
-              this[targetAfteCorrectedType].on(eventName, callback);
-            } else {
-              // 未处理的分支
-              const a: never = targetAfteCorrectedType;
-              throw `未处理的分支,${a}`;
-            }
+            this.events.on(
+              handlerToolName,
+              targetAfteCorrectedType,
+              event as string,
+              callback
+            );
           });
         }
       );
