@@ -10,8 +10,12 @@ interface ImageExportOption {
 }
 export class ImportExportTool {
   static readonly name = 'ImportExportTool'
+  // 本地自动保存使用的 key
+  static readonly storageKey = 'xy-whiteboard:scene'
 
   private render: ICanvasContext
+  // 本地存储配额不足时禁用自动保存，避免持续报错
+  private storageDisabled = false
   constructor(render: ICanvasContext) {
     this.render = render
   }
@@ -224,11 +228,42 @@ export class ImportExportTool {
 
     // 清空 main layer 节点
     this.render.layer.removeChildren()
-  
+
     try {
-      this.import(json,silent)
+      await this.import(json, silent)
     } catch (e) {
       console.error(e)
+    }
+  }
+
+  // 保存到 localStorage（自动保存）
+  saveToLocalStorage() {
+    if (this.storageDisabled) return
+    try {
+      localStorage.setItem(ImportExportTool.storageKey, this.save())
+    } catch (e) {
+      // 图片过多时 base64 体积会超出配额，停止自动保存
+      this.storageDisabled = true
+      console.warn('自动保存到本地失败，可能超出存储配额', e)
+    }
+  }
+
+  // 从 localStorage 读取
+  loadFromLocalStorage(): string | null {
+    try {
+      return localStorage.getItem(ImportExportTool.storageKey)
+    } catch (e) {
+      console.warn('读取本地缓存失败', e)
+      return null
+    }
+  }
+
+  // 清空本地缓存
+  clearLocalStorage() {
+    try {
+      localStorage.removeItem(ImportExportTool.storageKey)
+    } catch {
+      // ignore
     }
   }
 

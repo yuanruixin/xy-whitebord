@@ -1,8 +1,11 @@
-## 1. v-tooltip 全局指令
+## 1. ~~v-tooltip 全局指令~~ ✅ 已完成
+    实现于 src/directives/tooltip.ts，并在 main.ts 全局注册
+    已应用于 Header / ToolBar / MinorTool / ShapesTool / ZoomTool
 
-## 2. 如果需要持久化，图片工具导入时，需要使用base64，而不是objectURL 
+## 2. ~~如果需要持久化，图片工具导入时，需要使用base64，而不是objectURL~~ ✅ 已完成
     src\components\ToolBar\MinorTool.vue
-### （1）也是暂时不支持导出json和持久化的原因
+### （1）~~也是暂时不支持导出json和持久化的原因~~ ✅ 已完成
+    已支持导出/导入 JSON，并支持 localStorage 自动保存/恢复
     因为导出若为objectURL，导入时，无法再次正常使用
 
 ## 3.选中工具的bug

@@ -5,7 +5,10 @@
     <!-- 主要选择区域 -->
     <ul class="flex flex-col items-center p-2 gap-y-0.5 select-none">
       <!-- 模板 -->
-      <li class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden">
+      <li
+        class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden"
+        v-tooltip="'模板'"
+      >
         <TemplateTool></TemplateTool>
       </li>
       <!-- 形状选择工具 -->
@@ -27,6 +30,7 @@
       <span
         class="w-10 h-10 p-0 flex justify-center items-center cursor-pointer rounded-md overflow-hidden"
         :class="{'bg-primary':isActiveTool('select')||isActiveTool('drag')}"
+        v-tooltip="stageDraggable ? '拖拽画布' : '选择'"
         >
         <svg-icon
           prefix="menu"

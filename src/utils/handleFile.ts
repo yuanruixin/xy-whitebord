@@ -53,8 +53,28 @@ export const downloadFile = (
   a.href = href;
   a.dispatchEvent(event);
   a.remove();
-  // 下载完，对URL进行释放
-  URL.revokeObjectURL(href);
+  // 下载完，延迟释放 URL，避免刚触发下载就被回收导致下载失败
+  if (href.startsWith("blob:")) {
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+  }
+};
+
+export const readFileAsDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+};
+
+export const readFileAsText = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsText(file);
+  });
 };
 
 export const selectSingleFile = (): Promise<File | null> => {

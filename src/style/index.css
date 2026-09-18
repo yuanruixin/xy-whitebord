@@ -13,3 +13,25 @@ html,body{
   display: flex;
   flex-direction: column;
 }
+
+/* v-tooltip 指令生成的悬浮提示 */
+.xy-tooltip {
+  position: fixed;
+  z-index: 9999;
+  max-width: 240px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(29, 41, 58, 0.95);
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+}
+.xy-tooltip.is-visible {
+  opacity: 1;
+  visibility: visible;
+}

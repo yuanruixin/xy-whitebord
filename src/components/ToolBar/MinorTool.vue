@@ -14,6 +14,7 @@
           name="brush"
           :size="48"
           class="hover:animate-swing-small"
+          v-tooltip="'画笔'"
         ></svg-icon>
 
         <div
@@ -81,6 +82,7 @@
           name="text"
           :size="48"
           class="hover:animate-swing-small"
+          v-tooltip="'文本'"
         ></svg-icon>
       </a>
     </li>
@@ -95,6 +97,7 @@
           name="picture"
           :size="48"
           class="hover:animate-swing-small"
+          v-tooltip="'图片'"
         ></svg-icon>
       </a>
       <input
@@ -112,6 +115,7 @@ import { watch, ref } from "vue";
 import { useTool } from "./useTool";
 import { useRenderStore } from "@/store/render";
 import { onMounted, reactive } from "vue";
+import { readFileAsDataURL } from "@/utils/handleFile";
 const { selectedTool, isActiveTool, clearSelectedTool } = useTool();
 const { render } = useRenderStore();
 
@@ -127,12 +131,15 @@ watch(
 const pictureInputRef = ref<HTMLInputElement | null>();
 // 获取用户选择文件的URL
 onMounted(() => {
-  pictureInputRef.value?.addEventListener("change", (e) => {
+  pictureInputRef.value?.addEventListener("change", async (e) => {
     const target = e.target as HTMLInputElement;
-    if (!target.files) return;
-    // 如果需要持久化，需要使用base64，而不是objectURL
-    const url = URL.createObjectURL(target.files[0]);
-    render.value?.image.create({ src: url });
+    const file = target.files?.[0];
+    if (!file) return;
+    // 使用 base64，保证导出 JSON / 持久化后仍可再次导入
+    const src = await readFileAsDataURL(file);
+    render.value?.image.create({ src });
+    // 允许重复选择同一文件
+    target.value = "";
     clearSelectedTool();
   });
 });

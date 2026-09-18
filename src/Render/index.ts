@@ -107,7 +107,24 @@ export class Render implements ICanvasContext {
     this.layerCover.add(this.groupTransformer);
 
     this.init();
-    this.historyTool.updateHistory();
+    this.loadInitialScene();
+
+    // 页面隐藏/关闭前立即保存，避免防抖未触发导致丢数据
+    window.addEventListener("pagehide", () => {
+      this.importExportTool.saveToLocalStorage();
+    });
+  }
+  /**
+   * @description 初始化画面：优先恢复本地缓存，否则新建空历史记录
+   */
+  async loadInitialScene() {
+    const cached = this.importExportTool.loadFromLocalStorage();
+    if (cached) {
+      await this.importExportTool.restore(cached, true);
+      this.historyTool.reset();
+    } else {
+      this.historyTool.updateHistory();
+    }
   }
   init() {
     this.stage.add(this.layerFloor);

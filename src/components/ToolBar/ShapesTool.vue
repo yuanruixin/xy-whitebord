@@ -6,6 +6,7 @@
       class="focus-visible:outline-none w-full h-full hover:bg-gray-700 rounded-sm overflow-hidden"
       :class="{'bg-primary hover:bg-primary':isActiveTool('createShape')}"
       @click="selectedTool='createShape'"
+      v-tooltip="'形状'"
     >
       <svg-icon
         :name="shapes[currentIndex].name"
@@ -34,6 +35,7 @@
                 class="flex justify-center items-center w-10 h-10 hover:bg-gray-700 rounded-md cursor-pointer"
                 :class="{ 'bg-primary hover:bg-primary': checked }"
                 @click="selectShape(close)"
+                v-tooltip="shape.tip"
               >
                 <svg-icon
                   prefix="shapes"

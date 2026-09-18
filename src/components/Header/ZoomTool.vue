@@ -5,6 +5,7 @@
     <button
       class="text-xl grid place-items-center size-7 hover:bg-slate-600/10"
       @click="decreaseScale"
+      v-tooltip="'缩小'"
     >
       -
     </button>
@@ -66,6 +67,7 @@
     <button
       class="text-xl grid place-items-center size-7 hover:bg-slate-600/10 active:bg-slate-600/8"
       @click="increaseScale"
+      v-tooltip="'放大'"
     >
       +
     </button>
