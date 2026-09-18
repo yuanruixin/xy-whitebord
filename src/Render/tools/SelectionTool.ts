@@ -40,6 +40,9 @@ export class SelectionTool {
 
     // 清空选择节点
     this.selectingNodes = [];
+
+    // 同步属性面板
+    this.render.editToolbar.init();
   }
   set selectingNodes(nodes: Konva.Node[]) {
     if (nodes.length === 1 && isTextNode(nodes[0])) {
@@ -73,6 +76,9 @@ export class SelectionTool {
 
       this.render.transformer.nodes(this.selectingNodes);
     }
+
+    // 同步属性面板
+    this.render.editToolbar.init();
   }
 
   selectAll() {

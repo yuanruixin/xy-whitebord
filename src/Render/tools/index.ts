@@ -2,6 +2,7 @@ export { SelectionTool } from "./SelectionTool";
 export {PaintTool} from './PaintTool'
 export {EraserTool} from './EraserTool'
 export {ConnectorTool} from './ConnectorTool'
+export {StyleTool} from './StyleTool'
 export {ZIndexTool} from './ZIndexTool'
 export {EditToolbar} from './EditToolbar'
 export {HistoryTool} from './HistoryTool'

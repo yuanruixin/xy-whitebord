@@ -9,9 +9,51 @@ export class ShortcutHandlers implements Types.Handler {
     this.render = render;
   }
 
+  // 连续方向键微调时合并历史记录
+  private nudgeTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private scheduleNudgeHistory() {
+    if (this.nudgeTimer) clearTimeout(this.nudgeTimer);
+    this.nudgeTimer = setTimeout(() => {
+      this.render.historyTool.updateHistory();
+      this.nudgeTimer = null;
+    }, 300);
+  }
+
   handlers = {
     dom: {
       keydown: (e: GlobalEventHandlersEventMap["keydown"]) => {
+        // 方向键微调选中元素（Shift 加速）
+        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          const step = e.shiftKey ? 10 : 1;
+          let dx = 0;
+          let dy = 0;
+          switch (e.code) {
+            case Types.MoveKey.up:
+              dy = -step;
+              break;
+            case Types.MoveKey.down:
+              dy = step;
+              break;
+            case Types.MoveKey.left:
+              dx = -step;
+              break;
+            case Types.MoveKey.right:
+              dx = step;
+              break;
+          }
+
+          if (
+            (dx !== 0 || dy !== 0) &&
+            this.render.selectionTool.selectingNodes.length > 0
+          ) {
+            e.preventDefault();
+            this.render.moveSelectedBy(dx, dy, false);
+            this.scheduleNudgeHistory();
+            return;
+          }
+        }
+
         if (e.ctrlKey || e.metaKey) {
           if (e.code === Types.ShortcutKey.C) {
             this.render.copyTool.pasteStart();

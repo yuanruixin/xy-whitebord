@@ -9,8 +9,6 @@ import * as Draws from "./draws";
 import * as Handlers from "./handlers";
 import * as elements from "./Element";
 import { getKeys } from "@/utils/secureTS";
-// 选择元素后出现的编辑工具条（目前只有颜色修改器）
-import { PickColor } from "@/components/ColorPicker";
 // 主类
 export class Render implements ICanvasContext {
   container: HTMLDivElement;
@@ -43,6 +41,7 @@ export class Render implements ICanvasContext {
   paintTool: Tools.PaintTool = new Tools.PaintTool(this); // 绘制工具(画笔、橡皮)
   eraserTool: Tools.EraserTool = new Tools.EraserTool(this); // 橡皮擦工具(对象擦除)
   connectorTool: Tools.ConnectorTool = new Tools.ConnectorTool(this); // 连接线工具
+  styleTool: Tools.StyleTool = new Tools.StyleTool(this); // 选中元素样式工具
   selectionTool: Tools.SelectionTool = new Tools.SelectionTool(this); // 选择工具
   editToolbar: Tools.EditToolbar = new Tools.EditToolbar(this); // 编辑条工具
   zIndexTool: Tools.ZIndexTool = new Tools.ZIndexTool(this); // 层级工具
@@ -268,7 +267,8 @@ export class Render implements ICanvasContext {
   }
 
   deleteSelectingElement() {
-    PickColor.close();
+    this.editToolbar.close();
+
     const remove = (nodes: Konva.Node[]) => {
       for (const node of nodes) {
         if (node instanceof Konva.Transformer) {
@@ -289,5 +289,28 @@ export class Render implements ICanvasContext {
     this.selectionTool.selectingClear();
     // 刷新连接线（绑定图形被删除后保留在最后位置）
     this.connectorTool.refreshAll();
+  }
+
+  /**
+   * 方向键微调选中元素
+   * @param record 是否立即记录历史（连续按键时可延迟合并）
+   */
+  moveSelectedBy(dx: number, dy: number, record = true) {
+    const nodes = this.selectionTool.selectingNodes;
+    if (nodes.length === 0) return;
+
+    for (const node of nodes) {
+      node.x(node.x() + dx);
+      node.y(node.y() + dy);
+    }
+    this.transformer.forceUpdate();
+    // 同步拖动基线，避免下次拖动发生跳变
+    this.handlersManager[Handlers.SelectionHandlers.name].reset();
+    // 连接线跟随
+    this.connectorTool.refreshAll();
+
+    if (record) {
+      this.historyTool.updateHistory();
+    }
   }
 }

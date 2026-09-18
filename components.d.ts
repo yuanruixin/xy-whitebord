@@ -8,12 +8,12 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Board: typeof import('./src/components/Board/Board.vue')['default']
-    ColorPicker: typeof import('./src/components/ColorPicker/ColorPicker.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu/ContextMenu.vue')['default']
     ExportMenu: typeof import('./src/components/Header/ExportMenu.vue')['default']
     Header: typeof import('./src/components/Header/Header.vue')['default']
     MinorTool: typeof import('./src/components/ToolBar/MinorTool.vue')['default']
     Modal: typeof import('./src/components/Modal/Modal.vue')['default']
+    PropertiesPanel: typeof import('./src/components/PropertiesPanel/PropertiesPanel.vue')['default']
     ShapesTool: typeof import('./src/components/ToolBar/ShapesTool.vue')['default']
     SvgIcon: typeof import('./src/components/SvgIcon/SvgIcon.vue')['default']
     TemplatesPanel: typeof import('./src/components/TemplateTool/templatesPanel.vue')['default']

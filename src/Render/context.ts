@@ -10,6 +10,7 @@ import type { ContextmenuDraw } from "./draws/ContextmenuDraw";
 import type { PaintTool } from "./tools/PaintTool";
 import type { EraserTool } from "./tools/EraserTool";
 import type { ConnectorTool } from "./tools/ConnectorTool";
+import type { StyleTool } from "./tools/StyleTool";
 import type { SelectionTool } from "./tools/SelectionTool";
 import type { EditToolbar } from "./tools/EditToolbar";
 import type { ZIndexTool } from "./tools/ZIndexTool";
@@ -52,6 +53,7 @@ export interface ICanvasContext {
   paintTool: PaintTool;
   eraserTool: EraserTool;
   connectorTool: ConnectorTool;
+  styleTool: StyleTool;
   selectionTool: SelectionTool;
   editToolbar: EditToolbar;
   zIndexTool: ZIndexTool;
@@ -72,4 +74,5 @@ export interface ICanvasContext {
   setStageScale(scale: number): void;
   getPointerPosAfterStageChanged(): Konva.Vector2d | null;
   deleteSelectingElement(): void;
+  moveSelectedBy(dx: number, dy: number, record?: boolean): void;
 }
