@@ -44,12 +44,12 @@ describe("SceneHistory", () => {
     history.record([shape("a"), shape("b"), shape("c")]);
 
     expect(history.canUndo).toBe(true);
-    expect(history.undo()?.map((e) => e.id)).toEqual(["a", "b"]);
-    expect(history.undo()?.map((e) => e.id)).toEqual(["a"]);
+    expect(history.undo()?.elements.map((e) => e.id)).toEqual(["a", "b"]);
+    expect(history.undo()?.elements.map((e) => e.id)).toEqual(["a"]);
     expect(history.undo()).toBeNull();
 
     expect(history.canRedo).toBe(true);
-    expect(history.redo()?.map((e) => e.id)).toEqual(["a", "b"]);
+    expect(history.redo()?.elements.map((e) => e.id)).toEqual(["a", "b"]);
   });
 
   it("等价的重复记录不会新增条目", () => {
@@ -67,7 +67,15 @@ describe("SceneHistory", () => {
     history.record([shape("a"), createTextElement({ id: "t" })]);
 
     expect(history.canRedo).toBe(false);
-    expect(history.current?.map((e) => e.id)).toEqual(["a", "t"]);
+    expect(history.current?.elements.map((e) => e.id)).toEqual(["a", "t"]);
+  });
+
+  it("随元素变更保存并恢复选中状态", () => {
+    const history = new SceneHistory();
+    history.reset([shape("a")]);
+    history.record([shape("a"), shape("b")], ["a", "b"]);
+    expect(history.undo()?.selectedIds).toEqual([]);
+    expect(history.redo()?.selectedIds).toEqual(["a", "b"]);
   });
 
   it("超出上限丢弃最旧记录", () => {

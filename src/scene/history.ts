@@ -73,13 +73,22 @@ function listsEqual(a: BoardElement[], b: BoardElement[]): boolean {
 }
 
 /**
+ * 一条历史记录：元素列表 + 当时选中的元素 id。
+ * 仅元素变化才会产生新记录；选择随最近一次元素变更一起保存。
+ */
+export interface HistoryEntry {
+  elements: BoardElement[];
+  selectedIds: ElementId[];
+}
+
+/**
  * 场景历史栈。存储元素列表，并对未变元素做引用复用；
- * 撤销 / 重做返回目标元素列表，由渲染层负责应用。
+ * 撤销 / 重做返回目标记录，由渲染层负责应用。
  */
 export class SceneHistory {
   static readonly DEFAULT_LIMIT = 100;
 
-  private entries: BoardElement[][] = [];
+  private entries: HistoryEntry[] = [];
   private cursor = -1;
   private readonly limit: number;
 
@@ -103,22 +112,24 @@ export class SceneHistory {
     return this.cursor < this.entries.length - 1;
   }
 
-  get current(): BoardElement[] | null {
+  get current(): HistoryEntry | null {
     return this.entries[this.cursor] ?? null;
   }
 
-  /** 记录一份新状态；与当前等价时不产生新条目。返回是否真正记录 */
-  record(elements: BoardElement[]): boolean {
+  /** 记录一份新状态；元素与当前等价时不产生新条目。返回是否真正记录 */
+  record(elements: BoardElement[], selectedIds: ElementId[] = []): boolean {
     const current = this.current;
-    const interned = current ? internElements(current, elements) : elements;
+    const interned = current
+      ? internElements(current.elements, elements)
+      : elements;
 
-    if (current && listsEqual(current, interned)) {
+    if (current && listsEqual(current.elements, interned)) {
       return false;
     }
 
     // 丢弃重做分支
     this.entries.splice(this.cursor + 1);
-    this.entries.push(interned);
+    this.entries.push({ elements: interned, selectedIds: [...selectedIds] });
 
     // 超出上限时丢弃最旧的记录
     if (this.entries.length > this.limit) {
@@ -129,18 +140,18 @@ export class SceneHistory {
   }
 
   /** 以给定状态重置历史 */
-  reset(elements: BoardElement[]) {
-    this.entries = [elements];
+  reset(elements: BoardElement[], selectedIds: ElementId[] = []) {
+    this.entries = [{ elements, selectedIds: [...selectedIds] }];
     this.cursor = 0;
   }
 
-  undo(): BoardElement[] | null {
+  undo(): HistoryEntry | null {
     if (!this.canUndo) return null;
     this.cursor--;
     return this.entries[this.cursor];
   }
 
-  redo(): BoardElement[] | null {
+  redo(): HistoryEntry | null {
     if (!this.canRedo) return null;
     this.cursor++;
     return this.entries[this.cursor];
