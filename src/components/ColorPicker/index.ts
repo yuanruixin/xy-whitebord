@@ -4,13 +4,19 @@ import type { Props } from "./type";
 
 let container: HTMLDivElement | null = null;
 export function PickColor(
-  config: Pick<Props, "defaultColor" | "pos">,
+  config: Pick<
+    Props,
+    "defaultColor" | "pos" | "fontSize" | "fontSizes" | "onFontSize"
+  >,
   callback: Props["callback"]
 ) {
   const props: Props = {
     defaultColor: config.defaultColor,
     // 相对于视口的位置
     pos: config.pos,
+    fontSize: config.fontSize,
+    fontSizes: config.fontSizes,
+    onFontSize: config.onFontSize,
     callback,
   };
 

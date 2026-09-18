@@ -2,10 +2,13 @@ import Konva from "konva";
 import type { ICanvasContext } from "../context";
 import { nanoid } from "nanoid";
 import { MouseButton } from "../types";
-interface TextConfig {
+import { DEFAULT_FONT_SIZE } from "@/constants/fontSize";
+export interface TextConfig {
   text?: string;
   fontSize?: number;
   fontWeight?: number;
+  fontFamily?: string;
+  fill?: string;
 }
 export class Text {
   // 实际konva元素
@@ -17,9 +20,16 @@ export class Text {
   initialWidth: number = 200;
   // 用于预览的textarea
   textarea: HTMLTextAreaElement | null = null;
+  // 新建文本的默认样式
+  private option: TextConfig = { fontSize: DEFAULT_FONT_SIZE };
   constructor(render: ICanvasContext) {
     this.render = render;
     this.init();
+  }
+
+  // 更新新建文本的默认样式
+  configure(config: Partial<TextConfig>) {
+    this.option = { ...this.option, ...config };
   }
 
   init(config?: TextConfig) {
@@ -33,15 +43,19 @@ export class Text {
     this.bindEvents();
   }
   createElement(pos: { x: number; y: number }, config?: TextConfig) {
+    const options = { ...this.option, ...config };
     const group = new Konva.Group({
       id: nanoid(),
       name: "text",
     });
     const textNode = new Konva.Text({
-      text: config?.text || "添加文字",
+      text: options.text || "添加文字",
       x: pos.x,
       y: pos.y,
-      fontSize: 20,
+      fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
+      fontFamily: options.fontFamily,
+      fontStyle: options.fontWeight ? String(options.fontWeight) : undefined,
+      fill: options.fill,
       width: this.initialWidth,
     });
     group.add(textNode);

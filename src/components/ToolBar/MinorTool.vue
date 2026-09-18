@@ -88,11 +88,13 @@
     </li>
     <!-- 文本工具 -->
     <li
-      class="cursor-pointer hover:bg-gray-700 rounded-md"
+      class="relative cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('text') }"
-      @click="toggleTool('text')"
     >
-      <a class="w-10 h-10 p-0 flex justify-center items-center">
+      <a
+        class="w-10 h-10 p-0 flex justify-center items-center"
+        @click="toggleTool('text')"
+      >
         <svg-icon
           prefix="menu"
           name="text"
@@ -101,6 +103,31 @@
           v-tooltip="'文本'"
         ></svg-icon>
       </a>
+      <!-- 文本样式设置 -->
+      <div
+        class="text-optionMenu absolute left-full top-0 z-20 bg-[#1d232a] rounded-md translate-x-4 select-none"
+        v-show="selectedTool === 'text'"
+      >
+        <div class="flex flex-col gap-y-2 p-3">
+          <span class="w-max">字号</span>
+          <div class="flex items-center gap-1">
+            <button
+              v-for="preset in fontSizePresets"
+              :key="preset.label"
+              type="button"
+              class="w-8 h-7 rounded text-xs"
+              :class="
+                textOption.fontSize === preset.value
+                  ? 'bg-primary text-white'
+                  : 'bg-slate-600/30'
+              "
+              @click="textOption.fontSize = preset.value"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
+        </div>
+      </div>
     </li>
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
@@ -132,6 +159,7 @@ import { useTool } from "./useTool";
 import { useRenderStore } from "@/store/render";
 import { onMounted, reactive } from "vue";
 import { readFileAsDataURL } from "@/utils/handleFile";
+import { FONT_SIZE_PRESETS, DEFAULT_FONT_SIZE } from "@/constants/fontSize";
 const { selectedTool, isActiveTool, clearSelectedTool } = useTool();
 const { render } = useRenderStore();
 
@@ -176,10 +204,28 @@ watch(
     render.value?.paintTool.init(newVal);
   }
 );
+
+// 文本样式设置
+const fontSizePresets = FONT_SIZE_PRESETS;
+const textOption = reactive({
+  fontSize: DEFAULT_FONT_SIZE,
+});
+watch(textOption, (val) => {
+  const size = Number(val.fontSize);
+  render.value?.text.configure({
+    fontSize: Number.isFinite(size) && size > 0 ? size : DEFAULT_FONT_SIZE,
+  });
+});
 function toggleTool(tool: "picture" | "brush" | "text" | "eraser") {
+  // 再次点击当前工具：关闭它
   if (isActiveTool(tool)) {
     clearSelectedTool();
+    if (tool !== "picture") {
+      render.value?.workMode("default");
+    }
+    return;
   }
+
   selectedTool.value = tool;
   if (tool === "picture") {
     pictureInputRef.value?.click();
