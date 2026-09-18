@@ -2,6 +2,9 @@ import { clone, debounce } from "lodash-es";
 import Konva from "konva";
 import type { ICanvasContext } from "../context";
 export class HistoryTool {
+  static readonly name = "HistoryTool";
+  // 历史记录上限，避免快照（含 base64 图片）无限增长
+  static readonly MAX = 100;
   config: {
     on?: {
       historyChange?: (history: string[], historyIndex: number) => void;
@@ -54,6 +57,12 @@ export class HistoryTool {
   updateHistory() {
     this.history.splice(this.historyIndex + 1);
     this.history.push(this.render.importExportTool.save());
+
+    // 超出上限时丢弃最旧的记录
+    if (this.history.length > HistoryTool.MAX) {
+      this.history.splice(0, this.history.length - HistoryTool.MAX);
+    }
+
     this.historyIndex = this.history.length - 1;
     // 自动保存当前状态
     this.persist();

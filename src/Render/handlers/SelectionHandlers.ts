@@ -365,7 +365,7 @@ export class SelectionHandlers implements Types.Handler {
         this.reset();
 
         // 更新历史
-        // this.render.updateHistory()
+        this.render.historyTool.updateHistory();
       },
     },
   } satisfies Types.Handler["handlers"];
