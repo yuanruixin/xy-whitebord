@@ -1,34 +1,110 @@
 import { computed, ref, watch } from "vue";
 import { nanoid } from "nanoid";
 
-// 一次 AI 生成即一条历史对话
+export type AIChatRole = "user" | "assistant";
+export type AIChatKind = "ask" | "scene";
+
+export interface AIChatMessage {
+  id: string;
+  role: AIChatRole;
+  // 展示文本（用户输入 / 助手的提问或结果说明）
+  text: string;
+  // 助手的原始输出（JSON），用于重放与重新导入
+  raw?: string;
+  // 助手推理过程
+  reasoning?: string;
+  kind?: AIChatKind;
+  nodeCount?: number;
+  // 正在流式输出
+  streaming?: boolean;
+  createdAt: number;
+}
+
 export interface AIConversation {
   id: string;
   title: string;
-  prompt: string;
-  output: string;
-  reasoning: string;
-  nodeCount: number;
+  messages: AIChatMessage[];
   createdAt: number;
   updatedAt: number;
 }
 
 const STORAGE_KEY = "xy-whiteboard:ai-conversations";
-// 历史上限，避免本地存储无限增长
 const MAX = 50;
+const DEFAULT_TITLE = "新对话";
 
-function makeTitle(prompt: string): string {
-  const clean = prompt.replace(/\s+/g, " ").trim();
-  if (!clean) return "新对话";
+function makeTitle(text: string): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (!clean) return DEFAULT_TITLE;
   return clean.length > 18 ? `${clean.slice(0, 18)}…` : clean;
+}
+
+// 兼容旧版单次生成结构
+interface LegacyConversation {
+  id: string;
+  title?: string;
+  prompt?: string;
+  output?: string;
+  reasoning?: string;
+  nodeCount?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+function migrate(raw: unknown): AIConversation[] {
+  if (!Array.isArray(raw)) return [];
+
+  return raw
+    .map((item): AIConversation | null => {
+      if (!item || typeof item !== "object") return null;
+      const legacy = item as LegacyConversation & Partial<AIConversation>;
+
+      // 已是新结构
+      if (Array.isArray(legacy.messages)) {
+        return legacy as AIConversation;
+      }
+
+      // 旧结构：prompt + output -> user/assistant 两条消息
+      const messages: AIChatMessage[] = [];
+      if (typeof legacy.prompt === "string" && legacy.prompt.trim()) {
+        messages.push({
+          id: nanoid(),
+          role: "user",
+          text: legacy.prompt,
+          createdAt: legacy.createdAt ?? Date.now(),
+        });
+      }
+      if (typeof legacy.output === "string" && legacy.output.trim()) {
+        messages.push({
+          id: nanoid(),
+          role: "assistant",
+          text: legacy.nodeCount
+            ? `已生成 ${legacy.nodeCount} 个节点并导入画布`
+            : "已生成图形",
+          raw: legacy.output,
+          reasoning: legacy.reasoning,
+          kind: "scene",
+          nodeCount: legacy.nodeCount ?? 0,
+          createdAt: legacy.updatedAt ?? Date.now(),
+        });
+      }
+      if (messages.length === 0) return null;
+
+      return {
+        id: legacy.id ?? nanoid(),
+        title: legacy.title ?? makeTitle(messages[0].text),
+        messages,
+        createdAt: legacy.createdAt ?? Date.now(),
+        updatedAt: legacy.updatedAt ?? Date.now(),
+      };
+    })
+    .filter((item): item is AIConversation => item !== null);
 }
 
 function load(): AIConversation[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as AIConversation[]) : [];
+    return migrate(JSON.parse(raw));
   } catch {
     return [];
   }
@@ -53,7 +129,7 @@ function saveNow() {
 let saveTimer: number | undefined;
 function scheduleSave() {
   if (saveTimer) window.clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(saveNow, 500);
+  saveTimer = window.setTimeout(saveNow, 600);
 }
 
 watch(conversations, scheduleSave, { deep: true });
@@ -62,15 +138,12 @@ if (typeof window !== "undefined") {
   window.addEventListener("pagehide", saveNow);
 }
 
-function createConversation(prompt: string): AIConversation {
+function createConversation(): AIConversation {
   const now = Date.now();
   const conversation: AIConversation = {
     id: nanoid(),
-    title: makeTitle(prompt),
-    prompt,
-    output: "",
-    reasoning: "",
-    nodeCount: 0,
+    title: DEFAULT_TITLE,
+    messages: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -80,6 +153,24 @@ function createConversation(prompt: string): AIConversation {
   }
   activeId.value = conversation.id;
   return conversation;
+}
+
+function appendMessage(
+  conversation: AIConversation,
+  message: Omit<AIChatMessage, "id" | "createdAt">
+): AIChatMessage {
+  const full: AIChatMessage = {
+    id: nanoid(),
+    createdAt: Date.now(),
+    ...message,
+  };
+  conversation.messages.push(full);
+
+  if (conversation.title === DEFAULT_TITLE && message.role === "user") {
+    conversation.title = makeTitle(message.text);
+  }
+  conversation.updatedAt = Date.now();
+  return full;
 }
 
 function newConversation() {
@@ -103,6 +194,7 @@ export function useAIConversations() {
     activeId,
     activeConversation,
     createConversation,
+    appendMessage,
     newConversation,
     selectConversation,
     deleteConversation,

@@ -62,37 +62,40 @@ const TYPE_ALIASES: Record<string, AISceneNodeType> = {
   label: "text",
 };
 
-const SYSTEM_PROMPT = `你是一个图形/白板场景生成助手。请根据用户的描述，输出一个 JSON 对象，用于在无限画布上绘制图形与连接线。
-只输出 JSON 本身，不要输出任何解释文字，也不要使用 Markdown 代码块。
+const SYSTEM_PROMPT = `你是「白板绘图助手」，通过多轮对话理解用户需求，最终在无限画布上绘制图形与连接线。
 
-JSON 结构：
+## 决策
+回复前先判断用户需求是否足够明确：
+- 需求已足够明确（给出了主题、主要元素，以及流程/关系/方向/层级等）时，直接输出绘图 JSON。
+- 需求含糊或缺少关键信息（例如只说“画个流程图”却没说画什么、元素或关系不明确）时，先输出询问 JSON，提出 1~3 个简洁的澄清问题，不要绘图。
+- 用户回答后重新判断，直到明确再绘图；不要为了提问而提问，简单明确的需求直接绘制。
+
+## 输出格式
+每次只输出一个 JSON 对象，不要输出任何解释文字，也不要使用 Markdown 代码块。
+
+询问时：
+{ "type": "ask", "question": "澄清问题，可包含多个问句" }
+
+绘图时：
 {
+  "type": "scene",
   "nodes": [
     {
       "id": "唯一字符串",
       "type": "rectangle | ellipse | diamond | triangle | parallelogram | arrow | text",
-      "x": 数字,
-      "y": 数字,
-      "width": 数字,
-      "height": 数字,
-      "fill": "#十六进制颜色",
-      "text": "可选，图形内的文字",
-      "fontSize": "可选，text 节点的字号，默认 20"
+      "x": 数字, "y": 数字, "width": 数字, "height": 数字,
+      "fill": "#十六进制颜色", "text": "可选，图形内文字", "fontSize": 可选数字
     }
   ],
-  "edges": [
-    { "from": "起点节点id", "to": "终点节点id" }
-  ]
+  "edges": [ { "from": "起点节点id", "to": "终点节点id" } ]
 }
 
-规则：
-- 画布左上角为原点，建议从 x=120, y=120 开始布局，整体控制在 x:120~1080、y:120~680 范围内。
-- 尺寸建议：矩形/菱形 160x80；椭圆 140x100；文字节点 width 约 200。
-- 节点之间留出间距：横向间隔建议不小于 60，纵向不小于 80，严禁重叠。
-- 流程图建议自上而下或从左到右排列。
-- edges 表示带箭头的连接线，from/to 必须是 nodes 中真实存在的 id。
-- fill 从配色中选取：#4e95ff(主蓝), #34d399(绿), #fbbf24(黄), #f87171(红), #a78bfa(紫), #94a3b8(灰)。
-- 文字节点 type 为 "text" 时，fill 表示文字颜色，建议使用 #1d293a。
+## 绘图规则
+- 画布左上角为原点，从 x=120, y=120 开始布局，整体控制在 x:120~1080、y:120~680 范围内。
+- 尺寸：矩形/菱形约 160x80；椭圆约 140x100；文字节点宽约 200。
+- 节点间距：横向不小于 60，纵向不小于 80，严禁重叠；流程图建议自上而下或从左到右排列。
+- edges 为带箭头的连接线，from/to 必须是 nodes 中真实存在的 id。
+- 配色：#4e95ff(主蓝), #34d399(绿), #fbbf24(黄), #f87171(红), #a78bfa(紫), #94a3b8(灰)；文字节点 fill 为文字颜色，建议 #1d293a。
 - 节点数量控制在 30 个以内。`;
 
 // 从模型返回内容中提取 JSON（兼容代码块、前后说明文字）
@@ -186,12 +189,23 @@ export type AIStatus =
 export interface AIStreamHandlers {
   // 当前阶段，用于给用户过程反馈
   onStatus?: (status: AIStatus) => void;
-  // 正文增量（最终会解析为图形 JSON）
+  // 正文增量（最终会解析为询问或图形）
   onContent?: (delta: string, full: string) => void;
   // 推理过程增量（部分模型会返回 reasoning_content）
   onReasoning?: (delta: string, full: string) => void;
   signal?: AbortSignal;
 }
+
+// 一轮对话（发送给模型的历史）
+export interface AIChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+// 模型回复：要么追问，要么给出可绘制的场景
+export type AIResult =
+  | { type: "ask"; question: string }
+  | { type: "scene"; scene: AIScene };
 
 function validateConfig(config: AIConfig) {
   if (!config.apiKey.trim()) throw new Error("请先配置 API Key");
@@ -205,17 +219,14 @@ function validateConfig(config: AIConfig) {
  * - OpenAI o 系列、gpt-5：reasoning_effort
  * 关闭思考可显著减少输出 token、加快生成。
  */
-function buildRequestBody(config: AIConfig, prompt: string) {
+function buildRequestBody(config: AIConfig, turns: AIChatTurn[]) {
   const baseURL = config.baseURL.toLowerCase();
   const model = config.model.toLowerCase();
 
   const body: Record<string, unknown> = {
     model: config.model.trim(),
     stream: true,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: prompt },
-    ],
+    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...turns],
   };
 
   if (config.provider === "deepseek" || baseURL.includes("deepseek")) {
@@ -241,14 +252,14 @@ function extractErrorMessage(response: Response): Promise<string> {
 }
 
 /**
- * 调用 OpenAI 兼容接口（流式），根据自然语言描述生成画布场景。
- * 生成过程中通过 handlers 实时回调文本增量与状态，便于界面展示中间过程。
+ * 调用 OpenAI 兼容接口（流式）进行多轮对话。
+ * 模型要么返回追问，要么返回可绘制的场景；生成过程中通过 handlers 回传增量与状态。
  */
-export async function generateSceneStream(
-  prompt: string,
+export async function chatStream(
+  turns: AIChatTurn[],
   config: AIConfig,
   handlers: AIStreamHandlers = {}
-): Promise<AIScene> {
+): Promise<AIResult> {
   validateConfig(config);
 
   const baseURL = config.baseURL.trim().replace(/\/+$/, "");
@@ -263,7 +274,7 @@ export async function generateSceneStream(
         Authorization: `Bearer ${config.apiKey.trim()}`,
       },
       signal: handlers.signal,
-      body: JSON.stringify(buildRequestBody(config, prompt)),
+      body: JSON.stringify(buildRequestBody(config, turns)),
     });
   } catch (error) {
     if ((error as Error)?.name === "AbortError") throw error;
@@ -288,7 +299,7 @@ export async function generateSceneStream(
     }
     handlers.onContent?.(content, content);
     handlers.onStatus?.("parsing");
-    return normalizeScene(extractJson(content));
+    return parseAIResponse(content);
   }
 
   const reader = response.body.getReader();
@@ -356,10 +367,33 @@ export async function generateSceneStream(
   }
 
   handlers.onStatus?.("parsing");
-  return normalizeScene(extractJson(content));
+  return parseAIResponse(content);
 }
 
 // 从已保存的模型输出中解析场景（用于历史对话重新导入）
 export function parseScene(content: string): AIScene {
   return normalizeScene(extractJson(content));
+}
+
+// 解析模型回复：追问或场景
+export function parseAIResponse(content: string): AIResult {
+  const data = extractJson(content);
+  if (!data || typeof data !== "object") {
+    throw new Error("AI 返回的数据格式不正确");
+  }
+
+  const source = data as Record<string, unknown>;
+  if (source.type === "ask") {
+    const question =
+      typeof source.question === "string"
+        ? source.question
+        : typeof source.content === "string"
+          ? source.content
+          : "";
+    if (!question.trim()) throw new Error("AI 提出了问题但内容为空");
+    return { type: "ask", question: question.trim() };
+  }
+
+  // type === "scene" 或直接返回 { nodes, edges }
+  return { type: "scene", scene: normalizeScene(source) };
 }
