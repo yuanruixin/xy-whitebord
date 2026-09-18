@@ -51,8 +51,8 @@ export class Render implements ICanvasContext {
   historyTool: Tools.HistoryTool = new Tools.HistoryTool(this); // 历史工具
   // 复制工具
   copyTool: Tools.CopyTool = new Tools.CopyTool(this);
-  // AI 生成工具
-  aiTool: Tools.AITool = new Tools.AITool(this);
+  // 画布操作工具（供 AI 等外部能力调用：创建/移动/删除/连线）
+  canvasTool: Tools.CanvasCommandTool = new Tools.CanvasCommandTool(this);
   // 多选器层
   groupTransformer: Konva.Group = new Konva.Group();
 

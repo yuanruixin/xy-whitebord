@@ -2,7 +2,7 @@ import { computed, ref, watch } from "vue";
 import { nanoid } from "nanoid";
 
 export type AIChatRole = "user" | "assistant";
-export type AIChatKind = "ask" | "scene";
+export type AIChatKind = "ask" | "scene" | "action";
 
 export interface AIChatMessage {
   id: string;
@@ -15,6 +15,8 @@ export interface AIChatMessage {
   reasoning?: string;
   kind?: AIChatKind;
   nodeCount?: number;
+  // 本轮执行过的画布操作摘要
+  tools?: string[];
   // 正在流式输出
   streaming?: boolean;
   createdAt: number;

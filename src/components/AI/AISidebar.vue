@@ -254,6 +254,20 @@
                 </span>
               </div>
 
+              <div
+                v-if="message.tools?.length"
+                class="flex flex-wrap gap-1.5"
+              >
+                <span
+                  v-for="(tool, index) in message.tools"
+                  :key="index"
+                  class="flex items-center gap-x-0.5 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs text-slate-500"
+                >
+                  <span class="icon-[mdi--check] text-green-500"></span>
+                  {{ tool }}
+                </span>
+              </div>
+
               <button
                 v-if="message.kind === 'scene' && !message.streaming"
                 type="button"
@@ -324,6 +338,52 @@
           <p v-if="error" class="mt-2 text-xs text-red-500">{{ error }}</p>
         </div>
       </template>
+
+      <!-- 危险操作确认 -->
+      <div
+        v-if="confirmRequest"
+        class="absolute inset-0 z-10 flex items-center justify-center bg-black/30 p-4"
+      >
+        <div class="w-full rounded-xl bg-white p-4 shadow-xl">
+          <div class="flex items-center gap-x-2 text-slate-800">
+            <span
+              class="icon-[mdi--alert-outline] text-lg text-amber-500"
+            ></span>
+            <h4 class="font-semibold">确认危险操作</h4>
+          </div>
+          <p class="mt-2 text-sm text-slate-600">
+            AI 请求执行「{{ confirmSummary }}」，是否继续？
+          </p>
+          <ul
+            v-if="confirmTargets.length"
+            class="mt-2 max-h-40 overflow-y-auto rounded-lg bg-slate-50 p-2 text-xs text-slate-500"
+          >
+            <li
+              v-for="target in confirmTargets"
+              :key="target.id"
+              class="truncate py-0.5"
+            >
+              • {{ target.label || target.type }}
+            </li>
+          </ul>
+          <div class="mt-4 flex justify-end gap-x-2">
+            <button
+              type="button"
+              class="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100"
+              @click="resolveConfirm(false)"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="rounded-md bg-red-500 px-3 py-1.5 text-sm text-white hover:bg-red-600"
+              @click="resolveConfirm(true)"
+            >
+              确认执行
+            </button>
+          </div>
+        </div>
+      </div>
     </aside>
   </Transition>
 </template>
@@ -341,10 +401,15 @@ import {
 import { AI_PROVIDERS, CUSTOM_PROVIDER_ID } from "@/constants/aiProviders";
 import ComboBox from "./ComboBox.vue";
 import {
-  chatStream,
+  runCanvasAgent,
   parseScene,
+  tryParseScene,
+  CANVAS_TOOL_LABELS,
   type AIChatTurn,
   type AIStatus,
+  type AIToolCallRecord,
+  type CanvasNodeInfo,
+  type ConfirmationRequest,
 } from "@/utils/ai";
 
 const { render } = useRenderStore();
@@ -383,6 +448,32 @@ const status = ref<AIStatus>("idle");
 
 let controller: AbortController | null = null;
 
+// 危险操作确认
+const confirmRequest = ref<ConfirmationRequest | null>(null);
+let confirmResolver: ((approved: boolean) => void) | null = null;
+
+const confirmSummary = computed(() => confirmRequest.value?.summary ?? "");
+
+// 确认框中列出将被操作的元素（按 id 从当前画布解析）
+const confirmTargets = computed<CanvasNodeInfo[]>(() => {
+  const request = confirmRequest.value;
+  if (!request || !render.value) return [];
+  const args = request.args as { ids?: unknown } | undefined;
+  const ids = Array.isArray(args?.ids) ? args.ids.map(String) : [];
+  if (ids.length === 0) return [];
+  const data = render.value.canvasTool.getCanvas().data as
+    | { nodes?: CanvasNodeInfo[] }
+    | undefined;
+  return (data?.nodes ?? []).filter((node) => ids.includes(node.id));
+});
+
+function resolveConfirm(approved: boolean) {
+  const resolver = confirmResolver;
+  confirmResolver = null;
+  confirmRequest.value = null;
+  resolver?.(approved);
+}
+
 const examples = [
   "画一个用户登录流程图",
   "用四步说明软件开发流程",
@@ -394,8 +485,17 @@ const STATUS_TEXT: Record<AIStatus, string> = {
   connecting: "正在连接模型...",
   reasoning: "模型思考中...",
   generating: "正在生成图形...",
+  acting: "正在操作画布...",
   parsing: "正在解析并导入画布...",
 };
+
+// 画布工具的中文名，用于展示操作过程
+function describeToolCall(record: AIToolCallRecord): string {
+  const label =
+    CANVAS_TOOL_LABELS[record.name as keyof typeof CANVAS_TOOL_LABELS] ??
+    record.name;
+  return record.result.message || label;
+}
 
 const statusText = computed(() => STATUS_TEXT[status.value]);
 const messages = computed(() => activeConversation.value?.messages ?? []);
@@ -454,10 +554,12 @@ function onKeydown(event: KeyboardEvent) {
 }
 
 function onStop() {
+  resolveConfirm(false);
   controller?.abort();
 }
 
 function startNewConversation() {
+  resolveConfirm(false);
   controller?.abort();
   controller = null;
   loading.value = false;
@@ -483,7 +585,10 @@ function reimport(message: AIChatMessage) {
   if (!message.raw || !render.value) return;
   try {
     const scene = parseScene(message.raw);
-    render.value.aiTool.generate(scene);
+    render.value.canvasTool.createNodes({
+      nodes: scene.nodes,
+      edges: scene.edges,
+    });
     error.value = "";
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e);
@@ -520,11 +625,27 @@ async function send() {
 
   const conversation = activeConversation.value ?? createConversation();
   appendMessage(conversation, { role: "user", text });
-  const assistant = appendMessage(conversation, {
+  const placeholder = appendMessage(conversation, {
     role: "assistant",
     text: "",
     streaming: true,
   });
+
+  // 取响应式代理，保证流式输出与工具执行过程实时渲染
+  const conv =
+    conversations.value.find((item) => item.id === conversation.id) ??
+    conversation;
+  const assistant =
+    conv.messages.find((item) => item.id === placeholder.id) ?? placeholder;
+
+  if (!render.value) {
+    error.value = "画布尚未初始化";
+    assistant.streaming = false;
+    removeMessage(conv, assistant.id);
+    return;
+  }
+  // 画布能力端口：AI 模块通过它操作画布
+  const executor = render.value.canvasTool;
 
   loading.value = true;
   status.value = "connecting";
@@ -532,7 +653,7 @@ async function send() {
   const currentController = controller;
 
   // 仅取最近若干轮，控制上下文长度
-  const turns: AIChatTurn[] = conversation.messages
+  const turns: AIChatTurn[] = conv.messages
     .filter((message) => !message.streaming)
     .slice(-12)
     .map((message) => ({
@@ -552,52 +673,79 @@ async function send() {
   };
 
   try {
-    const result = await chatStream(
+    const result = await runCanvasAgent(
       turns,
       { ...config },
+      executor,
       {
         signal: controller.signal,
         onStatus: (next) => (status.value = next),
-        onContent: (_delta, full) => (contentText = full),
+        onContent: (_delta, full) => {
+          contentText = full;
+          assistant.text = full;
+        },
         onReasoning: (_delta, full) => {
           reasoningText = full;
           flushReasoning();
         },
+        onToolCall: (record) => {
+          assistant.tools = [
+            ...(assistant.tools ?? []),
+            describeToolCall(record),
+          ];
+        },
       },
-      { canvasContext: render.value?.aiTool.describeCanvas() }
+      {
+        canvasContext: executor.describeCanvas(),
+        onConfirm: (request) =>
+          new Promise<boolean>((resolve) => {
+            confirmRequest.value = request;
+            confirmResolver = resolve;
+          }),
+      }
     );
 
     if (controller !== currentController) return;
 
     assistant.streaming = false;
-    assistant.raw = contentText;
     if (reasoningText) assistant.reasoning = reasoningText;
 
-    if (result.type === "ask") {
-      assistant.kind = "ask";
-      assistant.text = result.question;
+    if (result.toolCalls.length > 0) {
+      // 已通过工具操作画布
+      assistant.kind = "action";
+      assistant.text =
+        result.text || `已完成 ${result.toolCalls.length} 项画布操作`;
     } else {
-      assistant.kind = "scene";
-      const count = result.scene.nodes.length;
-      assistant.nodeCount = count;
-      assistant.text = `已生成 ${count} 个节点并导入画布`;
-      if (!render.value) throw new Error("画布尚未初始化");
-      render.value.aiTool.generate(result.scene);
+      // 兼容未走工具调用、直接返回场景 JSON 的模型
+      const fallback = tryParseScene(result.text || contentText);
+      if (fallback) {
+        executor.createNodes({
+          nodes: fallback.nodes,
+          edges: fallback.edges,
+        });
+        assistant.kind = "scene";
+        assistant.raw = result.text || contentText;
+        assistant.nodeCount = fallback.nodes.length;
+        assistant.text = `已生成 ${fallback.nodes.length} 个节点并导入画布`;
+      } else {
+        assistant.kind = "ask";
+        assistant.text = result.text || "（无回复）";
+      }
     }
-    conversation.updatedAt = Date.now();
+    conv.updatedAt = Date.now();
   } catch (e) {
     if (controller !== currentController) return;
     assistant.streaming = false;
     if ((e as Error)?.name === "AbortError") {
       error.value = "已停止";
       if (!reasoningText && !contentText) {
-        removeMessage(conversation, assistant.id);
+        removeMessage(conv, assistant.id);
       } else {
         assistant.text = "（已停止）";
       }
     } else {
       error.value = e instanceof Error ? e.message : String(e);
-      removeMessage(conversation, assistant.id);
+      removeMessage(conv, assistant.id);
     }
   } finally {
     if (controller === currentController) {
@@ -625,7 +773,10 @@ watch(
 
 // 关闭侧边栏时中断生成
 watch(showDialog, (open) => {
-  if (!open && loading.value) controller?.abort();
+  if (!open && loading.value) {
+    resolveConfirm(false);
+    controller?.abort();
+  }
 });
 </script>
 
