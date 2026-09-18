@@ -199,6 +199,40 @@ function validateConfig(config: AIConfig) {
   if (!config.model.trim()) throw new Error("请先配置模型名称");
 }
 
+/**
+ * 构造请求体。根据服务商注入“思考”开关：
+ * - DeepSeek：thinking.enabled / disabled
+ * - OpenAI o 系列、gpt-5：reasoning_effort
+ * 关闭思考可显著减少输出 token、加快生成。
+ */
+function buildRequestBody(config: AIConfig, prompt: string) {
+  const baseURL = config.baseURL.toLowerCase();
+  const model = config.model.toLowerCase();
+
+  const body: Record<string, unknown> = {
+    model: config.model.trim(),
+    stream: true,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: prompt },
+    ],
+  };
+
+  if (config.provider === "deepseek" || baseURL.includes("deepseek")) {
+    body.thinking = { type: config.thinking ? "enabled" : "disabled" };
+  }
+
+  const isOpenAIReasoning = /^o\d/.test(model) || model.startsWith("gpt-5");
+  if (isOpenAIReasoning) {
+    body.reasoning_effort = config.thinking ? "high" : "low";
+  } else {
+    // 推理模型不接受 temperature，普通模型才设置
+    body.temperature = 0.4;
+  }
+
+  return body;
+}
+
 function extractErrorMessage(response: Response): Promise<string> {
   return response
     .json()
@@ -229,15 +263,7 @@ export async function generateSceneStream(
         Authorization: `Bearer ${config.apiKey.trim()}`,
       },
       signal: handlers.signal,
-      body: JSON.stringify({
-        model: config.model.trim(),
-        temperature: 0.4,
-        stream: true,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: prompt },
-        ],
-      }),
+      body: JSON.stringify(buildRequestBody(config, prompt)),
     });
   } catch (error) {
     if ((error as Error)?.name === "AbortError") throw error;
@@ -330,5 +356,10 @@ export async function generateSceneStream(
   }
 
   handlers.onStatus?.("parsing");
+  return normalizeScene(extractJson(content));
+}
+
+// 从已保存的模型输出中解析场景（用于历史对话重新导入）
+export function parseScene(content: string): AIScene {
   return normalizeScene(extractJson(content));
 }
