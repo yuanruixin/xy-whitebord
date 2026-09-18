@@ -17,6 +17,9 @@
       "eslint --fix"
     ]
   },
+  "engines": {
+    "node": "20"
+  },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
     "@typescript-eslint/eslint-plugin": "^7.10.0",
