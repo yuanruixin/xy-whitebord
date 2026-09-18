@@ -27,8 +27,7 @@ export class HistoryTool {
 
   nextHistory() {
     const record = this.history[this.historyIndex + 1];
-    console.log(record,this.history);
-    
+
     if (record) {
       this.render.importExportTool.restore(record, true)
       this.historyIndex++;

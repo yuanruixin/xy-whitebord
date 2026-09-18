@@ -78,7 +78,6 @@ export class SelectionHandlers implements Types.Handler {
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
         const parent = e.target.getParent();
-        console.log(e.target,'stage click');
         if (
           this.render.workMode() === "default" ||
           this.render.workMode() === "select"
@@ -215,8 +214,7 @@ export class SelectionHandlers implements Types.Handler {
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
         const anchor = this.render.transformer.getActiveAnchor();
-        console.log(e.target,'transformer click');
-        
+
         if (!anchor) {
           // 非变换
           if (e.evt.ctrlKey) {

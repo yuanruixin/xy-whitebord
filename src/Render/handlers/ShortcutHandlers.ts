@@ -20,7 +20,6 @@ export class ShortcutHandlers implements Types.Handler {
           } else if (e.code === Types.ShortcutKey.Z) {
             this.render.historyTool.prevHistory();
           } else if (e.code === Types.ShortcutKey.Y) {
-            console.log("redo");
             this.render.historyTool.nextHistory();
           } else if (e.code === Types.ShortcutKey.A) {
             this.render.selectionTool.selectAll();

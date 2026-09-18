@@ -13,17 +13,10 @@ export class SelectionTool {
   // 【被选中的】
   _selectingNodes: Konva.Node[] = [];
 
-  // 代替【被选中的】进行整体移动、放大缩小、旋转动作
-  selectingNodesArea: Konva.Group | null = null;
-
   // 清空已选
   selectingClear() {
     // 清空选择
     this.render.transformer.nodes([]);
-
-    // 移除 selectingNodesArea
-    this.selectingNodesArea?.remove();
-    this.selectingNodesArea = null;
 
     // 恢复透明度、层次、可交互
     for (const node of this.selectingNodes.sort(
@@ -66,15 +59,6 @@ export class SelectionTool {
     this.selectingClear();
 
     if (nodes.length > 0) {
-      // 最大zIndex
-      /*  const maxZIndex = Math.max(
-        ...this.render.layer
-          .getChildren((node) => {
-            return !this.render.ignore(node)
-          })
-          .map((o) => o.zIndex())
-      ) */
-
       // 记录状态
       for (const node of nodes) {
         node.setAttrs({
@@ -84,16 +68,6 @@ export class SelectionTool {
         });
       }
 
-      // 设置透明度、提升层次、不可交互
-      // for (const node of nodes.sort((a, b) => a.zIndex() - b.zIndex())) {
-
-      //   node.setAttrs({
-      //     listening: false,
-      //     // opacity: node.opacity() * 0.8,
-      //     zIndex: maxZIndex
-      //   })
-      // }
-
       // 选中的节点
       this.selectingNodes = nodes;
 
@@ -101,27 +75,13 @@ export class SelectionTool {
     }
   }
 
-  // 更新已选位置
-  selectingNodesAreaMove(offset: Konva.Vector2d) {
-    this.selectingNodesArea?.x(this.selectingNodesArea.x() + offset.x);
-    this.selectingNodesArea?.y(this.selectingNodesArea.y() + offset.y);
-  }
-
-  // 更新节点位置
-  selectingNodesMove(offset: Konva.Vector2d) {
-    for (const node of this.render.selectionTool.selectingNodes) {
-      node.x(node.x() + offset.x);
-      node.y(node.y() + offset.y);
-    }
-  }
   selectAll() {
     const nodeNames = [".text", ".shape", ".image",'.paint'];
     const nodes: Konva.Node[][] = [];
     nodeNames.forEach((name) => {
       nodes.push(this.render.layer.find(name) as Konva.Node[]);
     });
-    console.log(nodes,"全选");
-    
+
     this.select(nodes.flat());
   }
 }

@@ -8,17 +8,6 @@
       <li class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden">
         <TemplateTool></TemplateTool>
       </li>
-      <!-- 便签 -->
-      <!-- <li class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden">
-        <a class="w-12 h-12 p-0 flex justify-center">
-          <svg-icon
-            prefix="menu"
-            name="sticky"
-            :size="48"
-            class="hover:animate-swing-small"
-          ></svg-icon>
-        </a>
-      </li> -->
       <!-- 形状选择工具 -->
       <li class="cursor-pointer rounded-md overflow-hidden">
         <ShapesTool class="w-12 h-12"></ShapesTool>

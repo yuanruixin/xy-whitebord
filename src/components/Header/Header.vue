@@ -52,29 +52,6 @@ function openExportModal() {
   showExportModal.value = true;
 }
 
-// function onImport() {
-//   if (render.value) {
-//     const input = document.createElement("input");
-//     // 限制只能选择json文件
-//     input.accept = ".json";
-//     input.type = "file";
-//     const event = new MouseEvent("click");
-//     input.dispatchEvent(event);
-//     input.remove();
-//     input.onchange = () => {
-//       const files = input.files;
-//       if (files) {
-//         let reader = new FileReader();
-//         reader.onload = function () {
-//           // 读取为 json 文本
-//           render.value!.importExportTool.restore(this.result!.toString());
-//         };
-//         reader.readAsText(files[0]);
-//       }
-//     };
-//   }
-// }
-
 interface ExportImageConfig {
   type: "jpeg" | "png";
   bg: "grid" | "transparent" | "white";
@@ -93,13 +70,6 @@ function confirmExport(config: ExportImageConfig): void {
     }
   }
 }
-
-// function saveAsJson() {
-//   if (render.value) {
-//     const url = render.value.importExportTool.save();
-//     downloadFile(url);
-//   }
-// }
 </script>
 
 <style scoped></style>

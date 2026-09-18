@@ -84,21 +84,6 @@
         ></svg-icon>
       </a>
     </li>
-    <!-- 折线 -->
-    <!-- <li
-      class="cursor-pointer hover:bg-gray-700 rounded-md"
-      :class="{ 'bg-primary hover:bg-primary': isActiveTool('elbowed') }"
-      @click="selectedTool = 'elbowed'"
-    >
-      <a class="w-10 h-10 p-0 flex justify-center items-center">
-        <svg-icon
-          prefix="menu"
-          name="elbowed"
-          :size="48"
-          class="hover:animate-swing-small"
-        ></svg-icon>
-      </a>
-    </li> -->
     <li
       class="cursor-pointer hover:bg-gray-700 rounded-md"
       :class="{ 'bg-primary hover:bg-primary': isActiveTool('picture') }"
@@ -165,8 +150,6 @@ const brushOption:{
 watch(
   () => brushOption,
   (newVal) => {
-    console.log(brushOption);
-    
     render.value?.paintTool.init(newVal);
   }
 );

@@ -87,7 +87,6 @@ watch(
   () => props.visible,
   (newVal) => {
     show.value = newVal;
-    console.log(props);
   }
 );
 </script>
