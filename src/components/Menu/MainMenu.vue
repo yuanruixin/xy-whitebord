@@ -50,7 +50,9 @@ import {
 import ExportMenu from "@/components/Header/ExportMenu.vue";
 import { ref } from "vue";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import { useAIStore } from "@/store/ai";
 const { render } = useRenderStore();
+const { toggleDialog: toggleAIDialog } = useAIStore();
 
 const showExportModal = ref(false);
 function openExportModal() {
@@ -94,6 +96,11 @@ function confirmExport(config: ExportImageConfig): void {
 
 // 菜单项（图标 + 文字）
 const menuItems = [
+  {
+    label: "AI 生成图形",
+    icon: "icon-[mdi--robot-outline]",
+    action: toggleAIDialog,
+  },
   {
     label: "导出图片",
     icon: "icon-[ph--export-light]",

@@ -17,6 +17,7 @@ import type { ZIndexTool } from "./tools/ZIndexTool";
 import type { ImportExportTool } from "./tools/ImportExportTool";
 import type { HistoryTool } from "./tools/HistoryTool";
 import type { CopyTool } from "./tools/CopyTool";
+import type { AITool } from "./tools/AITool";
 
 export interface StageState {
   width: number;
@@ -62,6 +63,7 @@ export interface ICanvasContext {
   importExportTool: ImportExportTool;
   historyTool: HistoryTool;
   copyTool: CopyTool;
+  aiTool: AITool;
 
   workMode<T extends MouseMode>(
     workMode?: T,

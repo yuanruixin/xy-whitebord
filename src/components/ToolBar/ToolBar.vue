@@ -4,6 +4,18 @@
   >
     <!-- 主要选择区域 -->
     <ul class="flex flex-col items-center p-2 gap-y-0.5 select-none">
+      <!-- AI 生成图形 -->
+      <li
+        class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden"
+        @click="toggleAIDialog"
+        v-tooltip="'AI 生成图形'"
+      >
+        <span class="flex items-center justify-center w-12 h-12">
+          <span
+            class="icon-[mdi--robot-outline] text-2xl text-white"
+          ></span>
+        </span>
+      </li>
       <!-- 模板 -->
       <li
         class="cursor-pointer hover:bg-gray-700 rounded-md overflow-hidden"
@@ -59,8 +71,10 @@ import MinorTool from "./MinorTool.vue";
 import { useRenderStore } from "@/store/render";
 import { useTool } from "./useTool";
 import TemplateTool from "@/components/TemplateTool/TemplateTool.vue";
+import { useAIStore } from "@/store/ai";
 
 const { render } = useRenderStore();
+const { toggleDialog: toggleAIDialog } = useAIStore();
 const stageDraggable = ref(false);
 const { selectedTool,isActiveTool } = useTool();
 

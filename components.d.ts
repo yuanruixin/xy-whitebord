@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    AISidebar: typeof import('./src/components/AI/AISidebar.vue')['default']
     Board: typeof import('./src/components/Board/Board.vue')['default']
     ContextMenu: typeof import('./src/components/ContextMenu/ContextMenu.vue')['default']
     ExportMenu: typeof import('./src/components/Header/ExportMenu.vue')['default']
