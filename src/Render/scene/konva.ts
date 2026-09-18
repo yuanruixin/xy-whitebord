@@ -86,7 +86,9 @@ function textToKonva(element: TextElement): Konva.Group {
     text: element.text,
     fontSize: element.fontSize,
     fill: element.fill,
-    fontFamily: element.fontFamily,
+    width: element.width,
+    ...(element.fontFamily ? { fontFamily: element.fontFamily } : {}),
+    ...(element.fontWeight ? { fontStyle: String(element.fontWeight) } : {}),
   });
   group.add(text);
   group.position({ x: element.x, y: element.y });

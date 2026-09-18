@@ -1,8 +1,8 @@
 import Konva from "konva";
 import type { ICanvasContext } from "../context";
-import { nanoid } from "nanoid";
 import { MouseButton } from "../types";
 import { DEFAULT_FONT_SIZE } from "@/constants/fontSize";
+import { createTextElement } from "@/scene";
 import { layoutShapeLabel as applyShapeLabelLayout } from "@/Render/scene/label";
 export interface TextConfig {
   text?: string;
@@ -47,29 +47,21 @@ export class Text {
   }
   createElement(pos: { x: number; y: number }, config?: TextConfig) {
     const options = { ...this.option, ...config };
-    const group = new Konva.Group({
-      id: nanoid(),
-      name: "text",
-    });
-    const textNode = new Konva.Text({
+    const element = createTextElement({
       text: options.text || "添加文字",
       x: pos.x,
       y: pos.y,
       fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
       fontFamily: options.fontFamily,
-      fontStyle: options.fontWeight ? String(options.fontWeight) : undefined,
+      fontWeight: options.fontWeight,
       fill: options.fill,
       width: this.initialWidth,
     });
-    group.add(textNode);
 
-    this.render.layer.add(group);
+    this.render.createElement(element);
     this.completeCreate();
-    // 摧毁
   }
   completeCreate() {
-    // this.render.stage.off("click.createText");
-    this.render.historyTool.updateHistory();
     this.render.workMode("select");
   }
   destroy() {

@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { nanoid } from "nanoid";
+import { createConnectorElement } from "@/scene";
 import type { ICanvasContext } from "../context";
 import { MouseButton } from "../types";
 import { ANCHORS, anchorPoint, getAnchor } from "../utils/anchors";
@@ -382,19 +382,12 @@ export class ConnectorTool {
   }
 
   private createConnector(start: ConnectorEnd, end: ConnectorEnd) {
-    const group = new Konva.Group({ id: nanoid(), name: "connector" });
-    const arrow = new Konva.Arrow({
-      points: [start.x, start.y, end.x, end.y],
+    const element = createConnectorElement({
+      ends: [start, end],
       stroke: ConnectorTool.COLOR,
-      fill: ConnectorTool.COLOR,
       strokeWidth: 2,
-      pointerLength: 10,
-      pointerWidth: 10,
     });
-    group.add(arrow);
-    group.setAttr("ends", [start, end]);
-    this.render.layer.add(group);
-    return group;
+    return this.render.createElement(element, { record: false });
   }
 
   private onDown = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {

@@ -53,6 +53,7 @@ export interface TextElement extends BoardElementBase {
   fontSize: number;
   fill: string;
   fontFamily?: string;
+  fontWeight?: number;
 }
 
 export interface ImageElement extends BoardElementBase {

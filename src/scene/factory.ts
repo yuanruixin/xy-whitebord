@@ -90,6 +90,7 @@ export interface CreateTextInput extends BaseInput {
   fontSize?: number;
   fill?: string;
   fontFamily?: string;
+  fontWeight?: number;
 }
 
 export function createTextElement(input: CreateTextInput): TextElement {
@@ -103,6 +104,7 @@ export function createTextElement(input: CreateTextInput): TextElement {
     fontSize: input.fontSize ?? DEFAULT_FONT_SIZE,
     fill: input.fill ?? DEFAULT_TEXT_FILL,
     fontFamily: input.fontFamily,
+    fontWeight: input.fontWeight,
   };
 }
 

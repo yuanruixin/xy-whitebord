@@ -10,6 +10,8 @@ import * as Handlers from "./handlers";
 import * as elements from "./Element";
 import { getKeys } from "@/utils/secureTS";
 import { ActionManager } from "@/actions/ActionManager";
+import { elementToKonva } from "./scene/konva";
+import type { BoardElement } from "@/scene";
 // 主类
 export class Render implements ICanvasContext {
   container: HTMLDivElement;
@@ -224,6 +226,26 @@ export class Render implements ICanvasContext {
   // 绝对大小（基于可视区域像素）
   toBoardValue(stagePos: number) {
     return stagePos * this.stage.scaleX();
+  }
+
+  /**
+   * 模型 -> 节点 的统一创建入口：挂载节点，按需选中并记录历史。
+   * 运行时的形状 / 文本 / 连接线创建均通过此方法，保证行为一致。
+   */
+  createElement(
+    element: BoardElement,
+    options: { select?: boolean; record?: boolean } = {}
+  ): Konva.Group {
+    const node = elementToKonva(element);
+    this.layer.add(node);
+
+    if (options.select) {
+      this.selectionTool.select([node]);
+    }
+    if (options.record !== false) {
+      this.historyTool.updateHistory();
+    }
+    return node;
   }
 
   // 忽略非素材

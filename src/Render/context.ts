@@ -20,6 +20,7 @@ import type { CopyTool } from "./tools/CopyTool";
 import type { CanvasCommandTool } from "./tools/CanvasCommandTool";
 import type { GroupTool } from "./tools/GroupTool";
 import type { ActionManager } from "@/actions/ActionManager";
+import type { BoardElement } from "@/scene";
 
 export interface StageState {
   width: number;
@@ -77,6 +78,13 @@ export interface ICanvasContext {
   getStageState(): StageState;
   toStageValue(boardPos: number): number;
   toBoardValue(stagePos: number): number;
+  /**
+   * 模型 -> 节点 的统一创建入口：挂载节点，按需选中并记录历史。
+   */
+  createElement(
+    element: BoardElement,
+    options?: { select?: boolean; record?: boolean }
+  ): Konva.Group;
   ignore(node: Konva.Node): boolean;
   ignoreDraw(node: Konva.Node): boolean;
   setStageScale(scale: number): void;

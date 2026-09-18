@@ -115,6 +115,8 @@ function textFromKonva(group: Konva.Group): TextElement | null {
 
   const box = textNode.getClientRect({ relativeTo: group });
   const topLeft = layerTopLeft(group, box);
+  const fontStyle = textNode.fontStyle();
+  const fontWeight = /^\d+$/.test(fontStyle) ? Number(fontStyle) : undefined;
 
   return {
     ...baseOf(
@@ -129,6 +131,7 @@ function textFromKonva(group: Konva.Group): TextElement | null {
     fontSize: textNode.fontSize(),
     fill: String(textNode.fill() || DEFAULT_TEXT_FILL),
     fontFamily: textNode.fontFamily(),
+    fontWeight,
   };
 }
 

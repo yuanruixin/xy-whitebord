@@ -1,7 +1,6 @@
 import Konva from "konva";
-import { nanoid } from "nanoid";
 import type { ICanvasContext } from "@/Render/context";
-import { SHAPE_PATHS, type ShapeType } from "@/scene";
+import { SHAPE_PATHS, createShapeElement, type ShapeType } from "@/scene";
 import { throttle } from "@/utils/throttle";
 import { loadImage } from "@/Render/utils/loadImage";
 export type { ShapeType } from "@/scene";
@@ -15,8 +14,6 @@ export class Shape {
   private _moveTimesAfterCreate = 0;
   // 预览元素
   private previewingElement: HTMLDivElement | null = null;
-  // 实际konva元素
-  shapeElement: Konva.Path | null = null;
   initialSize: {
     width: number;
     height: number;
@@ -49,35 +46,27 @@ export class Shape {
   // 完成创建显示真实图形
   completeCreate = () => {
     if (!this.config) throw "请先执行init进行初始化，然后进行绘制";
-    const group = new Konva.Group({
-      id: nanoid(),
-      name: "shape",
-    });
-
-    const fill = this.config.fill ?? "#4e95ff";
-
-    this.shapeElement = new Konva.Path({
-      x: 0,
-      y: 0,
-      data: SHAPE_PATHS[this.config.shape],
-      fill,
-    });
     const pos = this.render.stage.getRelativePointerPosition();
-    if (!pos || !this.shapeElement) return;
-    this.shapeElement.setAttrs({
+    if (!pos) return;
+
+    // 以路径的自然尺寸建立模型元素，保持插入时的原始大小
+    const natural = new Konva.Path({ data: SHAPE_PATHS[this.config.shape] });
+    const box = natural.getClientRect();
+    const element = createShapeElement({
+      shape: this.config.shape,
+      fill: this.config.fill,
       x: pos.x,
       y: pos.y,
+      width: box.width,
+      height: box.height,
     });
-    group.add(this.shapeElement);
 
-    // hover 框（多选时才显示）
-    this.render.layer.add(group);
+    this.render.createElement(element);
 
     // 恢复鼠标模式
     this.render.workMode("default");
     this.hidePreviewElement();
     this.destroy();
-    this.render.historyTool.updateHistory();
   };
   creatingMousemoveHandler = throttle(
     (e: GlobalEventHandlersEventMap["mousemove"]) => {
