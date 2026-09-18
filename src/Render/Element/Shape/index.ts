@@ -28,7 +28,7 @@ interface ShapeConfig {
 export class Shape {
   render: Render;
   config: ShapeConfig | null = null;
-  private _moveTimesAfterCreat = 0;
+  private _moveTimesAfterCreate = 0;
   // 预览元素
   private previewingElement: HTMLDivElement | null = null;
   // 实际konva元素
@@ -92,13 +92,13 @@ export class Shape {
     // 恢复鼠标模式
     this.render.workMode("default");
     this.hidePreviewElement();
-    this.destory();
+    this.destroy();
     this.render.historyTool.updateHistory();
   };
   creatingMousemoveHandler = throttle(
     (e: GlobalEventHandlersEventMap["mousemove"]) => {
       // 用于确定是否是第一次移动
-      if (this._moveTimesAfterCreat < 3) this._moveTimesAfterCreat++;
+      if (this._moveTimesAfterCreate < 3) this._moveTimesAfterCreate++;
       // 鼠标不在stage中，不显示
       const previewingElement = this.previewingElement;
       if (!previewingElement) return;
@@ -110,7 +110,7 @@ export class Shape {
             translate(${x}px,${y}px)
        `;
 
-      if (this._moveTimesAfterCreat === 1) {
+      if (this._moveTimesAfterCreate === 1) {
         //  下次重绘时执行(保证上一行css操作完成后再执行下一步)，否则浏览器会把css多步操作进行合并操作
         requestAnimationFrame(() => {
           if (this.previewingElement) {
@@ -133,7 +133,7 @@ export class Shape {
     previewElementNode.style.pointerEvents = "none";
     previewElementNode.style.position = "fixed";
     // 图片节点
-    const imgNode = await loadImage(this.getSelectedImagetURl());
+    const imgNode = await loadImage(this.getSelectedImageURL());
     imgNode.style.pointerEvents = "none";
     imgNode.draggable = false;
 
@@ -163,7 +163,7 @@ export class Shape {
   /**
    * @description 动态引入图片文件
    */
-  getSelectedImagetURl() {
+  getSelectedImageURL() {
     return new URL(
       `../../../assets/shapes/${this.config?.shape}.svg`,
       import.meta.url
@@ -187,13 +187,13 @@ export class Shape {
       this.initialSize.height * this.render.stage.scaleX() + "px";
   }
 
-  destory = () => {
+  destroy = () => {
     this.render.container.removeEventListener(
       "mousemove",
       this.creatingMousemoveHandler
     );
     this.render.container.removeEventListener("click", this.completeCreate);
-    this._moveTimesAfterCreat = 0;
+    this._moveTimesAfterCreate = 0;
 
     if (this.previewingElement) {
       this.previewingElement.style.transition = "";

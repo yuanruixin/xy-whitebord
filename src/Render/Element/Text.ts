@@ -27,12 +27,12 @@ export class Text {
       if (this.render.workMode() !== "createText") return;
       const pos = this.render.stage.getRelativePointerPosition();
       if (pos) {
-        this.creatElement(pos, config);
+        this.createElement(pos, config);
       }
     });
     this.bindEvents();
   }
-  creatElement(pos: { x: number; y: number }, config?: TextConfig) {
+  createElement(pos: { x: number; y: number }, config?: TextConfig) {
     const group = new Konva.Group({
       id: nanoid(),
       name: "text",
@@ -55,7 +55,7 @@ export class Text {
     this.render.historyTool.updateHistory();
     this.render.workMode("select");
   }
-  destory() {
+  destroy() {
     this.render.cursor.reset();
     // this.render.stage.off("click.createText");
     const removeTextarea = () => {
@@ -221,14 +221,14 @@ export class Text {
       // todo bug待修复，选择多个节点时，若包含text节点，从右下角拖拽到右上角会报错
     });
   }
-  forcerMoveTextarea(selectingTextNode: Konva.Text) {
+  forceMoveTextarea(selectingTextNode: Konva.Text) {
     if (this.textarea) {
       selectingTextNode.text(this.textarea.value);
       // removeTextarea();
     }
   }
   // 舞台缩放时更新textarea
-  forcerUpdateTextarea() {
+  forceUpdateTextarea() {
     if (!this.textarea) return;
     const initTransform = this.textarea.style.transform;
     // 使用正则表达式替换其中的scale

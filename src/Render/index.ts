@@ -70,7 +70,7 @@ export class Render {
     [Handlers.ZoomHandlers.name]: new Handlers.ZoomHandlers(this),
     [Handlers.DragHandlers.name]: new Handlers.DragHandlers(this),
     [Handlers.SelectionHandlers.name]: new Handlers.SelectionHandlers(this),
-    [Handlers.ShutcutHandlers.name]: new Handlers.ShutcutHandlers(this),
+    [Handlers.ShortcutHandlers.name]: new Handlers.ShortcutHandlers(this),
   };
 
   // 监听函数回调管理
@@ -118,7 +118,7 @@ export class Render {
    * @description 这里设置获取获取当前工作模式(特殊工具初始化时，需要传递参数)
    */
 
-  workMode<T extends Types.MouseMode>(workMode?: T ,config?:T extends 'brush'?Tools.PaintTool.InitPainConfig:undefined){
+  workMode<T extends Types.MouseMode>(workMode?: T ,config?:T extends 'brush'?Tools.PaintTool.InitPaintConfig:undefined){
     if (!workMode) return this._workMode;
     if (workMode === this._workMode) return workMode;
     // 清除正在使用的旧工具
@@ -127,17 +127,17 @@ export class Render {
     function clearOldTool(this: Render) {
       const oldMouseMode = this._workMode;
       if (oldMouseMode === "createElement") {
-        this.shape.destory();
+        this.shape.destroy();
       } else if (oldMouseMode === "brush") {
         this.paintTool.destroy();
       } else if (oldMouseMode === "select" || oldMouseMode === "default") {
         this.selectionTool.selectingClear();
       } else if (oldMouseMode === "createText") {
-        this.text.destory();
+        this.text.destroy();
       } else if (oldMouseMode === "drag") {
         this.stage.draggable(false);
         this.cursor.reset();
-      } else if (oldMouseMode === "earser") {
+      } else if (oldMouseMode === "eraser") {
         this.paintTool.destroy();
       } else {
         const _: never = oldMouseMode;
@@ -155,8 +155,8 @@ export class Render {
       } else if (workMode === "brush") {
         this.paintTool.init(config!);
         this.cursor.set("brush");
-      } else if (workMode === "earser") {
-        console.log("earser工具待完成");
+      } else if (workMode === "eraser") {
+        console.log("eraser工具待完成");
       } else if (workMode === "createText") {
         this.cursor.set("crosshair");
       } else {
@@ -274,7 +274,7 @@ export class Render {
     // 更新工具条位置
     this.editToolbar.init();
     // 更新文本框位置
-    this.text.forcerUpdateTextarea();
+    this.text.forceUpdateTextarea();
   }
 
   /**

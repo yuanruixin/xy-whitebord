@@ -125,18 +125,18 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
       const paddingY = 10;
       const pointerPos = this.render.stage.getPointerPosition();
       if (pointerPos) {
-        const menuSizeAbsulute={
+        const menuSizeAbsolute={
           width: 150,
           height: lineHeight * menus.length + 2 * paddingY,
         }
-        const pos = this.computeSmartPostion(pointerPos, menuSizeAbsulute)
+        const pos = this.computeSmartPosition(pointerPos, menuSizeAbsolute)
         for (let i = 0; i < menus.length; i++) {
           // 框
           const menu = menus[i];
           if (i === 0) {
             const contextmenuContainer = new Konva.Rect({
-              width: this.render.toStageValue(menuSizeAbsulute.width),
-              height: this.render.toStageValue(menuSizeAbsulute.height),
+              width: this.render.toStageValue(menuSizeAbsolute.width),
+              height: this.render.toStageValue(menuSizeAbsolute.height),
               x: this.render.toStageValue(pos.x- stageState.x),
               y: this.render.toStageValue(pos.y- stageState.y),
               cornerRadius: 5,
@@ -233,7 +233,7 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
     }
     
   }
-   computeSmartPostion(
+   computeSmartPosition(
     click: { x: number; y: number },
     menuSize: {
       height: number;

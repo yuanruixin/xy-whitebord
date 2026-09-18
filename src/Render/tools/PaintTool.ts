@@ -5,7 +5,7 @@ import { throttle } from "@/utils/throttle";
 type PaintMode = "brush" | "eraser";
 
 export declare namespace PaintTool {
-  interface InitPainConfig {
+  interface InitPaintConfig {
     color?: string;
     mode?: PaintMode;
     lineWidth?: number;
@@ -22,7 +22,7 @@ export class PaintTool {
     this.render = render;
   }
 
-  init(config: PaintTool.InitPainConfig) {
+  init(config: PaintTool.InitPaintConfig) {
     this.render.stage.on("mousedown.paintTool touchstart.paintTool", () => {
       this.isPaint = true;
       const pos = this.render.stage.getPointerPosition();

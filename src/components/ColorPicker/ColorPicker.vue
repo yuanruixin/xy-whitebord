@@ -43,7 +43,7 @@ import type { Props } from "./type.ts";
 
 const props = withDefaults(defineProps<Props>(), {
   defaultColor: "#4a8cef",
-  visiable: false,
+  visible: false,
   colors: () => [
     "#101924",
     "#ff5a47",
@@ -66,7 +66,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const selectedColor = ref(props.defaultColor);
-const show = ref(props.visiable);
+const show = ref(props.visible);
 
 function selectColor(color: string) {
   selectedColor.value = color;
@@ -84,7 +84,7 @@ watch(
 );
 
 watch(
-  () => props.visiable,
+  () => props.visible,
   (newVal) => {
     show.value = newVal;
     console.log(props);

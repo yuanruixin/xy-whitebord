@@ -15,12 +15,12 @@ export function useContextMenu(containerRef: Ref, menuRef: Ref) {
     // 菜单位置自动调整
     nextTick(()=>{
       menuSize.value = computedMenuSize(menuRef.value as HTMLElement); 
-      const menuPostion = computePostion(
+      const menuPosition = computePosition(
         { x: e.clientX, y: e.clientY },
         menuSize.value
       );
-      x.value = menuPostion.x;
-      y.value = menuPostion.y;
+      x.value = menuPosition.x;
+      y.value = menuPosition.y;
     })
   };
   function closeMenu() {
@@ -48,7 +48,7 @@ export function useContextMenu(containerRef: Ref, menuRef: Ref) {
       height: menu.offsetHeight,
     };
   }
-  function computePostion(
+  function computePosition(
     click: { x: number; y: number },
     menu: {
       height: number;

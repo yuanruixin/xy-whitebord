@@ -85,7 +85,7 @@ export enum MoveKey {
   right = "ArrowRight",
   down = "ArrowDown",
 }
-export enum ShutcutKey {
+export enum ShortcutKey {
   Delete = 'Delete',
   C = 'KeyC',
   V = 'KeyV',
@@ -107,7 +107,7 @@ export type CursorType =
 
 export type  MouseMode =  "createElement"
 | "brush"
-| "earser"
+| "eraser"
 | "select"
 | "drag"
 | "default" 

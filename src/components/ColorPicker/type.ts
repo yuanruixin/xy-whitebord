@@ -1,7 +1,7 @@
 export interface Props {
   defaultColor?: string;
   colors?: string[];
-  visiable?:boolean;
+  visible?:boolean;
   callback?:(color:string)=>void,
   
   pos:{
