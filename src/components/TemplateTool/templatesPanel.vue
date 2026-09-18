@@ -41,6 +41,7 @@
 import { useRenderStore } from "@/store/render";
 const { render } = useRenderStore();
 import arrowTemplate from "./templates/arrow.json";
+import rabbitTemplate from "./templates/rabbit.json";
 import { onMounted,ref } from "vue";
 
 const emit = defineEmits<{
@@ -59,7 +60,7 @@ interface TemplateItem {
 
 const templates = ref<TemplateItem[]>([]);
 onMounted(() => {
-  templates.value=[arrowTemplate].map((item) => {
+  templates.value=[arrowTemplate, rabbitTemplate].map((item) => {
     return {
       info: {
         ...item.info,
