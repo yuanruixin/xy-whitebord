@@ -4,6 +4,8 @@ export interface AIProviderPreset {
   label: string;
   baseURL: string;
   models: string[];
+  // 强制开启思考、无法关闭的模型（UI 上禁用「深度思考」开关）
+  forcedThinkingModels?: string[];
 }
 
 export const CUSTOM_PROVIDER_ID = "custom";
@@ -29,6 +31,8 @@ export const AI_PROVIDERS: AIProviderPreset[] = [
     label: "智谱 GLM",
     baseURL: "https://open.bigmodel.cn/api/paas/v4",
     models: ["glm-5.3", "glm-5.3-flash"],
+    // GLM-5.3 / GLM-5.3-FLASH 强制思考，无法关闭
+    forcedThinkingModels: ["glm-5.3", "glm-5.3-flash"],
   },
   {
     id: "qwen",
@@ -50,4 +54,15 @@ export function findProviderByBaseURL(baseURL: string): AIProviderPreset | undef
 
 export function findProviderById(id: string): AIProviderPreset | undefined {
   return AI_PROVIDERS.find((provider) => provider.id === id);
+}
+
+// 该模型是否强制思考（无法关闭）
+export function isForcedThinkingModel(model: string): boolean {
+  const name = model.trim().toLowerCase();
+  if (!name) return false;
+  return AI_PROVIDERS.some((provider) =>
+    (provider.forcedThinkingModels ?? []).some(
+      (item) => item.toLowerCase() === name
+    )
+  );
 }

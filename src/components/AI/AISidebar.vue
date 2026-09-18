@@ -135,15 +135,28 @@
         <div class="flex items-center justify-between">
           <span class="flex flex-col">
             <span>深度思考</span>
-            <span class="text-xs text-slate-400">关闭可显著加快生成</span>
+            <span class="text-xs text-slate-400">
+              {{
+                forcedThinking
+                  ? "该模型强制思考，无法关闭"
+                  : "关闭可显著加快生成"
+              }}
+            </span>
           </span>
           <Switch
             v-model="config.thinking"
-            :class="config.thinking ? 'bg-primary' : 'bg-slate-200'"
-            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors"
+            :disabled="forcedThinking"
+            :class="
+              forcedThinking || config.thinking ? 'bg-primary' : 'bg-slate-200'
+            "
+            class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
             <span
-              :class="config.thinking ? 'translate-x-4' : 'translate-x-0.5'"
+              :class="
+                forcedThinking || config.thinking
+                  ? 'translate-x-4'
+                  : 'translate-x-0.5'
+              "
               class="inline-block size-4 transform rounded-full bg-white shadow transition-transform"
             />
           </Switch>
@@ -429,7 +442,11 @@ import {
   type AIConversation,
   type AIChatMessage,
 } from "@/store/aiConversations";
-import { AI_PROVIDERS, CUSTOM_PROVIDER_ID } from "@/constants/aiProviders";
+import {
+  AI_PROVIDERS,
+  CUSTOM_PROVIDER_ID,
+  isForcedThinkingModel,
+} from "@/constants/aiProviders";
 import ComboBox from "./ComboBox.vue";
 import {
   runCanvasAgent,
@@ -580,6 +597,9 @@ const modelOptions = computed(() => {
   if (provider) return provider.models;
   return Array.from(new Set(AI_PROVIDERS.flatMap((item) => item.models)));
 });
+
+// 当前模型是否强制思考（无法关闭）
+const forcedThinking = computed(() => isForcedThinkingModel(config.model));
 
 function onProviderChange(event: Event) {
   applyProvider((event.target as HTMLSelectElement).value);
