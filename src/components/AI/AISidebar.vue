@@ -87,30 +87,38 @@
           <div class="flex items-center gap-x-1">
             <input
               ref="apiKeyInputRef"
-              v-model="config.apiKey"
+              v-model="apiKeyInput"
               type="password"
-              autocomplete="off"
-              placeholder="sk-..."
+              autocomplete="new-password"
+              :placeholder="hasApiKey ? '已保存，输入新 Key 可替换' : 'sk-...'"
               class="min-w-0 flex-1 rounded-md border px-2 py-1.5 text-sm outline-none focus:border-primary"
               :class="
                 hasApiKey ? 'border-slate-200' : 'border-red-300 bg-red-50/40'
               "
-              @keydown.enter.prevent="confirmApiKey"
+              @keydown.enter.prevent="onConfirmApiKey"
             />
             <button
               type="button"
               class="shrink-0 rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-              :disabled="!hasApiKey || isApiKeyConfirmed"
-              @click="confirmApiKey"
+              :disabled="!apiKeyInput.trim()"
+              @click="onConfirmApiKey"
             >
-              确认
+              保存
+            </button>
+            <button
+              v-if="hasApiKey"
+              type="button"
+              class="shrink-0 rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-100"
+              @click="onClearApiKey"
+            >
+              清除
             </button>
           </div>
           <span v-if="!hasApiKey" class="text-xs text-red-500">
             尚未填写 API Key，无法使用
           </span>
-          <span v-else-if="!isApiKeyConfirmed" class="text-xs text-slate-400">
-            未确认，点击「确认」或按回车后生效
+          <span v-else class="text-xs text-slate-400">
+            已保存，不会再次显示；如需更换请输入新的 Key
           </span>
         </label>
 
@@ -163,8 +171,8 @@
         </div>
 
         <p class="text-xs leading-5 text-slate-400">
-          API Key 加密后仅保存在本地浏览器；每个服务商/模型可分别保存各自
-          Key，切换时自动读取。
+          API Key 加密后仅保存在本地浏览器；每个服务商可分别保存各自的 Key，
+          同一服务商下切换模型会自动复用。
         </p>
       </div>
 
@@ -234,16 +242,77 @@
 
           <template v-for="message in messages" :key="message.id">
             <!-- 用户 -->
-            <div v-if="message.role === 'user'" class="flex justify-end">
-              <div
-                class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-primary px-3 py-2 text-sm text-white"
-              >
-                {{ message.text }}
-              </div>
+            <div
+              v-if="message.role === 'user'"
+              class="group flex flex-col items-end gap-y-1"
+            >
+              <template v-if="editingId === message.id">
+                <textarea
+                  v-model="editingText"
+                  rows="2"
+                  class="w-full max-w-[85%] resize-none rounded-2xl rounded-br-md border border-primary/40 px-3 py-2 text-sm leading-6 outline-none focus:border-primary"
+                  @keydown.enter.exact.prevent="saveEdit(message)"
+                  @keydown.esc.prevent="cancelEdit"
+                ></textarea>
+                <div class="flex items-center gap-x-2">
+                  <button
+                    type="button"
+                    class="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-100"
+                    @click="cancelEdit"
+                  >
+                    取消
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-md bg-primary px-2.5 py-1 text-xs text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="!editingText.trim()"
+                    @click="saveEdit(message)"
+                  >
+                    保存并重新发送
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <div
+                  class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md bg-primary px-3 py-2 text-sm text-white"
+                >
+                  {{ message.text }}
+                </div>
+                <div
+                  class="flex items-center gap-x-0.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <button
+                    type="button"
+                    v-tooltip="'复制'"
+                    class="grid size-6 place-items-center rounded hover:bg-slate-100 hover:text-slate-600"
+                    @click="copyMessage(message)"
+                  >
+                    <span
+                      :class="
+                        copiedId === message.id
+                          ? 'icon-[mdi--check] text-green-500'
+                          : 'icon-[mdi--content-copy]'
+                      "
+                    ></span>
+                  </button>
+                  <button
+                    type="button"
+                    v-tooltip="'编辑并重新发送'"
+                    class="grid size-6 place-items-center rounded hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="loading"
+                    @click="startEdit(message)"
+                  >
+                    <span class="icon-[mdi--pencil-outline]"></span>
+                  </button>
+                </div>
+              </template>
             </div>
 
             <!-- 助手 -->
-            <div v-else class="flex flex-col items-start gap-y-2">
+            <div
+              v-else
+              class="group flex w-full flex-col items-start gap-y-2"
+            >
               <div
                 v-if="message.reasoning"
                 class="max-h-40 w-full overflow-y-auto whitespace-pre-wrap break-words rounded-lg border border-amber-100 bg-amber-50 p-2 text-xs leading-5 text-amber-700"
@@ -290,6 +359,36 @@
                 <span class="icon-[mdi--import]"></span>
                 重新导入画布
               </button>
+
+              <div
+                v-if="!message.streaming"
+                class="flex items-center gap-x-0.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100"
+              >
+                <button
+                  type="button"
+                  v-tooltip="'复制'"
+                  class="grid size-6 place-items-center rounded hover:bg-slate-100 hover:text-slate-600"
+                  @click="copyMessage(message)"
+                >
+                  <span
+                    :class="
+                      copiedId === message.id
+                        ? 'icon-[mdi--check] text-green-500'
+                        : 'icon-[mdi--content-copy]'
+                    "
+                  ></span>
+                </button>
+                <button
+                  v-if="lastMessageId === message.id"
+                  type="button"
+                  v-tooltip="'重试'"
+                  class="grid size-6 place-items-center rounded hover:bg-slate-100 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="loading"
+                  @click="retryMessage(message)"
+                >
+                  <span class="icon-[mdi--refresh]"></span>
+                </button>
+              </div>
             </div>
           </template>
         </div>
@@ -319,9 +418,9 @@
             <button
               type="button"
               class="ml-auto font-medium text-primary hover:underline"
-              @click="confirmApiKey"
+              @click="showSettings = true"
             >
-              确认
+              去设置
             </button>
           </div>
 
@@ -333,26 +432,26 @@
             <button
               v-if="selection.length > 0"
               type="button"
-              class="flex items-center gap-x-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs text-primary hover:bg-primary/10"
+              class="flex items-center gap-x-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 hover:bg-slate-100"
               @click="pinSelection"
             >
-              <span class="icon-[mdi--cursor-default-click-outline]"></span>
+              <span class="icon-[mdi--plus-circle-outline]"></span>
               引用选中图形 ({{ selection.length }})
             </button>
-            <span
-              v-for="node in pinnedSelection"
-              :key="node.id"
-              class="flex items-center gap-x-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
-            >
-              {{ node.label || node.type }}
-              <button
-                type="button"
-                class="text-slate-400 hover:text-red-500"
-                @click="unpinSelection(node.id)"
+            <template v-if="pinnedSelection.length > 0">
+              <span
+                class="flex items-center gap-x-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary"
               >
-                <span class="icon-[mdi--close] text-xs"></span>
-              </button>
-            </span>
+                已引用 {{ pinnedSelection.length }} 个图形
+                <button
+                  type="button"
+                  class="text-primary/60 hover:text-red-500"
+                  @click="clearPinnedSelection"
+                >
+                  <span class="icon-[mdi--close] text-xs"></span>
+                </button>
+              </span>
+            </template>
           </div>
 
           <div class="flex items-end gap-x-2">
@@ -466,6 +565,7 @@ const {
   hasApiKey,
   isApiKeyConfirmed,
   confirmApiKey,
+  clearApiKey,
   showDialog,
   showSettings,
   applyProvider,
@@ -485,6 +585,7 @@ const {
 const providers = AI_PROVIDERS;
 const baseURLOptions = AI_PROVIDERS.map((provider) => provider.baseURL);
 const apiKeyInputRef = ref<HTMLInputElement | null>(null);
+const apiKeyInput = ref("");
 const inputRef = ref<HTMLTextAreaElement | null>(null);
 const messagesRef = ref<HTMLDivElement | null>(null);
 
@@ -534,12 +635,6 @@ function pinSelection() {
   pinnedSelection.value = [...merged.values()];
 }
 
-function unpinSelection(id: string) {
-  pinnedSelection.value = pinnedSelection.value.filter(
-    (node) => node.id !== id
-  );
-}
-
 function clearPinnedSelection() {
   pinnedSelection.value = [];
 }
@@ -562,6 +657,39 @@ function buildSelectionContext(): string {
         }: x=${node.x}, y=${node.y}, w=${node.width}, h=${node.height}`
     ),
   ].join("\n");
+}
+
+// 消息交互：复制 / 编辑
+const editingId = ref<string | null>(null);
+const editingText = ref("");
+const copiedId = ref<string | null>(null);
+let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+function copyMessage(message: AIChatMessage) {
+  if (!message.text) return;
+  navigator.clipboard
+    ?.writeText(message.text)
+    .then(() => {
+      copiedId.value = message.id;
+      if (copiedTimer) clearTimeout(copiedTimer);
+      copiedTimer = setTimeout(() => {
+        copiedId.value = null;
+      }, 1500);
+    })
+    .catch(() => {
+      // 剪贴板不可用时忽略
+    });
+}
+
+function startEdit(message: AIChatMessage) {
+  if (loading.value) return;
+  editingId.value = message.id;
+  editingText.value = message.text;
+}
+
+function cancelEdit() {
+  editingId.value = null;
+  editingText.value = "";
 }
 
 const examples = [
@@ -589,6 +717,9 @@ function describeToolCall(record: AIToolCallRecord): string {
 
 const statusText = computed(() => STATUS_TEXT[status.value]);
 const messages = computed(() => activeConversation.value?.messages ?? []);
+const lastMessageId = computed(
+  () => messages.value[messages.value.length - 1]?.id ?? ""
+);
 const canSend = computed(() => loading.value || input.value.trim().length > 0);
 
 // 当前服务商的模型列表；自定义时汇总所有预置模型
@@ -603,6 +734,19 @@ const forcedThinking = computed(() => isForcedThinkingModel(config.model));
 
 function onProviderChange(event: Event) {
   applyProvider((event.target as HTMLSelectElement).value);
+}
+
+// 一次性保存 Key：保存后立即清空输入框，不再回显
+function onConfirmApiKey() {
+  const token = apiKeyInput.value.trim();
+  if (!token) return;
+  confirmApiKey(token);
+  apiKeyInput.value = "";
+}
+
+function onClearApiKey() {
+  clearApiKey();
+  apiKeyInput.value = "";
 }
 
 function toggleSettings() {
@@ -694,31 +838,25 @@ function removeMessage(conversation: AIConversation, id: string) {
   if (index !== -1) conversation.messages.splice(index, 1);
 }
 
-async function send() {
-  if (loading.value) return;
-  const text = input.value.trim();
-  if (!text) return;
-
+// 校验 API Key 是否可用
+async function ensureReady(): Promise<boolean> {
   if (!hasApiKey.value) {
     error.value = "请先填写 API Key";
     showSettings.value = true;
     await nextTick();
     apiKeyInputRef.value?.focus();
-    return;
+    return false;
   }
   if (!isApiKeyConfirmed.value) {
     error.value = "请先确认 API Key";
     showSettings.value = true;
-    return;
+    return false;
   }
+  return true;
+}
 
-  error.value = "";
-  input.value = "";
-  await nextTick();
-  autoGrow();
-
-  const conversation = activeConversation.value ?? createConversation();
-  appendMessage(conversation, { role: "user", text });
+// 追加助手消息并发起一次 AI 请求（流式渲染）
+async function runAgent(conversation: AIConversation) {
   const placeholder = appendMessage(conversation, {
     role: "assistant",
     text: "",
@@ -850,6 +988,71 @@ async function send() {
       status.value = "idle";
     }
   }
+}
+
+async function send() {
+  if (loading.value) return;
+  const text = input.value.trim();
+  if (!text) return;
+  if (!(await ensureReady())) return;
+
+  error.value = "";
+  input.value = "";
+  await nextTick();
+  autoGrow();
+
+  const conversation = activeConversation.value ?? createConversation();
+  appendMessage(conversation, { role: "user", text });
+  await runAgent(conversation);
+}
+
+// 编辑用户消息后，从该条重新发送（丢弃其后的回复并重新生成）
+async function saveEdit(message: AIChatMessage) {
+  if (loading.value) return;
+  const text = editingText.value.trim();
+  if (!text) return;
+
+  const conversation = activeConversation.value;
+  if (!conversation) return;
+
+  const index = conversation.messages.findIndex(
+    (item) => item.id === message.id
+  );
+  if (index === -1) return;
+
+  if (!(await ensureReady())) return;
+
+  error.value = "";
+  conversation.messages[index].text = text;
+  // 丢弃该消息之后的回复，重新生成
+  conversation.messages.splice(index + 1);
+  conversation.updatedAt = Date.now();
+  editingId.value = null;
+  editingText.value = "";
+
+  await runAgent(conversation);
+}
+
+// 重试最后一条模型回复：丢弃当前回复并重新生成
+async function retryMessage(message: AIChatMessage) {
+  if (loading.value) return;
+  const conversation = activeConversation.value;
+  if (!conversation) return;
+
+  const index = conversation.messages.findIndex(
+    (item) => item.id === message.id
+  );
+  // 仅允许重试最后一条回复，避免误删后续对话
+  if (index === -1 || index !== conversation.messages.length - 1) return;
+  if (!conversation.messages.some((item) => item.role === "user")) return;
+
+  if (!(await ensureReady())) return;
+
+  error.value = "";
+  conversation.messages.splice(index);
+  conversation.updatedAt = Date.now();
+
+  await runAgent(conversation);
 }
 
 // 新消息 / 流式增长时滚动到底部
