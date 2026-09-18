@@ -281,7 +281,7 @@ export class Text {
   }
 
   bindEvents() {
-    // 双击图形：在中心添加/编辑文本
+    // 双击：文本进入编辑；图形在中心添加/编辑文本标签
     this.render.stage.on("dblclick dbltap", () => {
       const mode = this.render.workMode();
       if (mode !== "default" && mode !== "select") return;
@@ -297,7 +297,19 @@ export class Text {
       while (target && target.getParent() !== this.render.layer) {
         target = target.getParent();
       }
-      if (!target || target.name() !== "shape") return;
+      if (!target) return;
+
+      // 双击文本：直接编辑
+      if (target.name() === "text") {
+        if (!this.render.selectionTool.selectingNodes.includes(target)) {
+          this.render.selectionTool.select([target as Konva.Group]);
+        }
+        this.editTextNode((target as Konva.Group).children[0] as Konva.Text);
+        return;
+      }
+
+      // 双击图形：添加/编辑居中标签
+      if (target.name() !== "shape") return;
 
       // 确保双击的图形处于选中状态
       if (!this.render.selectionTool.selectingNodes.includes(target)) {
