@@ -84,6 +84,9 @@ export class CopyTool {
       groupIdChanges[copy.id()] = gid
       copy.id(gid)
 
+      // 递归更新子节点 id，避免复制分组后出现重复 id
+      this.regenerateSubtreeIds(copy)
+
       // 连接线复制后解除绑定，避免指向原图形
       if (copy.name() === 'connector') {
         const ends = cloneDeep(copy.getAttr('ends') ?? [])
@@ -145,5 +148,24 @@ export class CopyTool {
     // 更新历史
     this.render.historyTool.updateHistory()
 
+  }
+
+  // 递归更新子节点 id；连接线复制后解除绑定，避免指向原图形
+  private regenerateSubtreeIds(node: Konva.Node) {
+    if (!(node instanceof Konva.Container)) return
+    for (const child of node.getChildren()) {
+      if (child.id()) child.id(nanoid())
+      if (child.name() === 'connector') {
+        const ends = cloneDeep(child.getAttr('ends') ?? [])
+        for (const end of ends) {
+          end.nodeId = undefined
+          end.anchor = undefined
+          end.offsetX = 0
+          end.offsetY = 0
+        }
+        child.setAttr('ends', ends)
+      }
+      this.regenerateSubtreeIds(child)
+    }
   }
 }

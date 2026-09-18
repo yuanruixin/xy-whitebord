@@ -95,12 +95,10 @@ export class SelectionTool {
   }
 
   selectAll() {
-    const nodeNames = [".text", ".shape", ".image", ".paint", ".connector"];
-    const nodes: Konva.Node[][] = [];
-    nodeNames.forEach((name) => {
-      nodes.push(this.render.layer.find(name) as Konva.Node[]);
-    });
-
-    this.select(nodes.flat());
+    // 只选顶层元素，避免选中 group 内部节点
+    const nodes = this.render.layer.getChildren(
+      (node) => !this.render.ignore(node)
+    );
+    this.select(nodes);
   }
 }

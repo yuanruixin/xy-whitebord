@@ -292,9 +292,14 @@ export class Text {
       const hit = this.render.layer.getIntersection(pos);
       if (!hit) return;
 
-      // 回溯到 layer 的顶层元素
+      // 回溯到具体元素（支持成组后的嵌套节点）
+      const elementNames = ["text", "shape", "image", "paint", "connector"];
       let target: Konva.Node | null = hit;
-      while (target && target.getParent() !== this.render.layer) {
+      while (
+        target &&
+        target.getParent() !== this.render.layer &&
+        !elementNames.includes(target.name())
+      ) {
         target = target.getParent();
       }
       if (!target) return;

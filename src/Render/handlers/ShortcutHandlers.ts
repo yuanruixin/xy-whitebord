@@ -66,6 +66,13 @@ export class ShortcutHandlers implements Types.Handler {
           } else if (e.code === Types.ShortcutKey.A) {
             this.render.selectionTool.selectAll();
             this.render.workMode("select");
+          } else if (e.code === Types.ShortcutKey.G) {
+            // Ctrl/Cmd + G 成组，加 Shift 解组
+            if (e.shiftKey) {
+              this.render.groupTool.ungroup();
+            } else {
+              this.render.groupTool.group();
+            }
           } else if (e.code === Types.ShortcutKey.R) {
             window.location.reload();
           }

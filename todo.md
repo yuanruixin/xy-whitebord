@@ -13,3 +13,13 @@
 预期应该是，只有b会被选中。
 猜测由于冒泡阶段触发，stage的点击事件，e.target一直是transformer而不是图形b。
 
+## 4. 多选（Shift/Cmd + 点击）与 Cmd + 滚轮缩放 —— 暂时搁置 ⏸
+    - 多选：SelectionHandlers 的 stage.mousedown / transformer.click 目前仍为 Ctrl 多选。
+      待排查点：transformer 的 shouldOverdrawWholeArea 会生成 name="back" 的命中层，
+      点击已选中区域时 e.target 是 back（其父才是 Transformer），需要基于
+      layer.getIntersection(pointer) 取真实元素，并处理 mousedown 与 click 的重复切换。
+    - 平台判断不可靠：某些环境 navigator.platform='MacIntel' 而 userAgent 是 Android，
+      不能依赖 platform/UA 决定多选修饰键。
+    - Cmd(⌘) + 滚轮缩放：ZoomHandlers 目前仅 ctrlKey（含触控板捏合）；metaKey 待验证。
+
+

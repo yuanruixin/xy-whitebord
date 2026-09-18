@@ -90,6 +90,7 @@ export enum ShortcutKey {
   Y = 'KeyY',
   A = 'KeyA',
   R = 'KeyR',
+  G = 'KeyG',
   Esc = 'Escape',
   Backspace = 'Backspace'
 }

@@ -107,6 +107,23 @@ export class ContextmenuDraw extends Types.BaseDraw implements Types.Draw {
             }
           },
         });
+        // 成组 / 解组（依据当前选择）
+        if (this.render.groupTool.canGroup()) {
+          menus.push({
+            name: "成组",
+            action: () => {
+              this.render.groupTool.group();
+            },
+          });
+        }
+        if (this.render.groupTool.canUngroup()) {
+          menus.push({
+            name: "解组",
+            action: () => {
+              this.render.groupTool.ungroup();
+            },
+          });
+        }
       }
 
       // stage 状态

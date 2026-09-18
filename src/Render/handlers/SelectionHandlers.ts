@@ -71,13 +71,32 @@ export class SelectionHandlers implements Types.Handler {
     this.selectingNodesPositionReset();
   }
 
+  // 回溯到 layer 的顶层元素（支持成组后的嵌套节点）
+  topElementOf(node: Konva.Node | null): Konva.Node | null {
+    let current: Konva.Node | null = node;
+    while (
+      current &&
+      current.getParent() &&
+      current.getParent() !== this.render.layer
+    ) {
+      current = current.getParent();
+    }
+    if (
+      current &&
+      current !== this.render.stage &&
+      current.getParent() === this.render.layer
+    ) {
+      return current;
+    }
+    return null;
+  }
+
   handlers = {
     // 选择相关
     stage: {
       mousedown: (
         e: Konva.KonvaEventObject<GlobalEventHandlersEventMap["mousedown"]>
       ) => {
-        const parent = e.target.getParent();
         if (
           this.render.workMode() === "default" ||
           this.render.workMode() === "select"
@@ -106,27 +125,35 @@ export class SelectionHandlers implements Types.Handler {
               // 开始选择
               this.selecting = true;
             }
-          } else if (parent instanceof Konva.Transformer) {
+          } else if (e.target.getParent() instanceof Konva.Transformer) {
             // transformer 点击事件交给 transformer 自己的 handler
-          } else if (parent instanceof Konva.Group) {
-            if (e.evt.button === Types.MouseButton.left) {
-              if (
-                !this.render.ignore(parent) &&
-                !this.render.ignoreDraw(e.target)
-              ) {
+          } else {
+            // 回溯到 layer 顶层元素（支持成组后的嵌套节点）
+            const node = this.topElementOf(e.target);
+            if (
+              node &&
+              !this.render.ignore(node) &&
+              !this.render.ignoreDraw(e.target)
+            ) {
+              if (e.evt.button === Types.MouseButton.left) {
                 if (e.evt.ctrlKey) {
                   // 新增多选
                   this.render.selectionTool.select([
                     ...this.render.selectionTool.selectingNodes,
-                    parent,
+                    node,
                   ]);
                 } else {
                   // 单选
-                  this.render.selectionTool.select([parent]);
+                  this.render.selectionTool.select([node]);
+                }
+              } else {
+                // 右键：点在已选中的元素上时保留选择（供右键菜单操作），否则清除
+                if (
+                  !this.render.selectionTool.selectingNodes.includes(node)
+                ) {
+                  this.render.selectionTool.selectingClear();
                 }
               }
-            } else {
-              this.render.selectionTool.selectingClear();
             }
           }
         }

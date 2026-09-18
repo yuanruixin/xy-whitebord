@@ -324,8 +324,10 @@ export class ConnectorTool {
   }
 
   private findElement(id: string): Konva.Node | null {
-    const list = this.render.layer.getChildren((n) => n.id() === id);
-    return list[0] ?? null;
+    // 递归查找，保证被成组的节点仍能被连接线绑定并跟随
+    return (
+      this.render.layer.findOne((node: Konva.Node) => node.id() === id) ?? null
+    );
   }
 
   // 顶层图形中心（board 坐标）

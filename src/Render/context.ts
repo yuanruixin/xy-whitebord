@@ -18,6 +18,7 @@ import type { ImportExportTool } from "./tools/ImportExportTool";
 import type { HistoryTool } from "./tools/HistoryTool";
 import type { CopyTool } from "./tools/CopyTool";
 import type { CanvasCommandTool } from "./tools/CanvasCommandTool";
+import type { GroupTool } from "./tools/GroupTool";
 
 export interface StageState {
   width: number;
@@ -64,6 +65,7 @@ export interface ICanvasContext {
   historyTool: HistoryTool;
   copyTool: CopyTool;
   canvasTool: CanvasCommandTool;
+  groupTool: GroupTool;
 
   workMode<T extends MouseMode>(
     workMode?: T,
