@@ -95,6 +95,7 @@ const SYSTEM_PROMPT = `你是「白板绘图助手」，通过多轮对话理解
 - 尺寸：矩形/菱形约 160x80；椭圆约 140x100；文字节点宽约 200。
 - 节点间距：横向不小于 60，纵向不小于 80，严禁重叠；流程图建议自上而下或从左到右排列。
 - edges 为带箭头的连接线，from/to 必须是 nodes 中真实存在的 id。
+- 若提供了「当前画布信息」，新图形必须避开其中已有元素的占用区域，不要重叠。
 - 配色：#4e95ff(主蓝), #34d399(绿), #fbbf24(黄), #f87171(红), #a78bfa(紫), #94a3b8(灰)；文字节点 fill 为文字颜色，建议 #1d293a。
 - 节点数量控制在 30 个以内。`;
 
@@ -207,6 +208,11 @@ export type AIResult =
   | { type: "ask"; question: string }
   | { type: "scene"; scene: AIScene };
 
+export interface AIChatOptions {
+  // 当前画布已有内容描述，附在 system 提示后用于避免重叠
+  canvasContext?: string;
+}
+
 function validateConfig(config: AIConfig) {
   if (!config.apiKey.trim()) throw new Error("请先配置 API Key");
   if (!config.baseURL.trim()) throw new Error("请先配置 Base URL");
@@ -219,14 +225,22 @@ function validateConfig(config: AIConfig) {
  * - OpenAI o 系列、gpt-5：reasoning_effort
  * 关闭思考可显著减少输出 token、加快生成。
  */
-function buildRequestBody(config: AIConfig, turns: AIChatTurn[]) {
+function buildRequestBody(
+  config: AIConfig,
+  turns: AIChatTurn[],
+  canvasContext?: string
+) {
   const baseURL = config.baseURL.toLowerCase();
   const model = config.model.toLowerCase();
+
+  const systemContent = canvasContext
+    ? `${SYSTEM_PROMPT}\n\n## 当前画布信息\n${canvasContext}`
+    : SYSTEM_PROMPT;
 
   const body: Record<string, unknown> = {
     model: config.model.trim(),
     stream: true,
-    messages: [{ role: "system", content: SYSTEM_PROMPT }, ...turns],
+    messages: [{ role: "system", content: systemContent }, ...turns],
   };
 
   if (config.provider === "deepseek" || baseURL.includes("deepseek")) {
@@ -258,7 +272,8 @@ function extractErrorMessage(response: Response): Promise<string> {
 export async function chatStream(
   turns: AIChatTurn[],
   config: AIConfig,
-  handlers: AIStreamHandlers = {}
+  handlers: AIStreamHandlers = {},
+  options: AIChatOptions = {}
 ): Promise<AIResult> {
   validateConfig(config);
 
@@ -274,7 +289,9 @@ export async function chatStream(
         Authorization: `Bearer ${config.apiKey.trim()}`,
       },
       signal: handlers.signal,
-      body: JSON.stringify(buildRequestBody(config, turns)),
+      body: JSON.stringify(
+        buildRequestBody(config, turns, options.canvasContext)
+      ),
     });
   } catch (error) {
     if ((error as Error)?.name === "AbortError") throw error;

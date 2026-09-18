@@ -168,4 +168,76 @@ export class AITool {
   private layerRectOf(node: Konva.Node): Rect {
     return node.getClientRect({ relativeTo: this.render.layer });
   }
+
+  private labelOf(node: Konva.Node): string {
+    if (!(node instanceof Konva.Container)) return "";
+    for (const child of node.getChildren()) {
+      if (child instanceof Konva.Text) {
+        const text = child.text().trim();
+        if (text) return text.slice(0, 20);
+      }
+      const nested = this.labelOf(child);
+      if (nested) return nested;
+    }
+    return "";
+  }
+
+  /**
+   * 描述当前画布内容与可见区域，供模型布局时避免与已有元素重叠。
+   */
+  describeCanvas(): string {
+    const nodes = this.render.layer.getChildren(
+      (node) => !this.render.ignore(node)
+    );
+
+    const stage = this.render.stage;
+    const scale = stage.scaleX() || 1;
+    const view = {
+      x: -stage.x() / scale,
+      y: -stage.y() / scale,
+      width: stage.width() / scale,
+      height: stage.height() / scale,
+    };
+    const viewText = `当前可见区域（画布坐标）：x:[${Math.round(
+      view.x
+    )}, ${Math.round(view.x + view.width)}], y:[${Math.round(
+      view.y
+    )}, ${Math.round(view.y + view.height)}]。`;
+
+    if (nodes.length === 0) {
+      return `${viewText}\n当前画布为空，可直接在可见区域内布局。`;
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    const items: string[] = [];
+
+    for (const node of nodes.slice(0, 60)) {
+      const rect = this.layerRectOf(node);
+      minX = Math.min(minX, rect.x);
+      minY = Math.min(minY, rect.y);
+      maxX = Math.max(maxX, rect.x + rect.width);
+      maxY = Math.max(maxY, rect.y + rect.height);
+      const label = this.labelOf(node);
+      items.push(
+        `- ${label ? `「${label}」` : node.name()}: x=${Math.round(
+          rect.x
+        )}, y=${Math.round(rect.y)}, w=${Math.round(rect.width)}, h=${Math.round(
+          rect.height
+        )}`
+      );
+    }
+
+    return [
+      viewText,
+      `当前画布已有 ${nodes.length} 个元素，占用区域（画布坐标）：`,
+      ...items,
+      `整体范围：x:[${Math.round(minX)}, ${Math.round(
+        maxX
+      )}], y:[${Math.round(minY)}, ${Math.round(maxY)}]。`,
+      "新图形必须避开上述占用区域；优先放在可见区域内的空白处，空间不足时放到已有元素的下方或右侧。",
+    ].join("\n");
+  }
 }

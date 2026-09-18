@@ -563,7 +563,8 @@ async function send() {
           reasoningText = full;
           flushReasoning();
         },
-      }
+      },
+      { canvasContext: render.value?.aiTool.describeCanvas() }
     );
 
     if (controller !== currentController) return;
