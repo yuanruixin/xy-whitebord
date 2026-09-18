@@ -6,14 +6,14 @@ export interface ElementDiff {
   updated: ElementId[];
 }
 
-// 忽略每次生成都会变化的 versionNonce，仅比较有意义的字段
+// 忽略每次生成都会变化的 versionNonce 与 version，仅比较有意义的内容
 function stableStringify(element: BoardElement): string {
   return JSON.stringify(element, (key, value) =>
-    key === "versionNonce" ? 0 : value
+    key === "versionNonce" || key === "version" ? 0 : value
   );
 }
 
-/** 元素结构相等（用于增量历史去重与复用） */
+/** 元素内容相等（忽略 version / versionNonce） */
 export function elementsEqual(a: BoardElement, b: BoardElement): boolean {
   if (a === b) return true;
   try {

@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import C2S from 'canvas2svg'
 import {
+  bumpVersions,
   createSceneDocument,
   parseSceneDocument,
   serializeSceneDocument,
@@ -24,6 +25,8 @@ export class ImportExportTool {
   private render: ICanvasContext
   // 本地存储配额不足时禁用自动保存，避免持续报错
   private storageDisabled = false
+  // 上一份元素快照，用于在内容变化时递增 version
+  private lastElements: BoardElement[] = []
   constructor(render: ICanvasContext) {
     this.render = render
   }
@@ -74,6 +77,12 @@ export class ImportExportTool {
       // 恢复节点图片素材
       await this.restoreImage(nodes)
       this.mountNodes(nodes, silent)
+      // 合并进版本基线（同 id 保留已有版本）
+      const importedIds = new Set(sceneDocument.elements.map((e) => e.id))
+      this.lastElements = [
+        ...sceneDocument.elements,
+        ...this.lastElements.filter((e) => !importedIds.has(e.id)),
+      ]
     } catch (e) {
       console.error(e)
     }
@@ -126,6 +135,7 @@ export class ImportExportTool {
       this.render.selectionTool.selectingClear()
       this.render.transformer.forceUpdate()
       this.render.connectorTool.refreshAll()
+      this.lastElements = to
     } catch (e) {
       console.error('增量更新失败，回退到全量恢复', e)
       void this.restore(serializeSceneDocument(createSceneDocument(to)), true)
@@ -259,8 +269,12 @@ export class ImportExportTool {
   toSceneDocument(): SceneDocument {
     const copy = this.getView()
     const layer = copy.getLayers()[0]
-    const elements = layer ? konvaToScene(layer.getChildren()) : []
+    const raw = layer ? konvaToScene(layer.getChildren()) : []
     copy.destroy()
+
+    // 与上一份元素比较：内容变化则递增 version，未变则复用旧版本
+    const elements = bumpVersions(this.lastElements, raw)
+    this.lastElements = elements
     return createSceneDocument(elements)
   }
 
