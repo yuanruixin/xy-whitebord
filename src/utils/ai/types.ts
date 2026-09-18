@@ -162,6 +162,8 @@ export interface AIStreamHandlers {
 export interface AIAgentOptions {
   // 当前画布已有内容描述，附在 system 提示后用于避免重叠
   canvasContext?: string;
+  // 用户当前选中的元素描述，本次提问优先针对它们
+  selectionContext?: string;
   // 工具调用最大轮数，避免模型无限调用
   maxSteps?: number;
   // 危险操作（如删除）执行前的确认回调，返回 false 表示拒绝执行

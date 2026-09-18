@@ -299,7 +299,13 @@ export async function runCanvasAgent(
   const records: AIToolCallRecord[] = [];
 
   const messages: ChatMessage[] = [
-    { role: "system", content: buildSystemPrompt(options.canvasContext) },
+    {
+      role: "system",
+      content: buildSystemPrompt(
+        options.canvasContext,
+        options.selectionContext
+      ),
+    },
     ...turns.map((turn) => ({
       role: turn.role,
       content: turn.content,

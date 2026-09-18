@@ -312,6 +312,36 @@
             </button>
           </div>
 
+          <!-- 引用选中图形 -->
+          <div
+            v-if="selection.length > 0 || pinnedSelection.length > 0"
+            class="mb-2 flex flex-wrap items-center gap-1.5"
+          >
+            <button
+              v-if="selection.length > 0"
+              type="button"
+              class="flex items-center gap-x-1 rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs text-primary hover:bg-primary/10"
+              @click="pinSelection"
+            >
+              <span class="icon-[mdi--cursor-default-click-outline]"></span>
+              引用选中图形 ({{ selection.length }})
+            </button>
+            <span
+              v-for="node in pinnedSelection"
+              :key="node.id"
+              class="flex items-center gap-x-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
+            >
+              {{ node.label || node.type }}
+              <button
+                type="button"
+                class="text-slate-400 hover:text-red-500"
+                @click="unpinSelection(node.id)"
+              >
+                <span class="icon-[mdi--close] text-xs"></span>
+              </button>
+            </span>
+          </div>
+
           <div class="flex items-end gap-x-2">
             <textarea
               ref="inputRef"
@@ -393,6 +423,7 @@ import { computed, nextTick, ref, watch } from "vue";
 import { Switch } from "@headlessui/vue";
 import { useRenderStore } from "@/store/render";
 import { useAIStore } from "@/store/ai";
+import { useSelectionStore } from "@/store/selection";
 import {
   useAIConversations,
   type AIConversation,
@@ -472,6 +503,48 @@ function resolveConfirm(approved: boolean) {
   confirmResolver = null;
   confirmRequest.value = null;
   resolver?.(approved);
+}
+
+// 选中图形引用：把画布上选中的元素附加到本次提问
+const selection = useSelectionStore();
+const pinnedSelection = ref<CanvasNodeInfo[]>([]);
+
+function pinSelection() {
+  const merged = new Map<string, CanvasNodeInfo>();
+  [...pinnedSelection.value, ...selection.value].forEach((node) =>
+    merged.set(node.id, node)
+  );
+  pinnedSelection.value = [...merged.values()];
+}
+
+function unpinSelection(id: string) {
+  pinnedSelection.value = pinnedSelection.value.filter(
+    (node) => node.id !== id
+  );
+}
+
+function clearPinnedSelection() {
+  pinnedSelection.value = [];
+}
+
+// 生成选中元素的上下文描述（按 id 解析最新位置）
+function buildSelectionContext(): string {
+  if (pinnedSelection.value.length === 0 || !render.value) return "";
+  const ids = pinnedSelection.value.map((node) => node.id);
+  const data = render.value.canvasTool.getCanvas().data as
+    | { nodes?: CanvasNodeInfo[] }
+    | undefined;
+  const nodes = (data?.nodes ?? []).filter((node) => ids.includes(node.id));
+  if (nodes.length === 0) return "";
+  return [
+    "用户在画布上选中了以下元素：",
+    ...nodes.map(
+      (node) =>
+        `- id=${node.id} ${node.type}${
+          node.label ? `「${node.label}」` : ""
+        }: x=${node.x}, y=${node.y}, w=${node.width}, h=${node.height}`
+    ),
+  ].join("\n");
 }
 
 const examples = [
@@ -567,6 +640,7 @@ function startNewConversation() {
   newConversation();
   input.value = "";
   error.value = "";
+  clearPinnedSelection();
   showHistory.value = false;
 }
 
@@ -697,6 +771,7 @@ async function send() {
       },
       {
         canvasContext: executor.describeCanvas(),
+        selectionContext: buildSelectionContext(),
         onConfirm: (request) =>
           new Promise<boolean>((resolve) => {
             confirmRequest.value = request;
@@ -732,6 +807,7 @@ async function send() {
         assistant.text = result.text || "（无回复）";
       }
     }
+    clearPinnedSelection();
     conv.updatedAt = Date.now();
   } catch (e) {
     if (controller !== currentController) return;

@@ -228,19 +228,16 @@ export class CanvasCommandTool implements CanvasExecutor {
 
   // ===== 工具：读取画布 =====
   getCanvas(): CanvasToolResult {
-    const nodes: CanvasNodeInfo[] = this.topNodes().map((node) => {
-      const rect = this.layerRectOf(node);
-      return {
-        id: node.id(),
-        type: this.nodeTypeOf(node),
-        label: this.labelOf(node),
-        x: Math.round(rect.x),
-        y: Math.round(rect.y),
-        width: Math.round(rect.width),
-        height: Math.round(rect.height),
-      };
-    });
-    return { ok: true, message: this.describeCanvas(), data: { nodes } };
+    return {
+      ok: true,
+      message: this.describeCanvas(),
+      data: { nodes: this.nodeInfos(this.topNodes()) },
+    };
+  }
+
+  // 当前选中的元素信息（供 UI / AI 引用选中图形使用）
+  getSelection(): CanvasNodeInfo[] {
+    return this.nodeInfos(this.render.selectionTool.selectingNodes);
   }
 
   // ===== 画布描述（供 system prompt 使用） =====
@@ -306,6 +303,22 @@ export class CanvasCommandTool implements CanvasExecutor {
 
   private topNodes(): Konva.Node[] {
     return this.render.layer.getChildren((node) => !this.render.ignore(node));
+  }
+
+  // 把节点映射为带类型、文字、位置、尺寸的信息
+  private nodeInfos(nodes: Konva.Node[]): CanvasNodeInfo[] {
+    return nodes.map((node) => {
+      const rect = this.layerRectOf(node);
+      return {
+        id: node.id(),
+        type: this.nodeTypeOf(node),
+        label: this.labelOf(node),
+        x: Math.round(rect.x),
+        y: Math.round(rect.y),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      };
+    });
   }
 
   private findById(id: string): Konva.Group | null {

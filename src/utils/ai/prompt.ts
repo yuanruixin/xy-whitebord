@@ -25,8 +25,16 @@ const BASE_PROMPT = `你是「白板绘图助手」，通过多轮对话理解�
 - 配色：#4e95ff(主蓝), #34d399(绿), #fbbf24(黄), #f87171(红), #a78bfa(紫), #94a3b8(灰)；文字节点 fill 为文字颜色，建议 #1d293a。
 - 单次创建节点数量控制在 30 个以内。`;
 
-export function buildSystemPrompt(canvasContext?: string): string {
-  return canvasContext
-    ? `${BASE_PROMPT}\n\n## 当前画布信息\n${canvasContext}`
-    : BASE_PROMPT;
+export function buildSystemPrompt(
+  canvasContext?: string,
+  selectionContext?: string
+): string {
+  const sections = [BASE_PROMPT];
+  if (canvasContext) sections.push(`## 当前画布信息\n${canvasContext}`);
+  if (selectionContext) {
+    sections.push(
+      `## 用户选中的元素\n${selectionContext}\n用户本次请求优先针对上述选中元素进行操作；除非用户明确指向其他元素。`
+    );
+  }
+  return sections.join("\n\n");
 }
